@@ -38,6 +38,7 @@ see https://www.gnu.org/licenses/. */
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <ios>
 
 #include <boost/container/container_fwd.hpp>
 #include <boost/container/flat_map.hpp>
@@ -234,6 +235,14 @@ ss_merge(const symbol_fset &s1, const symbol_fset &s2)
  */
 inline symbol_idx ss_index_of(const symbol_fset &ref, const std::string &name)
 {
+	std::cout << "name string is empty: " << std::boolalpha << name.empty();
+	std::cout << "name: " << name << std::endl;
+	for (const auto &n : ref) {
+		std::cout << n << '\n';
+	}
+
+	std::cout << "reference to " << name << " == end(): " << std::boolalpha << (ref.find(name) == ref.end()) << std::endl;
+
     return ref.index_of(ref.find(name));
 }
 
