@@ -321,3 +321,8 @@ IF(PIRANHA_BUILD_PYRANHA)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tools/mingw_wheel_libs_python${PYTHON_VERSION_MAJOR}.txt" "${CMAKE_CURRENT_BINARY_DIR}/wheel/mingw_wheel_libs_python${PYTHON_VERSION_MAJOR}.txt" @ONLY)
 	endif()
 endif()
+
+# create pseudo target to make header files visible in VS 
+if(MSVC)
+	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/include/piranha")
+endif()

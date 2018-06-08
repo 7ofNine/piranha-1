@@ -163,8 +163,19 @@ struct partial_tester {
         overflow_check<T>();
         auto s16 = math::invert(x - 4 * y);
         auto s17 = s2 * s2 * s2 * s2 * s2 * s16 * s16 * s16 * s12;
-        BOOST_CHECK_EQUAL(s17.partial("x"), -5 * s2 * s2 * s2 * s2 * s2 * s2 * s16 * s16 * s16 * s12
+		//auto temp1 = s17.partial("x");
+		//std::cout << s17 << std::endl << std::flush;
+		//std::cout << temp1 << std::endl<< std::flush;
+		//BOOST_TEST_MESSAGE("TRACE 4+2+1");
+		//auto temp2 = -5 * s2 * s2 * s2 * s2 * s2 * s2 * s16 * s16 * s16 * s12 - 3 * s2 * s2 * s2 * s2 * s2 * s16 * s16 * s16 * s16 * s12;
+		//BOOST_TEST_MESSAGE("TRACE 4+2+2");
+		//bool temp3 = temp1 == temp2;
+		//std::cout << temp3 << std::endl << std::flush;
+		BOOST_TEST_MESSAGE("TRACE 4+2+3");
+		std::string const theName("x");
+        BOOST_CHECK_EQUAL(s17.partial(theName), -5 * s2 * s2 * s2 * s2 * s2 * s2 * s16 * s16 * s16 * s12
                                                 - 3 * s2 * s2 * s2 * s2 * s2 * s16 * s16 * s16 * s16 * s12);
+		BOOST_TEST_MESSAGE("TRACE 4+3");
         // Excercise the chain rule.
         auto s18 = x * x * 3 / 4_q * y * z * z;
         auto s19 = -y * y * x * z * z;
@@ -198,21 +209,34 @@ struct partial_tester {
         T expo = std::numeric_limits<T>::max();
         k0.insert(vs.begin(), vs.end(), expo);
         s14.insert(typename s_type::term_type(typename s_type::term_type::cf_type(1), k0));
+		BOOST_TEST_MESSAGE("Trace 1");
         BOOST_CHECK_THROW(s14.partial("x"), std::overflow_error);
+		BOOST_TEST_MESSAGE("Trace 2");
         // Skip this overflow test if T is short, as short * short will become int * int and it will
         // not overflow.
         if (std::is_same<T, short>::value) {
+			BOOST_TEST_MESSAGE("Trace 2+0");
             return;
         }
+		BOOST_TEST_MESSAGE("Trace 2-1");
         s_type s15;
+		BOOST_TEST_MESSAGE("Trace 2+1");
         s15.set_symbol_set(symbol_fset{"x", "y"});
+		BOOST_TEST_MESSAGE("Trace 2+2");
         vs[0] = static_cast<T>(std::numeric_limits<T>::max() / T(4));
+		BOOST_TEST_MESSAGE("Trace 2+3");
         vs.push_back(T(1));
+		BOOST_TEST_MESSAGE("Trace 2+4");
         expo = static_cast<T>(std::numeric_limits<T>::max() - 1);
+		BOOST_TEST_MESSAGE("Trace 2+5");
         typename s_type::term_type::key_type k1;
+		BOOST_TEST_MESSAGE("Trace 2+6");
         k1.insert(vs.begin(), vs.end(), expo);
+		BOOST_TEST_MESSAGE("Trace 2+7");
         s15.insert(typename s_type::term_type(typename s_type::term_type::cf_type(1), k1));
+		BOOST_TEST_MESSAGE("Trace 3");
         BOOST_CHECK_THROW(s15.partial("x"), std::overflow_error);
+		BOOST_TEST_MESSAGE("Trace 4");
     }
     template <typename T, typename U = T, typename std::enable_if<!std::is_integral<U>::value, int>::type = 0>
     static void overflow_check()
