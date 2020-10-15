@@ -14,3 +14,4 @@ doc/conf.py
 
 # Python bits.
 *.pyc
+/.vs/*

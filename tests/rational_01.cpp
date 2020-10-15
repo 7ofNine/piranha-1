@@ -357,6 +357,11 @@ struct safe_cast_tester {
         BOOST_CHECK((!is_safely_convertible<const q_type &, void>::value));
         BOOST_CHECK((is_safely_convertible<q_type, z_type &>::value));
         BOOST_CHECK((is_safely_convertible<const q_type &, z_type &>::value));
+
+        bool test = !is_safely_convertible<const q_type &, z_type &&>::value;
+        bool test2 = !is_safely_convertible<const q_type &, const z_type &>::value;
+        bool test3 = !is_safely_convertible<const q_type &, const z_type &&>::value;
+        
         BOOST_CHECK((!is_safely_convertible<const q_type &, z_type &&>::value));
         BOOST_CHECK((!is_safely_convertible<const q_type &, const z_type &>::value));
         BOOST_CHECK((is_safely_castable<q_type, int>::value));

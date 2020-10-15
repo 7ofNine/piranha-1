@@ -15,7 +15,7 @@ function(ADD_PIRANHA_TESTCASE arg1)
 	endif()
 	add_executable("${arg1}" "${arg1}.cpp")
 	target_link_libraries(${arg1} piranha)
-	target_compile_options(${arg1} PRIVATE "$<$<CONFIG:DEBUG>:${PIRANHA_CXX_FLAGS_DEBUG}>" "$<$<CONFIG:RELEASE>:${PIRANHA_CXX_FLAGS_RELEASE}>")
+	target_compile_options(${arg1} PRIVATE "$<$<CONFIG:DEBUG>:${PIRANHA_CXX_FLAGS_DEBUG}>" "$<$<CONFIG:RELEASE>:${PIRANHA_CXX_FLAGS_RELEASE}>" "$<$<CONFIG:RELWITHDEBINFO>:${PIRANHA_CXX_FLAGS_RELWITHDEBINFO}>")
 	if(PIRANHA_RUN_ON_VALGRIND AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 		# Add a special definition for the unit tests when the run-on-Valgrind
 		# option is selected.

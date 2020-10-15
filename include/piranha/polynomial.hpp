@@ -1798,7 +1798,7 @@ private:
         // term in v1 multiplied by the idx-th term in v2 will be written into retval at a bucket index not less than
         // zb.
         auto l_bound
-            = [&v1, &v2, &r_bucket](size_type first, size_type last, bucket_size_type zb, size_type i) -> size_type {
+            = [&v1, &v2, &r_bucket, zm](size_type first, size_type last, bucket_size_type zb, size_type i) -> size_type {
             piranha_assert(first <= last);
             bucket_size_type ib = r_bucket(v1[i]);
             // Avoid zb - ib below wrapping around.
@@ -1826,7 +1826,7 @@ private:
         };
         // Fill the task table.
         auto table_filler = [&task_table, bpz, this, bucket_count, size1, size2, &l_bound, &task_split,
-                             &task_cmp](const unsigned &thread_idx) {
+                             &task_cmp,zm](const unsigned &thread_idx) {
             for (unsigned n = 0u; n < zm; ++n) {
                 std::vector<task_type> cur_tasks;
                 // [a,b[ is the container zone.
@@ -1918,7 +1918,7 @@ private:
         // Init the vector of atomic flags.
         detail::atomic_flag_array af(piranha::safe_cast<std::size_t>(task_table.size()));
         // Thread functor.
-        auto thread_functor = [&task_table, &af, &task_consume](const unsigned &thread_idx) {
+        auto thread_functor = [&task_table, &af, &task_consume, zm](const unsigned &thread_idx) {
             using t_size_type = decltype(task_table.size());
             // Temporary term_type for caching.
             term_type tmp_term;

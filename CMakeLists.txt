@@ -56,6 +56,7 @@ include(CheckCXXCompilerFlag)
 # Assemble the flags.
 set(PIRANHA_CXX_FLAGS_DEBUG ${YACMA_CXX_FLAGS} ${YACMA_CXX_FLAGS_DEBUG} ${YACMA_THREADING_CXX_FLAGS})
 set(PIRANHA_CXX_FLAGS_RELEASE ${YACMA_CXX_FLAGS} ${YACMA_THREADING_CXX_FLAGS})
+set(PIRANHA_CXX_FLAGS_RELWITHDEBINFO ${YACMA_CXX_FLAGS} ${YACMA_CXX_FLAGS_RELWITHDEBINFO}${YACMA_THREADING_CXX_FLAGS}) 
 # NOTE: the idea here is to enable globally certain compiler options that always need to be activated
 # on a certain platform. Further compiler flags will be set for specific targets.
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND YACMA_COMPILER_IS_CLANGXX)
@@ -66,7 +67,10 @@ endif()
 if(YACMA_COMPILER_IS_MSVC)
 	# Disable the idiotic minmax macros on MSVC and enable the bigobj option (but not with clang).
 	list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-DNOMINMAX")
+    list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
 	list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-DNOMINMAX")
+    list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
+	list(APPEND PIRANHA_CXX_FLAGS_RELWITHDEBINFO "-DNOMINMAX")#We have to fix the allocator warnings
 	if(YACMA_COMPILER_IS_CLANGXX)
 		# clang-cl emits various warnings from the Boost/GMP/MPFR libraries, let's just silence them.
 		# NOTE: at one point in the recent past, MSVC added an options similar to GCC's isystem:
@@ -74,6 +78,7 @@ if(YACMA_COMPILER_IS_MSVC)
 		# We probably just need to wait for this to be picked up by CMake/clang-cl. Let's
 		# revisit the issue in the future.
 		list(APPEND _PIRANHA_CLANG_CL_DISABLED_WARNINGS
+		"-Wno-unused-command-line-argument"
 			"-Wno-unused-variable"
 			"-Wno-inconsistent-dllimport"
 			"-Wno-unknown-pragmas"
@@ -321,3 +326,99 @@ IF(PIRANHA_BUILD_PYRANHA)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tools/mingw_wheel_libs_python${PYTHON_VERSION_MAJOR}.txt" "${CMAKE_CURRENT_BINARY_DIR}/wheel/mingw_wheel_libs_python${PYTHON_VERSION_MAJOR}.txt" @ONLY)
 	endif()
 endif()
+
+# Target to get the header files into MSVC	
+SET(INCS
+    include/piranha/array_key.hpp
+    include/piranha/
+    include/piranha/base_series_multiplier.hpp
+    include/piranha/cache_aligning_allocator.hpp
+    include/piranha/convert_to.hpp
+    include/piranha/divisor.hpp
+    include/piranha/divisor_series.hpp
+    include/piranha/dynamic_aligning_allocator.hpp
+    include/piranha/exceptions.hpp
+    include/piranha/forwarding.hpp
+    include/piranha/hash_set.hpp
+    include/piranha/integer.hpp
+    include/piranha/invert.hpp
+    include/piranha/ipow_substitutable_series.hpp
+    include/piranha/is_cf.hpp
+    include/piranha/is_key.hpp
+    include/piranha/key_is_convertible.hpp
+    include/piranha/key_is_multipliable.hpp
+    include/piranha/kronecker_array.hpp
+    include/piranha/kronecker_monomial.hpp
+    include/piranha/lambdify.hpp
+    include/piranha/math.hpp
+    include/piranha/memory.hpp
+    include/piranha/monomial.hpp
+    include/piranha/piranha.hpp
+    include/piranha/poisson_series.hpp
+    include/piranha/polynomial.hpp
+    include/piranha/power_series.hpp
+    include/piranha/print_tex_coefficient.hpp
+    include/piranha/rational.hpp
+    include/piranha/real.hpp
+    include/piranha/real_trigonometric_kronecker_monomial.hpp
+    include/piranha/runtime_info.hpp
+    include/piranha/s11n.hpp
+    include/piranha/safe_cast.hpp
+    include/piranha/safe_convert.hpp
+    include/piranha/series.hpp
+    include/piranha/series_multiplier.hpp
+    include/piranha/settings.hpp
+    include/piranha/small_vector.hpp
+    include/piranha/static_vector.hpp
+    include/piranha/symbol_utils.hpp
+    include/piranha/t_substitutable_series.hpp
+    include/piranha/term.hpp
+    include/piranha/thread_barrier.hpp
+    include/piranha/thread_management.hpp
+    include/piranha/thread_pool.hpp
+    include/piranha/trigonometric_series.hpp
+    include/piranha/tuning.hpp
+    include/piranha/type_traits.hpp
+    include/piranha/math/binomial.hpp
+    include/piranha/math/cos.hpp
+    include/piranha/math/degree.hpp
+    include/piranha/math/gcd.hpp
+    include/piranha/math/gcd3.hpp
+    include/piranha/math/is_one.hpp
+    include/piranha/math/is_zero.hpp
+    include/piranha/math/ldegree.hpp
+    include/piranha/math/pow.hpp
+    include/piranha/math/sin.hpp
+    include/piranha/key/key_degree.hpp
+    include/piranha/key/key_is_one.hpp
+    include/piranha/key/key_is_zero.hpp
+    include/piranha/key/key_ldegree.hpp
+    include/piranha/detail/atomic_flag_array.hpp
+    include/piranha/detail/atomic_lock_guard.hpp
+    include/piranha/detail/cf_mult_impl.hpp
+    include/piranha/detail/config_clang.hpp
+    include/piranha/detail/config_gcc.hpp
+    include/piranha/detail/config_intel.hpp
+    include/piranha/detail/debug_access.hpp
+    include/piranha/detail/demangle.hpp
+    include/piranha/detail/divisor_series_fwd.hpp
+    include/piranha/detail/init.hpp
+    include/piranha/detail/km_commons.hpp
+    include/piranha/detail/monomial_common.hpp
+    include/piranha/detail/parallel_vector_transform.hpp
+    include/piranha/detail/poisson_series_fwd.hpp
+    include/piranha/detail/polynomial_fwd.hpp
+    include/piranha/detail/prepare_for_print.hpp
+    include/piranha/detail/safe_integral_arith.hpp
+    include/piranha/detail/series_fwd.hpp
+    include/piranha/detail/series_multiplier_fwd.hpp
+    include/piranha/detail/sfinae_types.hpp
+    include/piranha/detail/small_vector_fwd.hpp
+    include/piranha/detail/stacktrace.hpp
+    include/piranha/detail/vector_hasher.hpp
+    
+)
+SOURCE_GROUP(TREE ${CMAKE_SOURCE_DIR} PREFIX "Header Files" FILES ${INCS})
+ADD_LIBRARY(Headers STATIC ${INCS})
+SET_TARGET_PROPERTIES(Headers PROPERTIES LINKER_LANGUAGE CXX)
+TARGET_INCLUDE_DIRECTORIES(Headers PRIVATE include/piranha/ include/piranha/detail/ include/piranha/math/ include/piranha/key/)

@@ -161,14 +161,16 @@ if(NOT _YACMACompilerLinkerSettingsRun)
     # MSVC setup.
     if(YACMA_COMPILER_IS_MSVC)
         # Enable higher warning level than usual.
-        _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)
+        _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WAll)
         # Treat warnings as errors.
-        _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)
+		message(STATUS "Checking WX-")
+        _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX-)
     endif()
 
     # Set the cache variables.
     set(YACMA_CXX_FLAGS "${_YACMA_CXX_FLAGS}" CACHE INTERNAL "")
     set(YACMA_CXX_FLAGS_DEBUG "${_YACMA_CXX_FLAGS_DEBUG}" CACHE INTERNAL "")
+	set(YACMA_CXX_FLAGS_RELWITHDEBINFO "${_YACMA_CXX_FLAGS_DEBUG}" CACHE INTERNAL "")
     set(_YACMACompilerLinkerSettingsRun YES CACHE INTERNAL "")
 endif()
 

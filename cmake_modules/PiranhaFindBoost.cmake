@@ -26,6 +26,10 @@ if(PIRANHA_BUILD_PYRANHA)
 	endif()
 endif()
 
+If(PIRANHA_BUILD_BENCHMARKS)
+    list(APPEND _PIRANHA_REQUIRED_BOOST_LIBS system filesystem)
+endif()
+
 message(STATUS "Required Boost libraries: ${_PIRANHA_REQUIRED_BOOST_LIBS}")
 
 if(PIRANHA_WITH_BOOST_STACKTRACE)
