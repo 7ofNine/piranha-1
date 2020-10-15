@@ -29,7 +29,7 @@ see https://www.gnu.org/licenses/. */
 #ifndef PIRANHA_DETAIL_DEMANGLE_HPP
 #define PIRANHA_DETAIL_DEMANGLE_HPP
 
-#include <mp++/detail/demangle.hpp>
+#include <mp++/type_name.hpp>
 
 namespace piranha
 {
