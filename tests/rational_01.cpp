@@ -331,10 +331,9 @@ struct stream_tester {
         q_type q(42, -5);
         std::stringstream ss;
         ss << q;
-        BOOST_CHECK_EQUAL(ss.str(), "-42/5");
-        q = 0;
-        ss >> q;
-        BOOST_CHECK_EQUAL(q, q_type(-42, 5));
+        BOOST_CHECK_EQUAL(ss.str(), "-42/5");   
+        
+        //the input operator has been removed in 0.14
     }
 };
 

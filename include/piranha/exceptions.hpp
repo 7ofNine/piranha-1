@@ -115,7 +115,7 @@ struct ex_thrower {
 #if defined(PIRANHA_WITH_BOOST_STACKTRACE)
         }
 #endif
-        oss << "\nException type   : " << demangle<Exception>();
+        oss << "\nException type   : " << type_name<Exception>();
         oss << "\nException message: " << std::forward<Str>(desc) << "\n";
         throw Exception(oss.str(), std::forward<Args>(args)...);
     }

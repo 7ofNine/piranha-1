@@ -86,7 +86,7 @@ using namespace piranha;
 
 static_assert(is_hashable<custom_string>::value, "cc");
 
-typedef boost::mpl::vector<int, integer, custom_string> value_types;
+typedef boost::mpl::vector<int, /*integer,*/ custom_string> value_types;  // integer doesn't have an input operator>>
 typedef boost::mpl::vector<std::integral_constant<std::uint_least8_t, 1u>,
                            std::integral_constant<std::uint_least8_t, 5u>,
                            std::integral_constant<std::uint_least8_t, 10u>>

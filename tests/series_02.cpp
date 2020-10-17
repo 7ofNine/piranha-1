@@ -228,7 +228,7 @@ struct mock_cf {
 BOOST_AUTO_TEST_CASE(series_partial_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); // is that really used below . Anyhere a mppp::real???
 #endif
     {
         typedef g_series_type<rational, int> p_type1;

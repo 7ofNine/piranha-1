@@ -77,8 +77,8 @@ inline To safe_cast(From &&x)
     if (likely(piranha::safe_convert(retval, std::forward<From>(x)))) {
         return retval;
     }
-    piranha_throw(safe_cast_failure, "the safe conversion of a value of type '" + demangle<decltype(x)>()
-                                         + "' to the type '" + demangle<To>() + "' failed");
+    piranha_throw(safe_cast_failure, "the safe conversion of a value of type '" + type_name<decltype(x)>()
+                                         + "' to the type '" + type_name<To>() + "' failed");
 }
 
 // Input iterator whose ref type is safely castable to To.

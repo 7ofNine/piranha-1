@@ -187,7 +187,7 @@ struct constructor_tester {
 BOOST_AUTO_TEST_CASE(rtkm_constructor_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); is that really used. is there a mppp::real used ???
 #endif
     tuple_for_each(int_types{}, constructor_tester{});
 }

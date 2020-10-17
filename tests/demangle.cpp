@@ -59,22 +59,13 @@ struct bar {
 
 BOOST_AUTO_TEST_CASE(demangle_test)
 {
-    // Likely not a valid mangled name.
-    std::cout << demangle("helloworld!") << '\n';
-    std::cout << demangle("") << '\n';
-    std::cout << demangle(std::string("")) << '\n';
     // A few valid types.
-    std::cout << demangle<int>() << '\n';
-    std::cout << demangle<std::vector<int>>() << '\n';
-    std::cout << demangle(std::type_index(typeid(std::vector<std::string>{}))) << '\n';
-    std::cout << demangle(typeid(std::unordered_set<std::string>{})) << '\n';
-    std::cout << demangle(typeid(std::unordered_set<std::string>{}).name()) << '\n';
-    std::cout << demangle(std::string(typeid(std::unordered_set<std::string>{}).name())) << '\n';
-    std::cout << demangle<base_foo>() << '\n';
-    std::cout << demangle<foo>() << '\n';
-    std::cout << demangle<myns::bar<int>>() << '\n';
+    std::cout << type_name<int>() << '\n';
+    std::cout << type_name<std::vector<int>>() << '\n';
+    std::cout << type_name<base_foo>() << '\n';
+    std::cout << type_name<foo>() << '\n';
+    std::cout << type_name<myns::bar<int>>() << '\n';
     // Check with dynamic polymorphism.
     std::unique_ptr<base_foo> foo_ptr(new foo{});
     auto ptr = foo_ptr.get();
-    BOOST_CHECK_EQUAL(demangle(typeid(*ptr)), demangle<foo>());
 }

@@ -140,7 +140,7 @@ struct constructor_tester {
 BOOST_AUTO_TEST_CASE(poisson_series_constructors_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); Do we really need this. is there a mppp::real in cf_types??
 #endif
     tuple_for_each(cf_types{}, constructor_tester());
 }
@@ -323,13 +323,13 @@ BOOST_AUTO_TEST_CASE(poisson_series_arithmetic_test)
     // NOTE: these won't work until we specialise safe_cast for real, due
     // to the new monomial pow() requirements.
     typedef poisson_series<polynomial<real, monomial<short>>> p_type2;
-    BOOST_CHECK_EQUAL(piranha::pow(p_type2(real("1.234")), real("-5.678")),
-                      piranha::pow(real("1.234"), real("-5.678")));
-    BOOST_CHECK_EQUAL(piranha::sin(p_type2(real("1.234"))), piranha::sin(real("1.234")));
-    BOOST_CHECK_EQUAL(piranha::cos(p_type2(real("1.234"))), piranha::cos(real("1.234")));
+    BOOST_CHECK_EQUAL(piranha::pow(p_type2(real("1.234", 100)), real("-5.678", 100)),
+                      piranha::pow(real("1.234", 100), real("-5.678", 100)));
+    BOOST_CHECK_EQUAL(piranha::sin(p_type2(real("1.234", 100))), piranha::sin(real("1.234", 100)));
+    BOOST_CHECK_EQUAL(piranha::cos(p_type2(real("1.234", 100))), piranha::cos(real("1.234", 100)));
     typedef poisson_series<real> p_type3;
-    BOOST_CHECK_EQUAL(piranha::sin(p_type3(real("1.234"))), piranha::sin(real("1.234")));
-    BOOST_CHECK_EQUAL(piranha::cos(p_type3(real("1.234"))), piranha::cos(real("1.234")));
+    BOOST_CHECK_EQUAL(piranha::sin(p_type3(real("1.234", 100))), piranha::sin(real("1.234", 100)));
+    BOOST_CHECK_EQUAL(piranha::cos(p_type3(real("1.234", 100))), piranha::cos(real("1.234", 100)));
 #endif
 }
 

@@ -112,7 +112,7 @@ public:
 }
 
 struct multiplication_tester {
-    template <typename Cf, typename std::enable_if<mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
         typedef polynomial<Cf, monomial<int>> p_type;
@@ -200,7 +200,7 @@ struct multiplication_tester {
             BOOST_CHECK(tmp1 == p_type{tmp_alt});
         }
     }
-    template <typename Cf, typename std::enable_if<!mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<!mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
     }

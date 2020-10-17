@@ -275,7 +275,7 @@ template <mppp::CppIntegralInteroperable To>
 class safe_convert_impl<To, real>
 #else
 template <typename To>
-class safe_convert_impl<To, real, enable_if_t<mppp::is_cpp_integral_interoperable<To>::value>>
+class safe_convert_impl<To, real, enable_if_t<mppp::is_cpp_integral<To>::value>>
 #endif
 {
 public:

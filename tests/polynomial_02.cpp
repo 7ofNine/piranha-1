@@ -119,7 +119,7 @@ public:
 BOOST_AUTO_TEST_CASE(polynomial_integrate_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); // is that really needed?? is there mppp::real used anywhere below???
 #endif
     // Simple echelon-1 polynomial.
     typedef polynomial<rational, monomial<short>> p_type1;

@@ -257,7 +257,7 @@ inline namespace impl
 // Enabler for the overload below.
 // NOTE: is_returnable is already checked by the invocation of the other overload.
 template <typename T, typename U, typename Int>
-using math_ipow_subs_int_t = enable_if_t<mppp::is_cpp_integral_interoperable<Int>::value, math_ipow_subs_t<T, U>>;
+using math_ipow_subs_int_t = enable_if_t<mppp::is_cpp_integral<Int>::value, math_ipow_subs_t<T, U>>;
 }
 
 /// Substitution of integral power (convenience overload).
@@ -703,7 +703,7 @@ template <std::size_t SSize, mppp::CppInteroperable From>
 class safe_convert_impl<mppp::integer<SSize>, From>
 #else
 template <std::size_t SSize, typename From>
-class safe_convert_impl<mppp::integer<SSize>, From, enable_if_t<mppp::is_cpp_interoperable<From>::value>>
+class safe_convert_impl<mppp::integer<SSize>, From, enable_if_t<mppp::is_cpp_arithmetic<From>::value>>
 #endif
 {
     template <typename T>
@@ -725,7 +725,7 @@ class safe_convert_impl<mppp::integer<SSize>, From, enable_if_t<mppp::is_cpp_int
 public:
     bool operator()(mppp::integer<SSize> &out, From x) const
     {
-        return impl(out, x, mppp::is_cpp_integral_interoperable<From>{});
+        return impl(out, x, mppp::is_cpp_integral<From>{});
     }
 };
 
@@ -734,7 +734,7 @@ template <mppp::CppIntegralInteroperable To, std::size_t SSize>
 class safe_convert_impl<To, mppp::integer<SSize>>
 #else
 template <typename To, std::size_t SSize>
-class safe_convert_impl<To, mppp::integer<SSize>, enable_if_t<mppp::is_cpp_integral_interoperable<To>::value>>
+class safe_convert_impl<To, mppp::integer<SSize>, enable_if_t<mppp::is_cpp_integral<To>::value>>
 #endif
 {
 public:

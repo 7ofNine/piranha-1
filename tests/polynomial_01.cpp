@@ -195,7 +195,7 @@ struct constructor_tester {
 BOOST_AUTO_TEST_CASE(polynomial_constructors_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); // did we actually ever need that anywhere ?? is cf_types a mppp::real??
 #endif
     boost::mpl::for_each<cf_types>(constructor_tester());
 }
@@ -319,7 +319,7 @@ BOOST_AUTO_TEST_CASE(polynomial_degree_test)
 }
 
 struct multiplication_tester {
-    template <typename Cf, typename std::enable_if<!mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<!mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
         // NOTE: this test is going to be exact in case of coefficients cancellations with double
@@ -415,7 +415,7 @@ struct multiplication_tester {
             BOOST_CHECK(tmp1 == p_type{tmp_alt});
         }
     }
-    template <typename Cf, typename std::enable_if<mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
     }
@@ -488,7 +488,7 @@ public:
         p_type3 p3;
         p3 = p_type3{"x"} * 2 + p_type3{"y"} * 4;
         BOOST_CHECK((p3.integral_combination() == map_type{{"x", integer(2)}, {"y", integer(4)}}));
-        p3 = p_type3{"x"} * real{"2.5"} + p_type3{"y"} * 4.;
+        p3 = p_type3{"x"} * real{"2.5",100} + p_type3{"y"} * 4.;
         BOOST_CHECK_THROW(p3.integral_combination(), std::invalid_argument);
 #endif
     }

@@ -96,7 +96,7 @@ struct hash<custom_string> {
 };
 }
 
-typedef boost::mpl::vector<int, integer, custom_string> key_types;
+typedef boost::mpl::vector<int, /*integer,*/ custom_string> key_types;  // integer doesn't have an inpiut operator>>. lexical_cast fails
 
 const int N = 10000;
 

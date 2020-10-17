@@ -80,7 +80,7 @@ inline namespace impl
 template <typename T>
 inline std::string safe_int_arith_err(const char *op, T op1, T op2)
 {
-    return std::string("overflow error in an integral ") + op + ": the operands' type is '" + demangle<T>()
+    return std::string("overflow error in an integral ") + op + ": the operands' type is '" + type_name<T>()
            + "', and the operands' values are " + std::to_string(op1) + " and " + std::to_string(op2);
 }
 

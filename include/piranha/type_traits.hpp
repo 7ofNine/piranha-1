@@ -41,11 +41,11 @@ see https://www.gnu.org/licenses/. */
 #include <type_traits>
 #include <utility>
 
-#include <mp++/concepts.hpp>
-#include <mp++/detail/type_traits.hpp>
+#include "mp++/concepts.hpp"
+#include "mp++/detail/type_traits.hpp"
 
-#include <piranha/config.hpp>
-#include <piranha/detail/init.hpp>
+#include "piranha/config.hpp"
+#include "piranha/detail/init.hpp"
 
 namespace piranha
 {
@@ -64,13 +64,13 @@ inline namespace impl
 {
 
 // Import a bunch of implementation-detail type traits / utils from mp++.
-using mppp::conjunction;
-using mppp::detected_t;
-using mppp::disjunction;
-using mppp::enable_if_t;
-using mppp::is_detected;
-using mppp::negation;
-using mppp::nonesuch;
+using std::conjunction;
+using mppp::detail::detected_t;
+using std::disjunction;
+using mppp::detail::enable_if_t;
+using mppp::detail::is_detected;
+using std::negation;
+using mppp::detail::nonesuch;
 
 // This is like disjunction, but instead of providing true/false it provides
 // the index of the first boolean class which evaluates to true. If no class

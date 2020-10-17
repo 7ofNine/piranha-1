@@ -94,7 +94,7 @@ struct mock_cf {
 BOOST_AUTO_TEST_CASE(poisson_series_partial_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100);  is that really needed somewhere is there a mppp::real used bewlow??
 #endif
     using math::partial;
     typedef poisson_series<polynomial<rational, monomial<short>>> p_type1;

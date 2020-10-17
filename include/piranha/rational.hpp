@@ -261,7 +261,7 @@ class safe_convert_impl<mppp::rational<SSize>, From>
 #else
 template <std::size_t SSize, typename From>
 class safe_convert_impl<mppp::rational<SSize>, From,
-                        enable_if_t<mppp::is_cpp_floating_point_interoperable<From>::value>>
+                        enable_if_t<mppp::is_cpp_floating_point<From>::value>>
 #endif
 {
 public:

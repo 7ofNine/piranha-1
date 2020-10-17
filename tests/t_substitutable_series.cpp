@@ -123,7 +123,7 @@ public:
 BOOST_AUTO_TEST_CASE(t_subs_series_t_subs_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); is that really used ??? are we using mppp::real
 #endif
     typedef poisson_series<polynomial<rational, monomial<short>>> p_type1;
     p_type1 x{"x"}, y{"y"};

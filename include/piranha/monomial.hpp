@@ -537,7 +537,7 @@ public:
 private:
     // Let's hard code the custom behaviour for rational exponents for the moment.
     // We can offer a customization point in the future.
-    template <typename U, enable_if_t<mppp::is_rational<U>::value, int> = 0>
+    template <typename U, enable_if_t<mppp::detail::is_rational<U>::value, int> = 0>
     static void print_exponent(std::ostream &os, const U &e)
     {
         if (piranha::is_one(e.get_den())) {
@@ -546,7 +546,7 @@ private:
             os << '(' << e << ')';
         }
     }
-    template <typename U, enable_if_t<!mppp::is_rational<U>::value, int> = 0>
+    template <typename U, enable_if_t<!mppp::detail::is_rational<U>::value, int> = 0>
     static void print_exponent(std::ostream &os, const U &e)
     {
         os << detail::prepare_for_print(e);

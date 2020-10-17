@@ -194,7 +194,7 @@ struct msgpack_convert_impl<
 template <typename T>
 class divisor
 {
-    static_assert((std::is_signed<T>::value && std::is_integral<T>::value) || mppp::is_integer<T>::value,
+    static_assert((std::is_signed<T>::value && std::is_integral<T>::value) || mppp::detail::is_integer<T>::value,
                   "The value type must be a signed integer or an mp++ integer");
     // Make friend with the divisor series.
     template <typename, typename>

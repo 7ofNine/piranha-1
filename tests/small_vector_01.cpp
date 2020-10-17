@@ -73,7 +73,7 @@ static std::mt19937 rng;
 
 using namespace piranha;
 
-typedef boost::mpl::vector<signed char, short, int, long, long long, integer, rational> value_types;
+typedef boost::mpl::vector<signed char, short, int, long, long long /* integer, rational*/> value_types;  //integer and  rational don't have an input operator >> and thus fails lexical_cast
 typedef boost::mpl::vector<std::integral_constant<std::size_t, 0u>, std::integral_constant<std::size_t, 1u>,
                            std::integral_constant<std::size_t, 5u>, std::integral_constant<std::size_t, 10u>>
     size_types;

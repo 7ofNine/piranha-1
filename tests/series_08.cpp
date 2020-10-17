@@ -158,7 +158,7 @@ struct negate_tester {
 BOOST_AUTO_TEST_CASE(series_negate_test)
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); do we need this???? is there a mppp::real???
 #endif
     tuple_for_each(cf_types{}, negate_tester());
 }
@@ -468,7 +468,7 @@ BOOST_AUTO_TEST_CASE(series_pow_test)
     auto p = p_type3{"x"} + 1;
     BOOST_CHECK_EQUAL(p.pow(3), p.pow(real{3}));
     BOOST_CHECK_THROW(p.pow(real{-3}), std::invalid_argument);
-    BOOST_CHECK_THROW(p.pow(real{"1.5"}), std::invalid_argument);
+    BOOST_CHECK_THROW(p.pow(real{"1.5",100}), std::invalid_argument);
     if (std::numeric_limits<double>::is_iec559 && std::numeric_limits<double>::radix == 2) {
         auto pp = p_type1{"x"} + 1;
         BOOST_CHECK_EQUAL(pp.pow(3), pp.pow(3.));

@@ -26,7 +26,7 @@ You should have received copies of the GNU General Public License and the
 GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
 
-#include <piranha/array_key.hpp>
+#include "piranha/array_key.hpp"
 
 #define BOOST_TEST_MODULE array_key_test
 #include <boost/test/included/unit_test.hpp>
