@@ -68,7 +68,7 @@ struct are_binomial_types : is_returnable<detected_t<binomial_t_, T, U>> {
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U = T>
-concept bool BinomialTypes = are_binomial_types<T, U>::value;
+concept BinomialTypes = are_binomial_types<T, U>::value;
 
 #endif
 

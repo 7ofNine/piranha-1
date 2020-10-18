@@ -71,7 +71,7 @@ using is_cosine_type = is_returnable<detected_t<cos_t_, T>>;
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool CosineType = is_cosine_type<T>::value;
+concept CosineType = is_cosine_type<T>::value;
 
 #endif
 

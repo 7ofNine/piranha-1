@@ -69,7 +69,7 @@ struct are_gcd_types : is_returnable<detected_t<gcd_t_, T, U>> {
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U = T>
-concept bool GcdTypes = are_gcd_types<T, U>::value;
+concept GcdTypes = are_gcd_types<T, U>::value;
 
 #endif
 
@@ -82,8 +82,8 @@ using gcd_t = enable_if_t<are_gcd_types<T, U>::value, gcd_t_<T, U>>;
 
 // GCD.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename T>
-inline auto gcd(GcdTypes<T> &&x, T &&y)
+template <GcdTypes T>
+inline auto gcd(T &&x, T &&y)
 #else
 template <typename T, typename U>
 inline gcd_t<T, U> gcd(T &&x, U &&y)

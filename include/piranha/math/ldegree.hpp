@@ -65,7 +65,7 @@ using is_ldegree_type
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool LdegreeType = is_ldegree_type<T>::value;
+concept LdegreeType = is_ldegree_type<T>::value;
 
 #endif
 

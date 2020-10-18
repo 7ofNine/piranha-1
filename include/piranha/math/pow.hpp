@@ -66,7 +66,7 @@ struct is_exponentiable : is_returnable<detected_t<pow_t_, T, U>> {
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U = T>
-concept bool Exponentiable = is_exponentiable<T, U>::value;
+concept Exponentiable = is_exponentiable<T, U>::value;
 
 #endif
 

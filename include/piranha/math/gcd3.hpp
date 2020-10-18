@@ -74,14 +74,14 @@ struct are_gcd3_types : is_detected<gcd3_t_, T, U, V> {
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U, typename V = U>
-concept bool Gcd3Types = are_gcd3_types<T, U, V>::value;
+concept Gcd3Types = are_gcd3_types<T, U, V>::value;
 
 #endif
 
 // GCD, ternary form.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename T, typename U>
-inline void gcd3(Gcd3Types<T, U> &&x, T &&y, U &&z)
+template <typename T, typename U, typename V> requires Gcd3Types<T, U, V>
+inline void gcd3(T &&x, U &&y, V &&z)
 #else
 template <typename T, typename U, typename V, enable_if_t<are_gcd3_types<T, U, V>::value, int> = 0>
 inline void gcd3(T &&x, U &&y, V &&z)

@@ -350,7 +350,7 @@ struct div3_impl<mppp::integer<SSize>> {
 
 // Specialisation of the implementation of piranha::gcd() for mp++'s integers.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename U, mppp::IntegerIntegralOpTypes<U> T>
+template <typename U, typename T> requires mppp::integer_integral_op_types<U,T>
 class gcd_impl<T, U>
 #else
 template <typename T, typename U>

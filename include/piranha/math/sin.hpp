@@ -63,7 +63,7 @@ using is_sine_type = is_returnable<detected_t<sin_t_, T>>;
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool SineType = is_sine_type<T>::value;
+concept SineType = is_sine_type<T>::value;
 
 #endif
 

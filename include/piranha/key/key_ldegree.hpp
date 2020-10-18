@@ -70,7 +70,7 @@ using is_key_ldegree_type = conjunction<is_returnable<detected_t<total_key_ldegr
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool KeyLdegreeType = is_key_ldegree_type<T>::value;
+concept KeyLdegreeType = is_key_ldegree_type<T>::value;
 
 #endif
 
