@@ -111,7 +111,7 @@ public:
 
 // Specialisation of piranha::pow() for piranha::real.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename U, mppp::RealOpTypes<U> T>
+template <typename U, mppp::real_op_types<U> T>
 class pow_impl<T, U>
 #else
 template <typename T, typename U>
@@ -271,7 +271,7 @@ struct div3_impl<real> {
 
 // From real to C++ integral.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <mppp::CppIntegralInteroperable To>
+template <mppp::cpp_integral To>
 class safe_convert_impl<To, real>
 #else
 template <typename To>

@@ -699,7 +699,7 @@ struct msgpack_convert_impl<T, integer_msgpack_convert_enabler<T>> {
 #endif
 
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <std::size_t SSize, mppp::CppInteroperable From>
+template <std::size_t SSize, mppp::cpp_arithmetic From>
 class safe_convert_impl<mppp::integer<SSize>, From>
 #else
 template <std::size_t SSize, typename From>
@@ -730,7 +730,7 @@ public:
 };
 
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <mppp::CppIntegralInteroperable To, std::size_t SSize>
+template <mppp::cpp_integral To, std::size_t SSize>
 class safe_convert_impl<To, mppp::integer<SSize>>
 #else
 template <typename To, std::size_t SSize>

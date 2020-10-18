@@ -79,13 +79,13 @@ concept Gcd3Types = are_gcd3_types<T, U, V>::value;
 #endif
 
 // GCD, ternary form.
-#if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename T, typename U, typename V> requires Gcd3Types<T, U, V>
-inline void gcd3(T &&x, U &&y, V &&z)
-#else
+//#if defined(PIRANHA_HAVE_CONCEPTS)                                                               //TODO:: this does not work properly. How to fix????
+//template <typename T, typename U, typename V> requires Gcd3Types<T, U, V>
+//inline void gcd3(T &&x, U &&y, V &&z)
+//#else
 template <typename T, typename U, typename V, enable_if_t<are_gcd3_types<T, U, V>::value, int> = 0>
 inline void gcd3(T &&x, U &&y, V &&z)
-#endif
+//#endif
 {
     gcd3_impl<uncvref_t<decltype(x)>, uncvref_t<decltype(y)>, uncvref_t<decltype(z)>>{}(
         std::forward<decltype(x)>(x), std::forward<decltype(y)>(y), std::forward<decltype(z)>(z));

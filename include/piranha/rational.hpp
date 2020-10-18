@@ -146,7 +146,7 @@ struct negate_impl<mppp::rational<SSize>> {
 
 // Specialisation of the implementation of piranha::pow() for mp++'s rationals.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename U, mppp::RationalOpTypes<U> T>
+template <typename U, mppp::rational_op_types<U> T>
 class pow_impl<T, U>
 #else
 template <typename T, typename U>
@@ -163,7 +163,7 @@ public:
 
 // Specialisation of the implementation of piranha::binomial() for mp++ rational top argument.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <std::size_t SSize, mppp::RationalIntegralInteroperable<SSize> T>
+template <std::size_t SSize, mppp::rational_integral_interoperable<SSize> T>
 class binomial_impl<mppp::rational<SSize>, T>
 #else
 template <std::size_t SSize, typename T>
@@ -238,7 +238,7 @@ struct partial_impl<mppp::rational<SSize>> {
 
 // From rational integral interop to rational.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <std::size_t SSize, mppp::RationalIntegralInteroperable<SSize> From>
+template <std::size_t SSize, mppp::rational_integral_interoperable<SSize> From>
 class safe_convert_impl<mppp::rational<SSize>, From>
 #else
 template <std::size_t SSize, typename From>
@@ -256,7 +256,7 @@ public:
 
 // From C++ FP to rational.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <std::size_t SSize, mppp::CppFloatingPointInteroperable From>
+template <std::size_t SSize, mppp::cpp_floating_point From>
 class safe_convert_impl<mppp::rational<SSize>, From>
 #else
 template <std::size_t SSize, typename From>
@@ -277,7 +277,7 @@ public:
 
 // From rational to rational integral interop.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <std::size_t SSize, mppp::RationalIntegralInteroperable<SSize> To>
+template <std::size_t SSize, mppp::rational_integral_interoperable<SSize> To>
 class safe_convert_impl<To, mppp::rational<SSize>>
 #else
 template <std::size_t SSize, typename To>

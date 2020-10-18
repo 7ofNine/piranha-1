@@ -81,8 +81,8 @@ using binomial_t = enable_if_t<are_binomial_types<T, U>::value, binomial_t_<T, U
 
 // Generalised binomial coefficient.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename T>
-inline auto binomial(BinomialTypes<T> &&x, T &&y)
+template <typename T, typename U> requires BinomialTypes<T, U>
+inline auto binomial(T &&x, U &&y)
 #else
 template <typename T, typename U>
 inline binomial_t<T, U> binomial(T &&x, U &&y)
@@ -110,7 +110,7 @@ public:
 
 // Specialisation for mp++ integers.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename U, mppp::IntegerIntegralOpTypes<U> T>
+template <typename U, mppp::integer_integral_op_types<U> T>
 class binomial_impl<T, U>
 #else
 template <typename T, typename U>
