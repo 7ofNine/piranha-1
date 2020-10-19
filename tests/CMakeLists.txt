@@ -1,5 +1,14 @@
 include(YACMACompilerLinkerSettings)
 
+add_library(piranha_test STATIC catch_main.cpp)
+target_compile_options(piranha_test PRIVATE
+  "$<$<CONFIG:Debug>:${OBAKE_CXX_FLAGS_DEBUG}>"
+  "$<$<CONFIG:Release>:${OBAKE_CXX_FLAGS_RELEASE}>"
+  "$<$<CONFIG:RelWithDebInfo>:${OBAKE_CXX_FLAGS_RELEASE}>"
+  "$<$<CONFIG:MinSizeRel>:${OBAKE_CXX_FLAGS_RELEASE}>"
+)
+
+
 function(ADD_PIRANHA_TESTCASE arg1)
 	if(PIRANHA_TEST_NSPLIT)
 		# Increase by one the _PIRANHA_TEST_NUM variable in the parent scope.
@@ -14,7 +23,7 @@ function(ADD_PIRANHA_TESTCASE arg1)
 		return()
 	endif()
 	add_executable("${arg1}" "${arg1}.cpp")
-	target_link_libraries(${arg1} piranha)
+	target_link_libraries(${arg1} piranha piranha_test)
 	target_compile_options(${arg1} PRIVATE "$<$<CONFIG:DEBUG>:${PIRANHA_CXX_FLAGS_DEBUG}>" "$<$<CONFIG:RELEASE>:${PIRANHA_CXX_FLAGS_RELEASE}>" "$<$<CONFIG:RELWITHDEBINFO>:${PIRANHA_CXX_FLAGS_RELWITHDEBINFO}>")
 	if(PIRANHA_RUN_ON_VALGRIND AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 		# Add a special definition for the unit tests when the run-on-Valgrind
