@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include "piranha/array_key.hpp"
 
-#define BOOST_TEST_MODULE array_key_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstddef>
@@ -45,6 +43,9 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/integer.hpp>
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "exception_matcher.hpp"
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -90,69 +91,70 @@ struct constructor_tester {
         {
             typedef g_key_type<T, U> key_type;
             key_type k0;
-            BOOST_CHECK_NO_THROW(key_type tmp = key_type());
-            BOOST_CHECK_NO_THROW(key_type tmp = key_type(key_type()));
-            BOOST_CHECK_NO_THROW(key_type tmp(k0));
+            key_type tmp = key_type();
+            CHECK_NOTHROW([]() { key_type tmp = key_type(); }());
+            CHECK_NOTHROW([]() { key_type tmp = key_type(key_type()); }());
+            CHECK_NOTHROW([&]() { key_type tmp(k0); }());
             // From init list.
             key_type k1{T(0), T(1), T(2), T(3)};
-            BOOST_CHECK_EQUAL(k1.size(), static_cast<decltype(k1.size())>(4));
+            CHECK(k1.size() == static_cast<decltype(k1.size())>(4));
             for (typename key_type::size_type i = 0; i < k1.size(); ++i) {
-                BOOST_CHECK_EQUAL(k1[i], i);
-                BOOST_CHECK_NO_THROW(k1[i] = static_cast<T>(T(i) + T(1)));
-                BOOST_CHECK_EQUAL(k1[i], T(i) + T(1));
+                CHECK(k1[i] == i);
+                CHECK_NOTHROW([&](){k1[i] = static_cast<T>(T(i) + T(1));}());
+                CHECK(k1[i] == T(i) + T(1));
             }
             key_type k1a{0, 1, 2, 3};
-            BOOST_CHECK_EQUAL(k1a.size(), static_cast<decltype(k1a.size())>(4));
+            CHECK(k1a.size() == static_cast<decltype(k1a.size())>(4));
             for (typename key_type::size_type i = 0; i < k1a.size(); ++i) {
-                BOOST_CHECK_EQUAL(k1a[i], i);
-                BOOST_CHECK_NO_THROW(k1a[i] = static_cast<T>(T(i) + T(1)));
-                BOOST_CHECK_EQUAL(k1a[i], T(i) + T(1));
+                CHECK(k1a[i] == i);
+                CHECK_NOTHROW([&]() { k1a[i] = static_cast<T>(T(i) + T(1)); }());
+                CHECK(k1a[i]== T(i) + T(1));
             }
-            BOOST_CHECK_NO_THROW(k0 = k1);
-            BOOST_CHECK_NO_THROW(k0 = std::move(k1));
+            CHECK_NOTHROW([&]() { k0 = k1; }());
+            CHECK_NOTHROW([&]() { k0 = std::move(k1); }());
             // Constructor from vector of symbols.
             symbol_fset vs{"a", "b", "c"};
             key_type k2(vs);
-            BOOST_CHECK_EQUAL(k2.size(), vs.size());
-            BOOST_CHECK_EQUAL(k2[0], T(0));
-            BOOST_CHECK_EQUAL(k2[1], T(0));
-            BOOST_CHECK_EQUAL(k2[2], T(0));
+            CHECK(k2.size()== vs.size());
+            CHECK(k2[0] == T(0));
+            CHECK(k2[1] == T(0));
+            CHECK(k2[2] == T(0));
             // Generic constructor for use in series.
-            BOOST_CHECK_EXCEPTION(key_type tmp(k2, symbol_fset{}), std::invalid_argument,
-                                  [](const std::invalid_argument &e) {
-                                      return boost::contains(e.what(), "inconsistent sizes in the generic array_key "
-                                                                       "constructor: the size of the array (3) differs "
-                                                                       "from the size of the symbol set (0)");
-                                  });
-            BOOST_CHECK_EXCEPTION(key_type tmp(k2, symbol_fset{"a", "b"}), std::invalid_argument,
-                                  [](const std::invalid_argument &e) {
-                                      return boost::contains(e.what(), "inconsistent sizes in the generic array_key "
-                                                                       "constructor: the size of the array (3) differs "
-                                                                       "from the size of the symbol set (2)");
-                                  });
+            CHECK_THROWS_MATCHES([&]() { key_type tmp(k2, symbol_fset{}); }(),
+                    std::invalid_argument,
+                    piranha::test::ExceptionMatcher<std::invalid_argument>(std::string("inconsistent sizes in the generic array_key "
+                    "constructor: the size of the array (3) differs "
+                    "from the size of the symbol set (0)"))
+            );
+            CHECK_THROWS_MATCHES([&]() { key_type tmp(k2, symbol_fset{"a", "b"});}(),
+                    std::invalid_argument,
+                    piranha::test::ExceptionMatcher<std::invalid_argument>(std::string("inconsistent sizes in the generic array_key "
+                    "constructor: the size of the array (3) differs "
+                    "from the size of the symbol set (2)"))
+            );
             key_type k3(k2, vs);
-            BOOST_CHECK_EQUAL(k3.size(), vs.size());
-            BOOST_CHECK_EQUAL(k3[0], T(0));
-            BOOST_CHECK_EQUAL(k3[1], T(0));
-            BOOST_CHECK_EQUAL(k3[2], T(0));
+            CHECK(k3.size() == vs.size());
+            CHECK(k3[0] == T(0));
+            CHECK(k3[1] == T(0));
+            CHECK(k3[2] == T(0));
             key_type k4(key_type(vs), vs);
-            BOOST_CHECK_EQUAL(k4.size(), vs.size());
-            BOOST_CHECK_EQUAL(k4[0], T(0));
-            BOOST_CHECK_EQUAL(k4[1], T(0));
-            BOOST_CHECK_EQUAL(k4[2], T(0));
+            CHECK(k4.size() == vs.size());
+            CHECK(k4[0] == T(0));
+            CHECK(k4[1] == T(0));
+            CHECK(k4[2] == T(0));
             typedef g_key_type<int, U> key_type2;
             key_type2 k5(vs);
-            BOOST_CHECK_THROW(key_type tmp(k5, symbol_fset{}), std::invalid_argument);
+            CHECK_THROWS_AS([&]() { key_type tmp(k5, symbol_fset{}); }(), std::invalid_argument);
             key_type k6(k5, vs);
-            BOOST_CHECK_EQUAL(k6.size(), vs.size());
-            BOOST_CHECK_EQUAL(k6[0], T(0));
-            BOOST_CHECK_EQUAL(k6[1], T(0));
-            BOOST_CHECK_EQUAL(k6[2], T(0));
+            CHECK(k6.size() == vs.size());
+            CHECK(k6[0] == T(0));
+            CHECK(k6[1] == T(0));
+            CHECK(k6[2] == T(0));
             key_type k7(key_type2(vs), vs);
-            BOOST_CHECK_EQUAL(k7.size(), vs.size());
-            BOOST_CHECK_EQUAL(k7[0], T(0));
-            BOOST_CHECK_EQUAL(k7[1], T(0));
-            BOOST_CHECK_EQUAL(k7[2], T(0));
+            CHECK(k7.size() == vs.size());
+            CHECK(k7[0] == T(0));
+            CHECK(k7[1] == T(0));
+            CHECK(k7[2] == T(0));
         }
     };
     template <typename T>
@@ -162,10 +164,12 @@ struct constructor_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_constructor_test)
+TEST_CASE("array_key_constructor_test")
 {
     tuple_for_each(value_types{}, constructor_tester{});
 }
+
+
 
 struct hash_tester {
     template <typename T>
@@ -175,10 +179,10 @@ struct hash_tester {
         {
             typedef g_key_type<T, U> key_type;
             key_type k0;
-            BOOST_CHECK_EQUAL(k0.hash(), std::size_t());
-            BOOST_CHECK_EQUAL(k0.hash(), std::hash<key_type>()(k0));
+            CHECK(k0.hash() == std::size_t());
+            CHECK(k0.hash() == std::hash<key_type>()(k0));
             key_type k1{T(0), T(1), T(2), T(3)};
-            BOOST_CHECK_EQUAL(k1.hash(), std::hash<key_type>()(k1));
+            CHECK(k1.hash() == std::hash<key_type>()(k1));
         }
     };
     template <typename T>
@@ -188,7 +192,7 @@ struct hash_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_hash_test)
+TEST_CASE("array_key_hash_test")
 {
     tuple_for_each(value_types{}, hash_tester{});
 }
@@ -204,13 +208,13 @@ struct push_back_tester {
             key_type k0;
             for (size_type i = 0u; i < 4u; ++i) {
                 k0.push_back(T(i));
-                BOOST_CHECK_EQUAL(k0[i], T(i));
+                CHECK(k0[i] == T(i));
             }
             key_type k1;
             for (size_type i = 0u; i < 4u; ++i) {
                 T tmp = static_cast<T>(i);
                 k1.push_back(tmp);
-                BOOST_CHECK_EQUAL(k1[i], tmp);
+                CHECK(k1[i] == tmp);
             }
         }
     };
@@ -221,7 +225,7 @@ struct push_back_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_push_back_test)
+TEST_CASE("array_key_push_back_test")
 {
     tuple_for_each(value_types{}, push_back_tester{});
 }
@@ -234,22 +238,22 @@ struct equality_tester {
         {
             typedef g_key_type<T, U> key_type;
             key_type k0;
-            BOOST_CHECK(k0 == key_type());
+            CHECK(k0 == key_type());
             for (int i = 0; i < 4; ++i) {
                 k0.push_back(T(i));
             }
             key_type k1{T(0), T(1), T(2), T(3)};
-            BOOST_CHECK(k0 == k1);
+            CHECK(k0 == k1);
             // Inequality.
             k0 = key_type();
-            BOOST_CHECK(k0 != k1);
+            CHECK(k0 != k1);
             for (int i = 0; i < 3; ++i) {
                 k0.push_back(T(i));
             }
-            BOOST_CHECK(k0 != k1);
+            CHECK(k0 != k1);
             k0.push_back(T(3));
             k0.push_back(T());
-            BOOST_CHECK(k0 != k1);
+            CHECK(k0 != k1);
         }
     };
     template <typename T>
@@ -259,7 +263,7 @@ struct equality_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_equality_test)
+TEST_CASE("array_key_equality_test")
 {
     tuple_for_each(value_types{}, equality_tester{});
 }
@@ -273,119 +277,118 @@ struct merge_symbols_tester {
             using key_type = g_key_type<T, U>;
             key_type k;
             auto out = k.merge_symbols({{0, {"a"}}}, symbol_fset{});
-            BOOST_CHECK((std::is_same<decltype(out), key_type>::value));
-            BOOST_CHECK_EQUAL(out.size(), 1u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
+            CHECK((std::is_same<decltype(out), key_type>::value));
+            CHECK(out.size() == 1u);
+            CHECK(out[0] == T(0));
             k.push_back(T(2));
             k.push_back(T(4));
             out = k.merge_symbols({{0, {"a"}}, {1, {"c"}}}, {"b", "d"});
-            BOOST_CHECK_EQUAL(out.size(), 4u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(2));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(4));
+            CHECK(out.size() == 4u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(2));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(4));
             out = k.merge_symbols({{0, {"a"}}, {1, {"c"}}}, {"b", "d"});
             k.push_back(T(5));
             k.push_back(T(7));
             out = k.merge_symbols({{0, {"a"}}, {4, {"h"}}, {3, {"f"}}, {1, {"c"}}}, {"b", "d", "g", "e"});
-            BOOST_CHECK_EQUAL(out.size(), 8u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(2));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(4));
-            BOOST_CHECK_EQUAL(out[4], T(5));
-            BOOST_CHECK_EQUAL(out[5], T(0));
-            BOOST_CHECK_EQUAL(out[6], T(7));
-            BOOST_CHECK_EQUAL(out[7], T(0));
+            CHECK(out.size() == 8u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(2));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(4));
+            CHECK(out[4] == T(5));
+            CHECK(out[5] == T(0));
+            CHECK(out[6] == T(7));
+            CHECK(out[7] == T(0));
             k = key_type{T(2), T(4)};
             out = k.merge_symbols({{0, {"a", "b", "c", "d"}}, {1, {"f"}}, {2, {"h"}}}, {"g", "e"});
-            BOOST_CHECK_EQUAL(out.size(), 8u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(0));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(0));
-            BOOST_CHECK_EQUAL(out[4], T(2));
-            BOOST_CHECK_EQUAL(out[5], T(0));
-            BOOST_CHECK_EQUAL(out[6], T(4));
-            BOOST_CHECK_EQUAL(out[7], T(0));
+            CHECK(out.size() ==  8u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(0));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(0));
+            CHECK(out[4] == T(2));
+            CHECK(out[5] == T(0));
+            CHECK(out[6] == T(4));
+            CHECK(out[7] == T(0));
             out = k.merge_symbols({{0, {"a"}}, {1, {"f", "e", "c", "d"}}, {2, {"h"}}}, {"b", "g"});
-            BOOST_CHECK_EQUAL(out.size(), 8u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(2));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(0));
-            BOOST_CHECK_EQUAL(out[4], T(0));
-            BOOST_CHECK_EQUAL(out[5], T(0));
-            BOOST_CHECK_EQUAL(out[6], T(4));
-            BOOST_CHECK_EQUAL(out[7], T(0));
+            CHECK(out.size() == 8u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(2));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(0));
+            CHECK(out[4] == T(0));
+            CHECK(out[5] == T(0));
+            CHECK(out[6] == T(4));
+            CHECK(out[7] == T(0));
             k = key_type{T(2)};
             out = k.merge_symbols({{1, {"f", "g", "h"}}, {0, {"a", "b", "c", "d"}}}, {"e"});
-            BOOST_CHECK_EQUAL(out.size(), 8u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(0));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(0));
-            BOOST_CHECK_EQUAL(out[4], T(2));
-            BOOST_CHECK_EQUAL(out[5], T(0));
-            BOOST_CHECK_EQUAL(out[6], T(0));
-            BOOST_CHECK_EQUAL(out[7], T(0));
+            CHECK(out.size() == 8u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(0));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(0));
+            CHECK(out[4] == T(2));
+            CHECK(out[5] == T(0));
+            CHECK(out[6] == T(0));
+            CHECK(out[7] == T(0));
             k = key_type{};
             out = k.merge_symbols({{0, {"a", "b", "c", "d"}}}, symbol_fset{});
-            BOOST_CHECK_EQUAL(out.size(), 4u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(0));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(0));
+            CHECK(out.size() == 4u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(0));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(0));
             k = key_type{T(2)};
             out = k.merge_symbols({{1, {"c", "d", "e", "f"}}}, {"b"});
-            BOOST_CHECK_EQUAL(out.size(), 5u);
-            BOOST_CHECK_EQUAL(out[0], T(2));
-            BOOST_CHECK_EQUAL(out[1], T(0));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(0));
-            BOOST_CHECK_EQUAL(out[4], T(0));
+            CHECK(out.size() == 5u);
+            CHECK(out[0] == T(2));
+            CHECK(out[1] == T(0));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(0));
+            CHECK(out[4] == T(0));
             k = key_type{T(2)};
             out = k.merge_symbols({{0, {"c", "d", "e", "f"}}}, {"g"});
-            BOOST_CHECK_EQUAL(out.size(), 5u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(0));
-            BOOST_CHECK_EQUAL(out[2], T(0));
-            BOOST_CHECK_EQUAL(out[3], T(0));
-            BOOST_CHECK_EQUAL(out[4], T(2));
+            CHECK(out.size() == 5u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(0));
+            CHECK(out[2] == T(0));
+            CHECK(out[3] == T(0));
+            CHECK(out[4] == T(2));
             // Test from the documentation.
             k = key_type{T(1), T(2), T(3), T(4)};
             out = k.merge_symbols({{0, {"a", "b"}}, {1, {"d"}}, {2, {"f"}}, {4, {"i"}}}, {"c", "e", "g", "h"});
-            BOOST_CHECK_EQUAL(out.size(), 9u);
-            BOOST_CHECK_EQUAL(out[0], T(0));
-            BOOST_CHECK_EQUAL(out[1], T(0));
-            BOOST_CHECK_EQUAL(out[2], T(1));
-            BOOST_CHECK_EQUAL(out[3], T(0));
-            BOOST_CHECK_EQUAL(out[4], T(2));
-            BOOST_CHECK_EQUAL(out[5], T(0));
-            BOOST_CHECK_EQUAL(out[6], T(3));
-            BOOST_CHECK_EQUAL(out[7], T(4));
-            BOOST_CHECK_EQUAL(out[8], T(0));
+            CHECK(out.size() == 9u);
+            CHECK(out[0] == T(0));
+            CHECK(out[1] == T(0));
+            CHECK(out[2] == T(1));
+            CHECK(out[3] == T(0));
+            CHECK(out[4] == T(2));
+            CHECK(out[5] == T(0));
+            CHECK(out[6] == T(3));
+            CHECK(out[7] == T(4));
+            CHECK(out[8] == T(0));
             // Check errors.
             k = key_type{T(2)};
-            BOOST_CHECK_EXCEPTION(k.merge_symbols({{0, {"c", "d", "e", "f"}}}, {"g", "h"}), std::invalid_argument,
-                                  [](const std::invalid_argument &e) {
-                                      return boost::contains(
-                                          e.what(),
-                                          "invalid argument(s) for symbol set merging: the size of the original "
-                                          "symbol set (2) must be equal to the key's size (1)");
-                                  });
-            BOOST_CHECK_EXCEPTION(
-                k.merge_symbols(symbol_idx_fmap<symbol_fset>{}, {"g"}), std::invalid_argument,
-                [](const std::invalid_argument &e) {
-                    return boost::contains(
-                        e.what(), "invalid argument(s) for symbol set merging: the insertion map cannot be empty");
-                });
-            BOOST_CHECK_EXCEPTION(k.merge_symbols({{2, {"f", "g", "h"}}, {0, {"a", "b", "c", "d"}}}, {"g"}),
-                                  std::invalid_argument, [](const std::invalid_argument &e) {
-                                      return boost::contains(e.what(), "invalid argument(s) for symbol set merging: "
-                                                                       "the last index of the insertion map (2) must "
-                                                                       "not be greater than the key's size (1)");
-                                  });
+            CHECK_THROWS_MATCHES( [&]() {k.merge_symbols({{0, {"c", "d", "e", "f"}}}, {"g", "h"});}(),
+                std::invalid_argument,
+                piranha::test::ExceptionMatcher<std::invalid_argument>(
+                    std::string("invalid argument(s) for symbol set merging: the size of the original "
+                                "symbol set (2) must be equal to the key's size (1)"))
+            );
+            CHECK_THROWS_MATCHES(
+                [&]() { k.merge_symbols(symbol_idx_fmap<symbol_fset>{}, {"g"}); }(),
+                std::invalid_argument,
+                piranha::test::ExceptionMatcher<std::invalid_argument>(std::string("invalid argument(s) for symbol set merging: the insertion map cannot be empty"))
+            );
+            CHECK_THROWS_MATCHES(
+                [&]() { k.merge_symbols({{2, {"f", "g", "h"}}, {0, {"a", "b", "c", "d"}}}, {"g"}); }(),
+                std::invalid_argument,
+                piranha::test::ExceptionMatcher<std::invalid_argument>(std::string("invalid argument(s) for symbol set merging: "
+                                          "the last index of the insertion map (2) must "
+                                          "not be greater than the key's size (1)"))
+            );
         }
     };
     template <typename T>
@@ -395,7 +398,7 @@ struct merge_symbols_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_merge_symbols_test)
+TEST_CASE("array_key_merge_symbols_test")
 {
     tuple_for_each(value_types{}, merge_symbols_tester{});
 }
@@ -408,14 +411,14 @@ struct iterators_tester {
         {
             typedef g_key_type<T, U> key_type;
             key_type k0;
-            BOOST_CHECK(k0.begin() == k0.end());
+            CHECK(k0.begin() == k0.end());
             for (int i = 0; i < 4; ++i) {
                 k0.push_back(T(i));
             }
-            BOOST_CHECK(k0.begin() + 4 == k0.end());
-            BOOST_CHECK(k0.begin() != k0.end());
+            CHECK(k0.begin() + 4 == k0.end());
+            CHECK(k0.begin() != k0.end());
             const key_type k1 = key_type();
-            BOOST_CHECK(k1.begin() == k1.end());
+            CHECK(k1.begin() == k1.end());
         }
     };
     template <typename T>
@@ -425,7 +428,7 @@ struct iterators_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_iterators_test)
+TEST_CASE("array_key_iterators_test")
 {
     tuple_for_each(value_types{}, iterators_tester{});
 }
@@ -438,11 +441,11 @@ struct resize_tester {
         {
             typedef g_key_type<T, U> key_type;
             key_type k0;
-            BOOST_CHECK(k0.size() == 0u);
+            CHECK(k0.size() == 0u);
             k0.resize(1u);
-            BOOST_CHECK(k0.size() == 1u);
+            CHECK(k0.size() == 1u);
             k0.resize(10u);
-            BOOST_CHECK(k0.size() == 10u);
+            CHECK(k0.size() == 10u);
         }
     };
     template <typename T>
@@ -452,7 +455,7 @@ struct resize_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_resize_test)
+TEST_CASE("array_key_resize_test")
 {
     tuple_for_each(value_types{}, resize_tester{});
 }
@@ -466,14 +469,14 @@ struct add_tester {
             typedef g_key_type<T, U> key_type;
             key_type k1, k2, retval;
             k1.vector_add(retval, k2);
-            BOOST_CHECK(!retval.size());
+            CHECK(!retval.size());
             k1.resize(1);
             k2.resize(1);
             k1[0] = 1;
             k2[0] = 2;
             k1.vector_add(retval, k2);
-            BOOST_CHECK(retval.size() == 1u);
-            BOOST_CHECK(retval[0] == T(3));
+            CHECK(retval.size() == 1u);
+            CHECK(retval[0] == T(3));
         }
     };
     template <typename T>
@@ -483,7 +486,7 @@ struct add_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_add_test)
+TEST_CASE("array_key_add_test")
 {
     tuple_for_each(value_types{}, add_tester{});
 }
@@ -497,14 +500,14 @@ struct sub_tester {
             typedef g_key_type<T, U> key_type;
             key_type k1, k2, retval;
             k1.vector_sub(retval, k2);
-            BOOST_CHECK(!retval.size());
+            CHECK(!retval.size());
             k1.resize(1);
             k2.resize(1);
             k1[0] = 2;
             k2[0] = 1;
             k1.vector_sub(retval, k2);
-            BOOST_CHECK(retval.size() == 1u);
-            BOOST_CHECK(retval[0] == T(1));
+            CHECK(retval.size() == 1u);
+            CHECK(retval[0] == T(1));
         }
     };
     template <typename T>
@@ -514,7 +517,7 @@ struct sub_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_sub_test)
+TEST_CASE("array_key_sub_test")
 {
     tuple_for_each(value_types{}, sub_tester{});
 }
@@ -529,42 +532,44 @@ struct trim_identify_tester {
             key_type k0;
             std::vector<char> us;
             k0.resize(1u);
-            BOOST_CHECK_EXCEPTION(
-                k0.trim_identify(us, symbol_fset{}), std::invalid_argument, [](const std::invalid_argument &e) {
-                    return boost::contains(e.what(), "invalid symbol set for trim_identify(): the size of the array "
-                                                     "(1) differs from the size of the reference symbol set (0)");
-                });
-            BOOST_CHECK_EXCEPTION(
-                k0.trim_identify(us, {"a"}), std::invalid_argument, [](const std::invalid_argument &e) {
-                    return boost::contains(e.what(), "invalid mask for trim_identify(): the size of the "
-                                                     "array (1) differs from the size of the mask (0)");
-                });
+            CHECK_THROWS_MATCHES([&]() { k0.trim_identify(us, symbol_fset{}); }(),
+                std::invalid_argument,
+                piranha::test::ExceptionMatcher<std::invalid_argument>(
+                        std::string("invalid symbol set for trim_identify(): the size of the array "
+                                    "(1) differs from the size of the reference symbol set (0)"))
+                );
+            CHECK_THROWS_MATCHES([&]() { k0.trim_identify(us, {"a"}); }(),
+                   std::invalid_argument,
+                   piranha::test::ExceptionMatcher<std::invalid_argument>(
+                   std::string("invalid mask for trim_identify(): the size of the "
+                               "array (1) differs from the size of the mask (0)"))
+                );
             k0 = key_type{};
             k0.trim_identify(us, symbol_fset{});
-            BOOST_CHECK(us.empty());
+            CHECK(us.empty());
             us.resize(3, 1);
             k0 = key_type{T(1), T(0), T(2)};
             k0.trim_identify(us, {"a", "b", "c"});
-            BOOST_CHECK((us == std::vector<char>{0, 1, 0}));
+            CHECK((us == std::vector<char>{0, 1, 0}));
             k0 = key_type{T(1), T(3), T(2)};
             k0.trim_identify(us, {"a", "b", "c"});
-            BOOST_CHECK((us == std::vector<char>{0, 0, 0}));
+            CHECK((us == std::vector<char>{0, 0, 0}));
             us.assign(3, 1);
             k0 = key_type{T(0), T(0), T(0)};
             k0.trim_identify(us, {"a", "b", "c"});
-            BOOST_CHECK((us == std::vector<char>{1, 1, 1}));
+            CHECK((us == std::vector<char>{1, 1, 1}));
             k0 = key_type{T(0), T(0), T(1)};
             k0.trim_identify(us, {"a", "b", "c"});
-            BOOST_CHECK((us == std::vector<char>{1, 1, 0}));
+            CHECK((us == std::vector<char>{1, 1, 0}));
             k0 = key_type{T(0), T(0), T(0)};
             k0.trim_identify(us, {"a", "b", "c"});
-            BOOST_CHECK((us == std::vector<char>{1, 1, 0}));
+            CHECK((us == std::vector<char>{1, 1, 0}));
             k0 = key_type{T(1), T(0), T(0)};
             k0.trim_identify(us, {"a", "b", "c"});
-            BOOST_CHECK((us == std::vector<char>{0, 1, 0}));
+            CHECK((us == std::vector<char>{0, 1, 0}));
             k0 = key_type{T(0), T(1), T(0)};
             k0.trim_identify(us, {"a", "b", "c"});
-            BOOST_CHECK((us == std::vector<char>{0, 0, 0}));
+            CHECK((us == std::vector<char>{0, 0, 0}));
         }
     };
     template <typename T>
@@ -574,7 +579,7 @@ struct trim_identify_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_trim_identify_test)
+TEST_CASE("array_key_trim_identify_test")
 {
     tuple_for_each(value_types{}, trim_identify_tester{});
 }
@@ -587,25 +592,24 @@ struct trim_tester {
         {
             typedef g_key_type<T, U> key_type;
             key_type k0;
-            BOOST_CHECK((k0.trim(std::vector<char>{}, symbol_fset{}) == key_type{}));
-            BOOST_CHECK_EXCEPTION(k0.trim(std::vector<char>{}, symbol_fset{"x", "y", "z"}), std::invalid_argument,
-                                  [](const std::invalid_argument &e) {
-                                      return boost::contains(
-                                          e.what(), "invalid arguments set for trim(): the size of the array (0) "
-                                                    "differs from the size of the reference symbol set (3)");
-                                  });
+            CHECK((k0.trim(std::vector<char>{}, symbol_fset{}) == key_type{}));
+            CHECK_THROWS_MATCHES([&]() {k0.trim(std::vector<char>{}, symbol_fset{"x", "y", "z"});}(),
+                std::invalid_argument,
+                piranha::test::ExceptionMatcher<std::invalid_argument>(
+                    std::string("invalid arguments set for trim(): the size of the array (0) differs from the size of the "
+                    "reference symbol set (3)"))
+            );
             k0 = key_type{T(1), T(2), T(3)};
-            BOOST_CHECK_EXCEPTION(k0.trim(std::vector<char>{true, false}, symbol_fset{"x", "y", "z"}),
-                                  std::invalid_argument, [](const std::invalid_argument &e) {
-                                      return boost::contains(e.what(),
-                                                             "invalid mask for trim(): the size of the "
-                                                             "array (3) differs from the size of the mask (2)");
-                                  });
-            BOOST_CHECK(
-                (k0.trim(std::vector<char>{true, false, false}, symbol_fset{"x", "y", "z"}) == key_type{T(2), T(3)}));
-            BOOST_CHECK((k0.trim(std::vector<char>{2, 0, -1}, symbol_fset{"x", "y", "z"}) == key_type{T(2)}));
-            BOOST_CHECK((k0.trim(std::vector<char>{true, true, true}, symbol_fset{"x", "y", "z"}) == key_type{}));
-            BOOST_CHECK((k0.trim(std::vector<char>{false, false, false}, symbol_fset{"x", "y", "z"}) == k0));
+            CHECK_THROWS_MATCHES( [&]() { k0.trim(std::vector<char>{true, false}, symbol_fset{"x", "y", "z"}); }(),
+                std::invalid_argument,
+                piranha::test::ExceptionMatcher<std::invalid_argument>(
+                    std::string("invalid mask for trim(): the size of the "
+                                "array (3) differs from the size of the mask (2)"))
+            );
+            CHECK((k0.trim(std::vector<char>{true, false, false}, symbol_fset{"x", "y", "z"}) == key_type{T(2), T(3)}));
+            CHECK((k0.trim(std::vector<char>{2, 0, -1}, symbol_fset{"x", "y", "z"}) == key_type{T(2)}));
+            CHECK((k0.trim(std::vector<char>{true, true, true}, symbol_fset{"x", "y", "z"}) == key_type{}));
+            CHECK((k0.trim(std::vector<char>{false, false, false}, symbol_fset{"x", "y", "z"}) == k0));
         }
     };
     template <typename T>
@@ -615,7 +619,7 @@ struct trim_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_trim_test)
+TEST_CASE("array_key_trim_test")
 {
     tuple_for_each(value_types{}, trim_tester{});
 }
@@ -627,8 +631,8 @@ struct tt_tester {
         void operator()(const U &) const
         {
             typedef g_key_type<T, U> key_type;
-            BOOST_CHECK(is_hashable<key_type>::value);
-            BOOST_CHECK(is_equality_comparable<const key_type &>::value);
+            CHECK(is_hashable<key_type>::value);
+            CHECK(is_equality_comparable<const key_type &>::value);
         }
     };
     template <typename T>
@@ -638,7 +642,7 @@ struct tt_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_type_traits_test)
+TEST_CASE("array_key_type_traits_test")
 {
 
     tuple_for_each(value_types{}, tt_tester{});
@@ -731,15 +735,15 @@ struct ae_tester {
     void operator()(const T &) const
     {
         typedef g_key_type<fvt, T> key_type;
-        BOOST_CHECK(!has_add<key_type>::value);
+        CHECK(!has_add<key_type>::value);
         typedef g_key_type<fvt2, T> key_type2;
-        BOOST_CHECK(has_add<key_type2>::value);
+        CHECK(has_add<key_type2>::value);
         typedef g_key_type<fvt3, T> key_type3;
-        BOOST_CHECK(!has_add<key_type3>::value);
+        CHECK(!has_add<key_type3>::value);
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_add_enabler_test)
+TEST_CASE("array_key_add_enabler_test")
 {
 
     tuple_for_each(size_types{}, ae_tester{});
@@ -752,25 +756,25 @@ struct sbe_tester {
         typedef g_key_type<int, T> key_type;
         key_type tmp;
         auto sbe1 = tmp.size_begin_end();
-        BOOST_CHECK((std::is_same<decltype(sbe1), std::tuple<typename key_type::size_type, int *, int *>>::value));
-        BOOST_CHECK_EQUAL(std::get<0>(sbe1), 0u);
-        BOOST_CHECK(std::get<1>(sbe1) == std::get<2>(sbe1));
+        CHECK((std::is_same<decltype(sbe1), std::tuple<typename key_type::size_type, int *, int *>>::value));
+        CHECK(std::get<0>(sbe1) == 0u);
+        CHECK(std::get<1>(sbe1) == std::get<2>(sbe1));
         auto sbe2 = static_cast<const key_type &>(tmp).size_begin_end();
-        BOOST_CHECK(
+        CHECK(
             (std::is_same<decltype(sbe2), std::tuple<typename key_type::size_type, int const *, int const *>>::value));
-        BOOST_CHECK_EQUAL(std::get<0>(sbe2), 0u);
-        BOOST_CHECK(std::get<1>(sbe2) == std::get<2>(sbe2));
+        CHECK(std::get<0>(sbe2) == 0u);
+        CHECK(std::get<1>(sbe2) == std::get<2>(sbe2));
         key_type k0({1, 2, 3, 4, 5});
         auto sbe3 = k0.size_begin_end();
-        BOOST_CHECK_EQUAL(std::get<0>(sbe3), 5u);
-        BOOST_CHECK(std::get<1>(sbe3) + 5 == std::get<2>(sbe3));
+        CHECK(std::get<0>(sbe3) == 5u);
+        CHECK(std::get<1>(sbe3) + 5 == std::get<2>(sbe3));
         auto sbe4 = static_cast<const key_type &>(k0).size_begin_end();
-        BOOST_CHECK_EQUAL(std::get<0>(sbe4), 5u);
-        BOOST_CHECK(std::get<1>(sbe4) + 5 == std::get<2>(sbe4));
+        CHECK(std::get<0>(sbe4) == 5u);
+        CHECK(std::get<1>(sbe4) + 5 == std::get<2>(sbe4));
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_sbe_test)
+TEST_CASE("array_key_sbe_test")
 {
 
     tuple_for_each(size_types{}, sbe_tester{});
@@ -783,12 +787,12 @@ struct subscript_tester {
         typedef g_key_type<int, T> key_type;
         key_type k0;
         k0.push_back(0);
-        BOOST_CHECK_EQUAL(k0[0], 0);
-        BOOST_CHECK_EQUAL(static_cast<key_type const &>(k0)[0], 0);
+        CHECK(k0[0] == 0);
+        CHECK(static_cast<key_type const &>(k0)[0] == 0);
     }
 };
 
-BOOST_AUTO_TEST_CASE(array_key_subscript_test)
+TEST_CASE("array_key_subscript_test")
 {
 
     tuple_for_each(size_types{}, subscript_tester{});

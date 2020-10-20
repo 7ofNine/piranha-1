@@ -417,7 +417,7 @@ SET(INCS
     include/piranha/detail/small_vector_fwd.hpp
     include/piranha/detail/stacktrace.hpp
     include/piranha/detail/vector_hasher.hpp
-    
+    tests/exception_matcher.hpp
 )
 SOURCE_GROUP(TREE ${CMAKE_SOURCE_DIR} PREFIX "Header Files" FILES ${INCS})
 ADD_LIBRARY(Headers STATIC ${INCS})
