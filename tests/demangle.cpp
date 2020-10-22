@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/detail/demangle.hpp>
 
-#define BOOST_TEST_MODULE demangle_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <iostream>
 #include <memory>
@@ -39,6 +37,7 @@ see https://www.gnu.org/licenses/. */
 #include <unordered_set>
 #include <vector>
 
+#include "catch.hpp"
 using namespace piranha;
 
 struct base_foo {
@@ -57,7 +56,7 @@ struct bar {
 };
 }
 
-BOOST_AUTO_TEST_CASE(demangle_test)
+TEST_CASE("demangle_test")
 {
     // A few valid types.
     std::cout << type_name<int>() << '\n';

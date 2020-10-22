@@ -518,8 +518,9 @@ TEST_CASE("base_series_multiplier_sanitise_series_test")
     settings::reset_n_threads();
 }
 
+template <typename T>
 struct multiplication_tester {
-    template <typename T>
+//    template <typename T>
     void operator()(const T &)
     {
         // NOTE: this test is going to be exact in case of coefficients cancellations with double
@@ -646,8 +647,11 @@ TEST_CASE("base_series_multiplier_plain_multiplication_test")
         //boost::mpl::for_each<p_types>(multiplication_tester());
         //TEMPLATE_TEST_CASE("test for different p_ptypes", "", pt1, pt2, p_type<rational>)
         //(
-        //    multiplication_tester(TestType);
+        //    multiplication_tester<TestType>();
         //);
+        multiplication_tester<pt1>();
+        multiplication_tester<pt2>();
+        multiplication_tester<p_type<rational>>();
     }
     {
         // Some testing with double for the zero absorber modifications.

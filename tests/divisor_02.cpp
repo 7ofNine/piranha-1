@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/divisor.hpp>
 
-#define BOOST_TEST_MODULE divisor_02_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
@@ -49,6 +47,9 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
 
+#include "catch_impl.hpp"
+#include "exception_matcher.hpp"
+
 using namespace piranha;
 
 using value_types = std::tuple<signed char, short, int, long, long long, integer>;
@@ -59,7 +60,7 @@ static std::mt19937 rng;
 static const int ntries = 1000;
 #endif
 
-BOOST_AUTO_TEST_CASE(divisor_empty_test) {}
+TEST_CASE("divisor_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -104,20 +105,20 @@ struct boost_s11n_tester {
     {
         using d_type = divisor<T>;
         using w_type = boost_s11n_key_wrapper<d_type>;
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, w_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const w_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const w_type &>::value));
-        BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const w_type &>::value));
-        BOOST_CHECK((!has_boost_save<void, const w_type &>::value));
-        BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, w_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, w_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, w_type>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const w_type>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const w_type &>::value));
-        BOOST_CHECK((!has_boost_load<const boost::archive::binary_iarchive &, const w_type &>::value));
-        BOOST_CHECK((!has_boost_load<void, const w_type &>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, w_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive, w_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, const w_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, const w_type &>::value));
+        CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const w_type &>::value));
+        CHECK((!has_boost_save<void, const w_type &>::value));
+        CHECK((!has_boost_save<boost::archive::binary_iarchive, w_type>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive, w_type>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive &, w_type>::value));
+        CHECK((!has_boost_load<boost::archive::binary_iarchive &, const w_type>::value));
+        CHECK((!has_boost_load<boost::archive::binary_iarchive &, const w_type &>::value));
+        CHECK((!has_boost_load<const boost::archive::binary_iarchive &, const w_type &>::value));
+        CHECK((!has_boost_load<void, const w_type &>::value));
+        CHECK((!has_boost_load<boost::archive::binary_oarchive, w_type>::value));
         std::uniform_int_distribution<int> sdist(0, 10), ddist(-10, 10), edist(1, 10);
         const std::vector<std::string> vs = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
         for (int i = 0; i < ntries; ++i) {
@@ -190,7 +191,7 @@ struct boost_s11n_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(divisor_boost_s11n_test)
+TEST_CASE("divisor_boost_s11n_test")
 {
     tuple_for_each(value_types{}, boost_s11n_tester{});
 }
@@ -216,14 +217,14 @@ struct msgpack_s11n_tester {
     void operator()(const T &) const
     {
         using d_type = divisor<T>;
-        BOOST_CHECK((key_has_msgpack_pack<msgpack::sbuffer, d_type>::value));
-        BOOST_CHECK((key_has_msgpack_pack<msgpack::sbuffer, d_type &>::value));
-        BOOST_CHECK((key_has_msgpack_pack<msgpack::sbuffer, const d_type &>::value));
-        BOOST_CHECK((!key_has_msgpack_pack<msgpack::sbuffer &, const d_type &>::value));
-        BOOST_CHECK((!key_has_msgpack_pack<void, const d_type &>::value));
-        BOOST_CHECK((key_has_msgpack_convert<d_type>::value));
-        BOOST_CHECK((key_has_msgpack_convert<d_type &>::value));
-        BOOST_CHECK((!key_has_msgpack_convert<const d_type &>::value));
+        CHECK((key_has_msgpack_pack<msgpack::sbuffer, d_type>::value));
+        CHECK((key_has_msgpack_pack<msgpack::sbuffer, d_type &>::value));
+        CHECK((key_has_msgpack_pack<msgpack::sbuffer, const d_type &>::value));
+        CHECK((!key_has_msgpack_pack<msgpack::sbuffer &, const d_type &>::value));
+        CHECK((!key_has_msgpack_pack<void, const d_type &>::value));
+        CHECK((key_has_msgpack_convert<d_type>::value));
+        CHECK((key_has_msgpack_convert<d_type &>::value));
+        CHECK((!key_has_msgpack_convert<const d_type &>::value));
         std::uniform_int_distribution<int> sdist(0, 10), ddist(-10, 10), edist(1, 10);
         const std::vector<std::string> vs = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
         for (auto f : {msgpack_format::portable, msgpack_format::binary}) {
@@ -305,11 +306,11 @@ struct msgpack_s11n_tester {
                                                          "the divisor loaded from a msgpack object failed internal "
                                                          "consistency checks");
                               });
-        BOOST_CHECK(dv == d_type{});
+        CHECK(dv == d_type{});
     }
 };
 
-BOOST_AUTO_TEST_CASE(divisor_msgpack_s11n_test)
+TEST_CASE("divisor_msgpack_s11n_test")
 {
     tuple_for_each(value_types{}, msgpack_s11n_tester{});
 }
