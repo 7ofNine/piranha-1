@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/monomial.hpp>
 
-#define BOOST_TEST_MODULE monomial_02_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
@@ -52,6 +49,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/s11n.hpp>
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -108,7 +107,7 @@ struct negate_impl<fake_int_01> {
 }
 }
 
-BOOST_AUTO_TEST_CASE(monomial_empty_test) {}
+TEST_CASE("monomial_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -139,34 +138,34 @@ struct boost_s11n_tester {
             using monomial_type = monomial<T, U>;
             using w_type = boost_s11n_key_wrapper<monomial_type>;
             // Test the type traits.
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, w_type>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, w_type &>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, const w_type &>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, const w_type>::value));
-            BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, w_type>::value));
-            BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, w_type &>::value));
-            BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, w_type &&>::value));
-            BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, const w_type &>::value));
-            BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, const w_type>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type &>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type &&>::value));
-            BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, w_type>::value));
-            BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, w_type>::value));
-            BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, w_type>::value));
-            BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive, w_type>::value));
-            BOOST_CHECK((!has_boost_load<const boost::archive::binary_iarchive, w_type>::value));
-            BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, w_type>::value));
-            BOOST_CHECK((!has_boost_load<const boost::archive::binary_iarchive &, w_type>::value));
-            BOOST_CHECK((!has_boost_save<int, w_type>::value));
-            BOOST_CHECK((!has_boost_load<int, w_type>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, w_type>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, w_type &>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, const w_type &>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, const w_type>::value));
+            CHECK((has_boost_load<boost::archive::binary_iarchive, w_type>::value));
+            CHECK((has_boost_load<boost::archive::binary_iarchive, w_type &>::value));
+            CHECK((has_boost_load<boost::archive::binary_iarchive, w_type &&>::value));
+            CHECK((!has_boost_load<boost::archive::binary_iarchive, const w_type &>::value));
+            CHECK((!has_boost_load<boost::archive::binary_iarchive, const w_type>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type &>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive &, w_type &&>::value));
+            CHECK((has_boost_load<boost::archive::binary_iarchive &, w_type>::value));
+            CHECK((!has_boost_save<boost::archive::binary_iarchive, w_type>::value));
+            CHECK((!has_boost_load<boost::archive::binary_oarchive, w_type>::value));
+            CHECK((!has_boost_save<const boost::archive::binary_oarchive, w_type>::value));
+            CHECK((!has_boost_load<const boost::archive::binary_iarchive, w_type>::value));
+            CHECK((!has_boost_save<const boost::archive::binary_oarchive &, w_type>::value));
+            CHECK((!has_boost_load<const boost::archive::binary_iarchive &, w_type>::value));
+            CHECK((!has_boost_save<int, w_type>::value));
+            CHECK((!has_boost_load<int, w_type>::value));
             // Check exceptions.
             symbol_fset s{"a"};
             monomial_type m;
             std::stringstream ss;
             {
                 boost::archive::text_oarchive oa(ss);
-                BOOST_CHECK_EXCEPTION(
+                CHECK_EXCEPTION(
                     boost_save(oa, w_type{m, s}), std::invalid_argument, [](const std::invalid_argument &ia) {
                         return boost::contains(
                             ia.what(),
@@ -185,7 +184,7 @@ struct boost_s11n_tester {
                 boost::archive::text_iarchive ia(ss);
                 symbol_fset s2;
                 w_type w{m, s2};
-                BOOST_CHECK_EXCEPTION(boost_load(ia, w), std::invalid_argument, [](const std::invalid_argument &iae) {
+                CHECK_EXCEPTION(boost_load(ia, w), std::invalid_argument, [](const std::invalid_argument &iae) {
                     return boost::contains(
                         iae.what(),
                         "incompatible symbol set in monomial serialization: the reference "
@@ -196,18 +195,18 @@ struct boost_s11n_tester {
             m = monomial_type{};
             auto n = boost_round_trip_monomial<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(
                 m, symbol_fset{});
-            BOOST_CHECK(n == m);
+            CHECK(n == m);
             n = boost_round_trip_monomial<boost::archive::text_oarchive, boost::archive::text_iarchive>(m,
                                                                                                         symbol_fset{});
-            BOOST_CHECK(n == m);
+            CHECK(n == m);
             std::vector<T> vexpo = {T(1), T(2), T(3)};
             m = monomial_type(vexpo.begin(), vexpo.end());
             n = boost_round_trip_monomial<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(
                 m, symbol_fset{"a", "b", "c"});
-            BOOST_CHECK(n == m);
+            CHECK(n == m);
             n = boost_round_trip_monomial<boost::archive::text_oarchive, boost::archive::text_iarchive>(
                 m, symbol_fset{"a", "b", "c"});
-            BOOST_CHECK(n == m);
+            CHECK(n == m);
             // Random testing.
             random_test<U>();
         }
@@ -226,10 +225,10 @@ struct boost_s11n_tester {
                 }
                 monomial_type m(tmp.begin(), tmp.end());
                 symbol_fset ss(vs.begin(), vs.begin() + size);
-                BOOST_CHECK((
+                CHECK((
                     m
                     == boost_round_trip_monomial<boost::archive::text_oarchive, boost::archive::text_iarchive>(m, ss)));
-                BOOST_CHECK(
+                CHECK(
                     (m
                      == boost_round_trip_monomial<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(
                             m, ss)));
@@ -254,10 +253,10 @@ struct boost_s11n_tester {
                 }
                 monomial_type m(tmp.begin(), tmp.end());
                 symbol_fset ss(vs.begin(), vs.begin() + size);
-                BOOST_CHECK((
+                CHECK((
                     m
                     == boost_round_trip_monomial<boost::archive::text_oarchive, boost::archive::text_iarchive>(m, ss)));
-                BOOST_CHECK(
+                CHECK(
                     (m
                      == boost_round_trip_monomial<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(
                             m, ss)));
@@ -278,10 +277,10 @@ struct boost_s11n_tester {
                 }
                 monomial_type m(tmp.begin(), tmp.end());
                 symbol_fset ss(vs.begin(), vs.begin() + size);
-                BOOST_CHECK((
+                CHECK((
                     m
                     == boost_round_trip_monomial<boost::archive::text_oarchive, boost::archive::text_iarchive>(m, ss)));
-                BOOST_CHECK(
+                CHECK(
                     (m
                      == boost_round_trip_monomial<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(
                             m, ss)));
@@ -295,13 +294,13 @@ struct boost_s11n_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(monomial_boost_s11n_test)
+TEST_CASE("monomial_boost_s11n_test")
 {
     tuple_for_each(expo_types{}, boost_s11n_tester());
-    BOOST_CHECK((is_key<monomial<fake_int_01>>::value));
-    BOOST_CHECK(
+    CHECK((is_key<monomial<fake_int_01>>::value));
+    CHECK(
         (!has_boost_save<boost::archive::binary_oarchive, boost_s11n_key_wrapper<monomial<fake_int_01>>>::value));
-    BOOST_CHECK(
+    CHECK(
         (!has_boost_load<boost::archive::binary_iarchive, boost_s11n_key_wrapper<monomial<fake_int_01>>>::value));
 }
 
@@ -353,34 +352,34 @@ struct msgpack_tester {
         void operator()(const U &) const
         {
             using monomial_type = monomial<T, U>;
-            BOOST_CHECK((key_has_msgpack_pack<msgpack::sbuffer, monomial_type>::value));
-            BOOST_CHECK((key_has_msgpack_pack<std::ostringstream, monomial_type>::value));
-            BOOST_CHECK((key_has_msgpack_pack<std::ostringstream, monomial_type &>::value));
-            BOOST_CHECK((key_has_msgpack_pack<std::ostringstream, const monomial_type &>::value));
-            BOOST_CHECK((key_has_msgpack_pack<std::ostringstream, const monomial_type>::value));
-            BOOST_CHECK((key_has_msgpack_pack<sw<std::ostringstream>, monomial_type>::value));
-            BOOST_CHECK((!key_has_msgpack_pack<msgpack::sbuffer &, monomial_type>::value));
-            BOOST_CHECK((!key_has_msgpack_pack<int, monomial_type>::value));
-            BOOST_CHECK((!key_has_msgpack_pack<const std::ostringstream, monomial_type>::value));
-            BOOST_CHECK((!key_has_msgpack_pack<const std::ostringstream &&, monomial_type>::value));
-            BOOST_CHECK((!key_has_msgpack_pack<std::ostringstream &&, monomial_type>::value));
-            BOOST_CHECK((key_has_msgpack_convert<monomial_type>::value));
-            BOOST_CHECK((key_has_msgpack_convert<monomial_type &>::value));
-            BOOST_CHECK((key_has_msgpack_convert<monomial_type &&>::value));
-            BOOST_CHECK((!key_has_msgpack_convert<const monomial_type &>::value));
-            BOOST_CHECK((!key_has_msgpack_convert<const monomial_type>::value));
+            CHECK((key_has_msgpack_pack<msgpack::sbuffer, monomial_type>::value));
+            CHECK((key_has_msgpack_pack<std::ostringstream, monomial_type>::value));
+            CHECK((key_has_msgpack_pack<std::ostringstream, monomial_type &>::value));
+            CHECK((key_has_msgpack_pack<std::ostringstream, const monomial_type &>::value));
+            CHECK((key_has_msgpack_pack<std::ostringstream, const monomial_type>::value));
+            CHECK((key_has_msgpack_pack<sw<std::ostringstream>, monomial_type>::value));
+            CHECK((!key_has_msgpack_pack<msgpack::sbuffer &, monomial_type>::value));
+            CHECK((!key_has_msgpack_pack<int, monomial_type>::value));
+            CHECK((!key_has_msgpack_pack<const std::ostringstream, monomial_type>::value));
+            CHECK((!key_has_msgpack_pack<const std::ostringstream &&, monomial_type>::value));
+            CHECK((!key_has_msgpack_pack<std::ostringstream &&, monomial_type>::value));
+            CHECK((key_has_msgpack_convert<monomial_type>::value));
+            CHECK((key_has_msgpack_convert<monomial_type &>::value));
+            CHECK((key_has_msgpack_convert<monomial_type &&>::value));
+            CHECK((!key_has_msgpack_convert<const monomial_type &>::value));
+            CHECK((!key_has_msgpack_convert<const monomial_type>::value));
             // Some simple checks.
             for (auto f : {msgpack_format::portable, msgpack_format::binary}) {
-                BOOST_CHECK((msgpack_round_trip_monomial(monomial_type{}, symbol_fset{}, f) == monomial_type{}));
-                BOOST_CHECK((msgpack_round_trip_monomial_ss(monomial_type{}, symbol_fset{}, f) == monomial_type{}));
+                CHECK((msgpack_round_trip_monomial(monomial_type{}, symbol_fset{}, f) == monomial_type{}));
+                CHECK((msgpack_round_trip_monomial_ss(monomial_type{}, symbol_fset{}, f) == monomial_type{}));
                 monomial_type m{T(1), T(2)};
                 symbol_fset s{"a", "b"};
-                BOOST_CHECK((msgpack_round_trip_monomial(m, s, f) == m));
-                BOOST_CHECK((msgpack_round_trip_monomial_ss(m, s, f) == m));
+                CHECK((msgpack_round_trip_monomial(m, s, f) == m));
+                CHECK((msgpack_round_trip_monomial_ss(m, s, f) == m));
                 // Test exceptions.
                 sbuffer sbuf;
                 packer<sbuffer> p(sbuf);
-                BOOST_CHECK_EXCEPTION(
+                CHECK_EXCEPTION(
                     m.msgpack_pack(p, f, symbol_fset{}), std::invalid_argument, [](const std::invalid_argument &ia) {
                         return boost::contains(
                             ia.what(),
@@ -389,7 +388,7 @@ struct msgpack_tester {
                     });
                 m.msgpack_pack(p, f, s);
                 auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
-                BOOST_CHECK_EXCEPTION(
+                CHECK_EXCEPTION(
                     m.msgpack_convert(oh.get(), f, symbol_fset{}), std::invalid_argument,
                     [](const std::invalid_argument &ia) {
                         return boost::contains(
@@ -437,7 +436,7 @@ struct msgpack_tester {
             t1.join();
             t2.join();
             t3.join();
-            BOOST_CHECK(flag.load());
+            CHECK(flag.load());
         }
         template <typename U, typename V = T, typename std::enable_if<std::is_same<V, rational>::value, int>::type = 0>
         void random_test() const
@@ -479,7 +478,7 @@ struct msgpack_tester {
             t1.join();
             t2.join();
             t3.join();
-            BOOST_CHECK(flag.load());
+            CHECK(flag.load());
         }
         template <typename U, typename V = T, typename std::enable_if<std::is_integral<V>::value, int>::type = 0>
         void random_test() const
@@ -517,7 +516,7 @@ struct msgpack_tester {
             t1.join();
             t2.join();
             t3.join();
-            BOOST_CHECK(flag.load());
+            CHECK(flag.load());
         }
     };
     template <typename T>
@@ -527,13 +526,13 @@ struct msgpack_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(monomial_msgpack_test)
+TEST_CASE("monomial_msgpack_test")
 {
     tuple_for_each(expo_types{}, msgpack_tester());
-    BOOST_CHECK((!key_has_msgpack_pack<msgpack::sbuffer, monomial<fake_int_01>>::value));
-    BOOST_CHECK((!key_has_msgpack_pack<std::ostringstream, monomial<fake_int_01>>::value));
-    BOOST_CHECK((!key_has_msgpack_pack<sw<std::ostringstream>, monomial<fake_int_01>>::value));
-    BOOST_CHECK((!key_has_msgpack_convert<monomial<fake_int_01>>::value));
+    CHECK((!key_has_msgpack_pack<msgpack::sbuffer, monomial<fake_int_01>>::value));
+    CHECK((!key_has_msgpack_pack<std::ostringstream, monomial<fake_int_01>>::value));
+    CHECK((!key_has_msgpack_pack<sw<std::ostringstream>, monomial<fake_int_01>>::value));
+    CHECK((!key_has_msgpack_convert<monomial<fake_int_01>>::value));
 }
 
 #endif

@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/invert.hpp>
 
-#define BOOST_TEST_MODULE invert_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <cmath>
 #include <string>
@@ -47,6 +45,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/real.hpp>
 #endif
 
+#include "catch.hpp"
+
 using namespace piranha;
 
 using math::invert;
@@ -60,49 +60,49 @@ static inline real operator"" _r(const char *s)
 
 #endif
 
-BOOST_AUTO_TEST_CASE(invert_test_00)
+TEST_CASE("invert_test_00")
 {
     // Some tests with non-piranha types.
-    BOOST_CHECK(is_invertible<float>::value);
-    BOOST_CHECK(is_invertible<double>::value);
-    BOOST_CHECK(is_invertible<long double>::value);
-    BOOST_CHECK_EQUAL(piranha::pow(1.5f, -1), invert(1.5f));
-    BOOST_CHECK((std::is_same<decltype(std::pow(1.5f, -1)), decltype(invert(1.5f))>::value));
-    BOOST_CHECK_EQUAL(piranha::pow(1.5, -1), invert(1.5));
-    BOOST_CHECK((std::is_same<double, decltype(invert(1.5))>::value));
-    BOOST_CHECK_EQUAL(piranha::pow(1.5l, -1), invert(1.5l));
-    BOOST_CHECK((std::is_same<long double, decltype(invert(1.5l))>::value));
-    BOOST_CHECK(!is_invertible<std::string>::value);
-    BOOST_CHECK(!is_invertible<void>::value);
+    CHECK(is_invertible<float>::value);
+    CHECK(is_invertible<double>::value);
+    CHECK(is_invertible<long double>::value);
+    CHECK(piranha::pow(1.5f, -1) ==  invert(1.5f));
+    CHECK((std::is_same<decltype(std::pow(1.5f, -1)), decltype(invert(1.5f))>::value));
+    CHECK(piranha::pow(1.5, -1) == invert(1.5));
+    CHECK((std::is_same<double, decltype(invert(1.5))>::value));
+    CHECK(piranha::pow(1.5l, -1) == invert(1.5l));
+    CHECK((std::is_same<long double, decltype(invert(1.5l))>::value));
+    CHECK(!is_invertible<std::string>::value);
+    CHECK(!is_invertible<void>::value);
     // Test with piranha's scalar types.
-    BOOST_CHECK(is_invertible<integer>::value);
-    BOOST_CHECK(is_invertible<rational>::value);
+    CHECK(is_invertible<integer>::value);
+    CHECK(is_invertible<rational>::value);
 #if defined(MPPP_WITH_MPFR)
-    BOOST_CHECK(is_invertible<real>::value);
+    CHECK(is_invertible<real>::value);
 #endif
-    BOOST_CHECK_EQUAL(invert(1_z), 1);
-    BOOST_CHECK_EQUAL(invert(-1_z), -1);
-    BOOST_CHECK_EQUAL(invert(2_z), 0);
-    BOOST_CHECK((std::is_same<integer, decltype(invert(1_z))>::value));
-    BOOST_CHECK_EQUAL(invert(1_q), 1);
-    BOOST_CHECK_EQUAL(invert(1 / 2_q), 2);
-    BOOST_CHECK_EQUAL(invert(-2 / 3_q), -3 / 2_q);
-    BOOST_CHECK((std::is_same<rational, decltype(invert(1_q))>::value));
+    CHECK(invert(1_z) == 1);
+    CHECK(invert(-1_z) == -1);
+    CHECK(invert(2_z) == 0);
+    CHECK((std::is_same<integer, decltype(invert(1_z))>::value));
+    CHECK(invert(1_q) == 1);
+    CHECK(invert(1 / 2_q) == 2);
+    CHECK(invert(-2 / 3_q) == -3 / 2_q);
+    CHECK((std::is_same<rational, decltype(invert(1_q))>::value));
 #if defined(MPPP_WITH_MPFR)
-    BOOST_CHECK_EQUAL(invert(1_r), 1);
-    BOOST_CHECK_EQUAL(invert(1.5_r), piranha::pow(1.5_r, -1));
-    BOOST_CHECK_EQUAL(invert(-2.5_r), piranha::pow(-2.5_r, -1));
-    BOOST_CHECK((std::is_same<real, decltype(invert(1_r))>::value));
+    CHECK(invert(1_r) == 1);
+    CHECK(invert(1.5_r) == piranha::pow(1.5_r, -1));
+    CHECK(invert(-2.5_r) == piranha::pow(-2.5_r, -1));
+    CHECK((std::is_same<real, decltype(invert(1_r))>::value));
 #endif
     // Test with some series types.
     using p_type = polynomial<rational, monomial<short>>;
-    BOOST_CHECK(is_invertible<p_type>::value);
+    CHECK(is_invertible<p_type>::value);
     p_type x{"x"};
-    BOOST_CHECK_EQUAL(invert(x), piranha::pow(x, -1));
-    BOOST_CHECK((std::is_same<p_type, decltype(invert(x))>::value));
+    CHECK(invert(x) == piranha::pow(x, -1));
+    CHECK((std::is_same<p_type, decltype(invert(x))>::value));
     using ps_type = poisson_series<p_type>;
-    BOOST_CHECK(is_invertible<ps_type>::value);
+    CHECK(is_invertible<ps_type>::value);
     ps_type a{"a"};
-    BOOST_CHECK_EQUAL(invert(a), piranha::pow(a, -1));
-    BOOST_CHECK((std::is_same<ps_type, decltype(invert(a))>::value));
+    CHECK(invert(a) == piranha::pow(a, -1));
+    CHECK((std::is_same<ps_type, decltype(invert(a))>::value));
 }

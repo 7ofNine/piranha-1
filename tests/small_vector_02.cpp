@@ -27,10 +27,6 @@ GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
 
 #include <piranha/small_vector.hpp>
-
-#define BOOST_TEST_MODULE small_vector_02_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <cstddef>
 #include <initializer_list>
 #include <random>
@@ -43,6 +39,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/rational.hpp>
 #include <piranha/s11n.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 #if defined(PIRANHA_WITH_BOOST_S11N) || defined(PIRANHA_WITH_MSGPACK)
 static const int ntries = 1000;
@@ -58,7 +56,7 @@ using size_types = std::tuple<std::integral_constant<std::size_t, 0u>, std::inte
 struct no_s11n {
 };
 
-BOOST_AUTO_TEST_CASE(small_vector_empty_test) {}
+TEST_CASE("small_vector_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -75,7 +73,7 @@ static inline void boost_round_trip(const V &v)
         IArchive ia(ss);
         boost_load(ia, retval);
     }
-    BOOST_CHECK(retval == v);
+    CHECK(retval == v);
 }
 
 struct boost_s11n_tester {
@@ -85,20 +83,20 @@ struct boost_s11n_tester {
         void operator()(const U &) const
         {
             using v_type = small_vector<T, U>;
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, v_type>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, small_vector<v_type, U>>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, v_type &>::value));
-            BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, const v_type &>::value));
-            BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive const, const v_type &>::value));
-            BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, const v_type &>::value));
-            BOOST_CHECK((!has_boost_save<void, v_type>::value));
-            BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, v_type>::value));
-            BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, small_vector<v_type, U>>::value));
-            BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, v_type &>::value));
-            BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, const v_type &>::value));
-            BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive const, const v_type &>::value));
-            BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, v_type>::value));
-            BOOST_CHECK((!has_boost_load<void, v_type>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, v_type>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, small_vector<v_type, U>>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, v_type &>::value));
+            CHECK((has_boost_save<boost::archive::binary_oarchive, const v_type &>::value));
+            CHECK((!has_boost_save<boost::archive::binary_oarchive const, const v_type &>::value));
+            CHECK((!has_boost_save<boost::archive::binary_iarchive, const v_type &>::value));
+            CHECK((!has_boost_save<void, v_type>::value));
+            CHECK((has_boost_load<boost::archive::binary_iarchive, v_type>::value));
+            CHECK((has_boost_load<boost::archive::binary_iarchive, small_vector<v_type, U>>::value));
+            CHECK((has_boost_load<boost::archive::binary_iarchive, v_type &>::value));
+            CHECK((!has_boost_load<boost::archive::binary_iarchive, const v_type &>::value));
+            CHECK((!has_boost_load<boost::archive::binary_iarchive const, const v_type &>::value));
+            CHECK((!has_boost_load<boost::archive::binary_oarchive, v_type>::value));
+            CHECK((!has_boost_load<void, v_type>::value));
             using size_type = typename v_type::size_type;
             std::uniform_int_distribution<unsigned> sdist(0u, 20u);
             std::uniform_int_distribution<int> edist(-10, 10);
@@ -120,13 +118,13 @@ struct boost_s11n_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(small_vector_boost_s11n_test)
+TEST_CASE("small_vector_boost_s11n_test")
 {
     tuple_for_each(value_types{}, boost_s11n_tester{});
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive, small_vector<no_s11n>>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, small_vector<no_s11n>>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive, small_vector<small_vector<no_s11n>>>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, small_vector<small_vector<no_s11n>>>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive, small_vector<no_s11n>>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, small_vector<no_s11n>>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive, small_vector<small_vector<no_s11n>>>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, small_vector<small_vector<no_s11n>>>::value));
 }
 
 #endif
@@ -144,7 +142,7 @@ static inline void msgpack_round_trip(const Vector &v, msgpack_format f)
     auto oh = unpack(sbuf.data(), sbuf.size());
     Vector retval;
     msgpack_convert(retval, oh.get(), f);
-    BOOST_CHECK(v == retval);
+    CHECK(v == retval);
 }
 
 struct msgpack_s11n_tester {
@@ -154,17 +152,17 @@ struct msgpack_s11n_tester {
         void operator()(const U &) const
         {
             using v_type = small_vector<T, U>;
-            BOOST_CHECK((has_msgpack_pack<sbuffer, v_type>::value));
-            BOOST_CHECK((has_msgpack_pack<sbuffer, small_vector<v_type, U>>::value));
-            BOOST_CHECK((has_msgpack_pack<sbuffer, v_type &>::value));
-            BOOST_CHECK((has_msgpack_pack<sbuffer, const v_type &>::value));
-            BOOST_CHECK((!has_msgpack_pack<sbuffer const, const v_type &>::value));
-            BOOST_CHECK((!has_msgpack_pack<void, v_type>::value));
-            BOOST_CHECK((has_msgpack_convert<v_type>::value));
-            BOOST_CHECK((has_msgpack_convert<small_vector<v_type, U>>::value));
-            BOOST_CHECK((has_msgpack_convert<v_type &>::value));
-            BOOST_CHECK((!has_msgpack_convert<const v_type &>::value));
-            BOOST_CHECK((!has_msgpack_convert<const v_type &>::value));
+            CHECK((has_msgpack_pack<sbuffer, v_type>::value));
+            CHECK((has_msgpack_pack<sbuffer, small_vector<v_type, U>>::value));
+            CHECK((has_msgpack_pack<sbuffer, v_type &>::value));
+            CHECK((has_msgpack_pack<sbuffer, const v_type &>::value));
+            CHECK((!has_msgpack_pack<sbuffer const, const v_type &>::value));
+            CHECK((!has_msgpack_pack<void, v_type>::value));
+            CHECK((has_msgpack_convert<v_type>::value));
+            CHECK((has_msgpack_convert<small_vector<v_type, U>>::value));
+            CHECK((has_msgpack_convert<v_type &>::value));
+            CHECK((!has_msgpack_convert<const v_type &>::value));
+            CHECK((!has_msgpack_convert<const v_type &>::value));
             using size_type = typename v_type::size_type;
             std::uniform_int_distribution<unsigned> sdist(0u, 20u);
             std::uniform_int_distribution<int> edist(-10, 10);
@@ -187,13 +185,13 @@ struct msgpack_s11n_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(small_vector_msgpack_s11n_test)
+TEST_CASE("small_vector_msgpack_s11n_test")
 {
     tuple_for_each(value_types{}, msgpack_s11n_tester{});
-    BOOST_CHECK((!has_msgpack_pack<sbuffer, small_vector<no_s11n>>::value));
-    BOOST_CHECK((!has_msgpack_convert<small_vector<no_s11n>>::value));
-    BOOST_CHECK((!has_msgpack_pack<sbuffer, small_vector<small_vector<no_s11n>>>::value));
-    BOOST_CHECK((!has_msgpack_convert<small_vector<small_vector<no_s11n>>>::value));
+    CHECK((!has_msgpack_pack<sbuffer, small_vector<no_s11n>>::value));
+    CHECK((!has_msgpack_convert<small_vector<no_s11n>>::value));
+    CHECK((!has_msgpack_pack<sbuffer, small_vector<small_vector<no_s11n>>>::value));
+    CHECK((!has_msgpack_convert<small_vector<small_vector<no_s11n>>>::value));
 }
 
 #endif

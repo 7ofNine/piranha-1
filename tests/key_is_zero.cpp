@@ -26,14 +26,12 @@ You should have received copies of the GNU General Public License and the
 GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
 
-#include <piranha/key/key_is_zero.hpp>
-
-#define BOOST_TEST_MODULE key_is_zero_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <string>
 
 #include <piranha/symbol_utils.hpp>
+#include <piranha/key/key_is_zero.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -78,31 +76,31 @@ public:
 };
 }
 
-BOOST_AUTO_TEST_CASE(key_is_zero_test_00)
+TEST_CASE("key_is_zero_test_00")
 {
-    BOOST_CHECK(!key_is_zero(0, symbol_fset{}));
-    BOOST_CHECK(!key_is_zero(foo{}, symbol_fset{}));
-    BOOST_CHECK(key_is_zero(bar{}, symbol_fset{}));
-    BOOST_CHECK(is_key_is_zero_type<int>::value);
-    BOOST_CHECK(is_key_is_zero_type<const int>::value);
-    BOOST_CHECK(is_key_is_zero_type<const int &>::value);
-    BOOST_CHECK(is_key_is_zero_type<int &&>::value);
-    BOOST_CHECK(is_key_is_zero_type<foo>::value);
-    BOOST_CHECK(is_key_is_zero_type<const foo>::value);
-    BOOST_CHECK(is_key_is_zero_type<const foo &>::value);
-    BOOST_CHECK(is_key_is_zero_type<foo &&>::value);
-    BOOST_CHECK(is_key_is_zero_type<bar>::value);
-    BOOST_CHECK(is_key_is_zero_type<const bar>::value);
-    BOOST_CHECK(is_key_is_zero_type<const bar &>::value);
-    BOOST_CHECK(is_key_is_zero_type<bar &&>::value);
-    BOOST_CHECK(!is_key_is_zero_type<baz>::value);
-    BOOST_CHECK(!is_key_is_zero_type<const baz>::value);
-    BOOST_CHECK(!is_key_is_zero_type<const baz &>::value);
-    BOOST_CHECK(!is_key_is_zero_type<baz &&>::value);
-    BOOST_CHECK(!is_key_is_zero_type<void>::value);
-    BOOST_CHECK(is_key_is_zero_type<nab>::value);
-    BOOST_CHECK(is_key_is_zero_type<const nab>::value);
-    BOOST_CHECK(is_key_is_zero_type<const nab &>::value);
-    BOOST_CHECK(is_key_is_zero_type<nab &&>::value);
-    BOOST_CHECK(!is_key_is_zero_type<nab &>::value);
+    CHECK(!key_is_zero(0, symbol_fset{}));
+    CHECK(!key_is_zero(foo{}, symbol_fset{}));
+    CHECK(key_is_zero(bar{}, symbol_fset{}));
+    CHECK(is_key_is_zero_type<int>::value);
+    CHECK(is_key_is_zero_type<const int>::value);
+    CHECK(is_key_is_zero_type<const int &>::value);
+    CHECK(is_key_is_zero_type<int &&>::value);
+    CHECK(is_key_is_zero_type<foo>::value);
+    CHECK(is_key_is_zero_type<const foo>::value);
+    CHECK(is_key_is_zero_type<const foo &>::value);
+    CHECK(is_key_is_zero_type<foo &&>::value);
+    CHECK(is_key_is_zero_type<bar>::value);
+    CHECK(is_key_is_zero_type<const bar>::value);
+    CHECK(is_key_is_zero_type<const bar &>::value);
+    CHECK(is_key_is_zero_type<bar &&>::value);
+    CHECK(!is_key_is_zero_type<baz>::value);
+    CHECK(!is_key_is_zero_type<const baz>::value);
+    CHECK(!is_key_is_zero_type<const baz &>::value);
+    CHECK(!is_key_is_zero_type<baz &&>::value);
+    CHECK(!is_key_is_zero_type<void>::value);
+    CHECK(is_key_is_zero_type<nab>::value);
+    CHECK(is_key_is_zero_type<const nab>::value);
+    CHECK(is_key_is_zero_type<const nab &>::value);
+    CHECK(is_key_is_zero_type<nab &&>::value);
+    CHECK(!is_key_is_zero_type<nab &>::value);
 }

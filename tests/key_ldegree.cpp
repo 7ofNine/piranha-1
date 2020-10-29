@@ -28,12 +28,11 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/key/key_ldegree.hpp>
 
-#define BOOST_TEST_MODULE key_ldegree_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <utility>
 
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -96,33 +95,33 @@ public:
 };
 }
 
-BOOST_AUTO_TEST_CASE(key_ldegree_test_00)
+TEST_CASE("key_ldegree_test_00")
 {
-    BOOST_CHECK(!is_key_ldegree_type<void>::value);
-    BOOST_CHECK(!is_key_ldegree_type<int>::value);
-    BOOST_CHECK(!is_key_ldegree_type<const int>::value);
-    BOOST_CHECK(!is_key_ldegree_type<const int &&>::value);
-    BOOST_CHECK(!is_key_ldegree_type<int &&>::value);
-    BOOST_CHECK(is_key_ldegree_type<foo>::value);
-    BOOST_CHECK(is_key_ldegree_type<foo &>::value);
-    BOOST_CHECK(is_key_ldegree_type<const foo>::value);
-    BOOST_CHECK(is_key_ldegree_type<const foo &>::value);
-    BOOST_CHECK(is_key_ldegree_type<foo &&>::value);
-    BOOST_CHECK_EQUAL(piranha::key_ldegree(foo{}, symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(piranha::key_ldegree(foo{}, symbol_idx_fset{}, symbol_fset{}), 1);
-    BOOST_CHECK(!is_key_ldegree_type<bar>::value);
-    BOOST_CHECK(!is_key_ldegree_type<bar &>::value);
-    BOOST_CHECK(!is_key_ldegree_type<const bar>::value);
-    BOOST_CHECK(!is_key_ldegree_type<const bar &>::value);
-    BOOST_CHECK(!is_key_ldegree_type<bar &&>::value);
-    BOOST_CHECK(is_key_ldegree_type<mbar>::value);
-    BOOST_CHECK_EQUAL(piranha::key_ldegree(mbar{}, symbol_fset{}), 1);
-    BOOST_CHECK_EQUAL(piranha::key_ldegree(mbar{}, symbol_idx_fset{}, symbol_fset{}), 2);
+    CHECK(!is_key_ldegree_type<void>::value);
+    CHECK(!is_key_ldegree_type<int>::value);
+    CHECK(!is_key_ldegree_type<const int>::value);
+    CHECK(!is_key_ldegree_type<const int &&>::value);
+    CHECK(!is_key_ldegree_type<int &&>::value);
+    CHECK(is_key_ldegree_type<foo>::value);
+    CHECK(is_key_ldegree_type<foo &>::value);
+    CHECK(is_key_ldegree_type<const foo>::value);
+    CHECK(is_key_ldegree_type<const foo &>::value);
+    CHECK(is_key_ldegree_type<foo &&>::value);
+    CHECK(piranha::key_ldegree(foo{}, symbol_fset{}) == 0);
+    CHECK(piranha::key_ldegree(foo{}, symbol_idx_fset{}, symbol_fset{}) == 1);
+    CHECK(!is_key_ldegree_type<bar>::value);
+    CHECK(!is_key_ldegree_type<bar &>::value);
+    CHECK(!is_key_ldegree_type<const bar>::value);
+    CHECK(!is_key_ldegree_type<const bar &>::value);
+    CHECK(!is_key_ldegree_type<bar &&>::value);
+    CHECK(is_key_ldegree_type<mbar>::value);
+    CHECK(piranha::key_ldegree(mbar{}, symbol_fset{}) == 1);
+    CHECK(piranha::key_ldegree(mbar{}, symbol_idx_fset{}, symbol_fset{}) == 2);
     mbar m1, m2;
-    BOOST_CHECK_EQUAL(m1.value, 0);
-    BOOST_CHECK_EQUAL(m2.value, 0);
+    CHECK(m1.value == 0);
+    CHECK(m2.value == 0);
     piranha::key_ldegree(std::move(m1), symbol_fset{});
     piranha::key_ldegree(std::move(m2), symbol_idx_fset{}, symbol_fset{});
-    BOOST_CHECK_EQUAL(m1.value, 1);
-    BOOST_CHECK_EQUAL(m2.value, 1);
+    CHECK(m1.value == 1);
+    CHECK(m2.value == 1);
 }

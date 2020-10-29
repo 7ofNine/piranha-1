@@ -27,10 +27,6 @@ GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
 
 #include <piranha/series.hpp>
-
-#define BOOST_TEST_MODULE series_08_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/lexical_cast.hpp>
 #include <initializer_list>
 #include <limits>
@@ -67,6 +63,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/settings.hpp>
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -137,15 +135,15 @@ struct negate_tester {
             p_type p("x");
             p += 1;
             p += p_type("y");
-            BOOST_CHECK_EQUAL(p.size(), unsigned(3));
+            CHECK(p.size() == unsigned(3));
             p_type q1 = p, q2 = p;
             p.negate();
-            BOOST_CHECK_EQUAL(p.size(), unsigned(3));
+            CHECK(p.size() == unsigned(3));
             p += q1;
-            BOOST_CHECK(p.empty());
+            CHECK(p.empty());
             math::negate(q2);
             q2 += q1;
-            BOOST_CHECK(q2.empty());
+            CHECK(q2.empty());
         }
     };
     template <typename Cf>
@@ -155,7 +153,7 @@ struct negate_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(series_negate_test)
+TEST_CASE("series_negate_test")
 {
 #if defined(MPPP_WITH_MPFR)
     //mppp::real_set_default_prec(100); do we need this???? is there a mppp::real???
@@ -170,12 +168,12 @@ struct identity_tester {
         void operator()(const Expo &) const
         {
             typedef g_series_type<Cf, Expo> p_type1;
-            BOOST_CHECK(+p_type1{} == +p_type1{});
-            BOOST_CHECK(+p_type1{} == p_type1{});
-            BOOST_CHECK(p_type1{} == +p_type1{});
-            BOOST_CHECK(p_type1("x") == +p_type1("x"));
-            BOOST_CHECK(+p_type1("x") == p_type1("x"));
-            BOOST_CHECK(+p_type1("x") == +p_type1("x"));
+            CHECK(+p_type1{} == +p_type1{});
+            CHECK(+p_type1{} == p_type1{});
+            CHECK(p_type1{} == +p_type1{});
+            CHECK(p_type1("x") == +p_type1("x"));
+            CHECK(+p_type1("x") == p_type1("x"));
+            CHECK(+p_type1("x") == +p_type1("x"));
         }
     };
     template <typename Cf>
@@ -185,7 +183,7 @@ struct identity_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(series_identity_test)
+TEST_CASE("series_identity_test")
 {
     tuple_for_each(cf_types{}, identity_tester());
 }
@@ -197,10 +195,10 @@ struct negation_tester {
         void operator()(const Expo &) const
         {
             typedef g_series_type<Cf, Expo> p_type1;
-            BOOST_CHECK(+p_type1{} == -(-(+p_type1{})));
-            BOOST_CHECK(-(-(+p_type1{})) == p_type1{});
-            BOOST_CHECK(-p_type1("x") == -(+p_type1("x")));
-            BOOST_CHECK(-(+p_type1("x")) == -p_type1("x"));
+            CHECK(+p_type1{} == -(-(+p_type1{})));
+            CHECK(-(-(+p_type1{})) == p_type1{});
+            CHECK(-p_type1("x") == -(+p_type1("x")));
+            CHECK(-(+p_type1("x")) == -p_type1("x"));
         }
     };
     template <typename Cf>
@@ -210,7 +208,7 @@ struct negation_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(series_negation_test)
+TEST_CASE("series_negation_test")
 {
     tuple_for_each(cf_types{}, negation_tester());
 }
@@ -229,84 +227,84 @@ struct stream_tester {
             typedef g_series_type<p_type1, Expo> p_type11;
             std::ostringstream oss;
             oss << p_type1{};
-            BOOST_CHECK(oss.str() == "0");
+            CHECK(oss.str() == "0");
             oss.str("");
             oss << p_type1{1};
-            BOOST_CHECK(oss.str() == "1");
+            CHECK(oss.str() == "1");
             oss.str("");
             oss << p_type1{-1};
-            BOOST_CHECK(oss.str() == "-1");
+            CHECK(oss.str() == "-1");
             oss.str("");
             oss << p_type1{"x"};
-            BOOST_CHECK(oss.str() == "x");
+            CHECK(oss.str() == "x");
             oss.str("");
             oss << (-p_type1{"x"});
-            BOOST_CHECK(oss.str() == "-x");
+            CHECK(oss.str() == "-x");
             oss.str("");
             oss << (-p_type1{"x"} * p_type1{"y"});
-            BOOST_CHECK(oss.str() == "-x*y");
+            CHECK(oss.str() == "-x*y");
             oss.str("");
             oss << (-p_type1{"x"} + 1);
-            BOOST_CHECK(oss.str() == "1-x" || oss.str() == "-x+1");
+            CHECK((oss.str() == "1-x" || oss.str() == "-x+1"));
             oss.str("");
             oss << p_type11{};
-            BOOST_CHECK(oss.str() == "0");
+            CHECK(oss.str() == "0");
             oss.str("");
             oss << p_type11{"x"};
-            BOOST_CHECK(oss.str() == "x");
+            CHECK(oss.str() == "x");
             oss.str("");
             oss << (-p_type11{"x"});
-            BOOST_CHECK(oss.str() == "-x");
+            CHECK(oss.str() == "-x");
             oss.str("");
             oss << (p_type11{1});
-            BOOST_CHECK(oss.str() == "1");
+            CHECK(oss.str() == "1");
             oss.str("");
             oss << (p_type11{-1});
-            BOOST_CHECK(oss.str() == "-1");
+            CHECK(oss.str() == "-1");
             oss.str("");
             oss << (p_type11{"x"} * p_type11{"y"});
-            BOOST_CHECK(oss.str() == "x*y");
+            CHECK(oss.str() == "x*y");
             oss.str("");
             oss << (-p_type11{"x"} * p_type11{"y"});
-            BOOST_CHECK(oss.str() == "-x*y");
+            CHECK(oss.str() == "-x*y");
             oss.str("");
             oss << (-p_type11{"x"} + 1);
-            BOOST_CHECK(oss.str() == "1-x" || oss.str() == "-x+1");
+            CHECK((oss.str() == "1-x" || oss.str() == "-x+1"));
             oss.str("");
             oss << (p_type11{"x"} - 1);
-            BOOST_CHECK(oss.str() == "x-1" || oss.str() == "-1+x");
+            CHECK((oss.str() == "x-1" || oss.str() == "-1+x"));
             // Test wih less term output.
             typedef polynomial<Cf, monomial<Expo>> poly_type;
             settings::set_max_term_output(3u);
             oss.str("");
             oss << p_type11{};
-            BOOST_CHECK(oss.str() == "0");
+            CHECK(oss.str() == "0");
             oss.str("");
             oss << p_type11{"x"};
-            BOOST_CHECK(oss.str() == "x");
+            CHECK(oss.str() == "x");
             oss.str("");
             oss << (-p_type11{"x"});
-            BOOST_CHECK(oss.str() == "-x");
+            CHECK(oss.str() == "-x");
             oss.str("");
             oss << (p_type11{1});
-            BOOST_CHECK(oss.str() == "1");
+            CHECK(oss.str() == "1");
             oss.str("");
             oss << (p_type11{-1});
-            BOOST_CHECK(oss.str() == "-1");
+            CHECK(oss.str() == "-1");
             oss.str("");
             oss << (p_type11{"x"} * p_type11{"y"});
-            BOOST_CHECK(oss.str() == "x*y");
+            CHECK(oss.str() == "x*y");
             oss.str("");
             oss << (-p_type11{"x"} * p_type11{"y"});
-            BOOST_CHECK(oss.str() == "-x*y");
+            CHECK(oss.str() == "-x*y");
             // Test wih small term output.
             settings::set_max_term_output(1u);
             const std::string tmp_out
                 = boost::lexical_cast<std::string>(3 * poly_type{"x"} + 1 + poly_type{"x"} * poly_type{"x"}
                                                    + poly_type{"x"} * poly_type{"x"} * poly_type{"x"}),
                 tmp_cmp = "...";
-            BOOST_CHECK(std::equal(tmp_cmp.begin(), tmp_cmp.end(), tmp_out.rbegin()));
-            BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(poly_type{}), "0");
+            CHECK(std::equal(tmp_cmp.begin(), tmp_cmp.end(), tmp_out.rbegin()));
+            CHECK(boost::lexical_cast<std::string>(poly_type{}) == "0");
             settings::reset_max_term_output();
         }
     };
@@ -317,7 +315,7 @@ struct stream_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(series_stream_test)
+TEST_CASE("series_stream_test")
 {
     tuple_for_each(cf_types{}, stream_tester());
 }
@@ -331,13 +329,13 @@ struct table_info_tester {
             typedef g_series_type<Cf, Expo> p_type1;
             p_type1 p;
             using s_type = decltype(p.table_sparsity());
-            BOOST_CHECK(p.table_sparsity() == s_type{});
-            BOOST_CHECK(p.table_bucket_count() == 0u);
-            BOOST_CHECK(p.table_load_factor() == 0.);
+            CHECK(p.table_sparsity() == s_type{});
+            CHECK(p.table_bucket_count() == 0u);
+            CHECK(p.table_load_factor() == 0.);
             p_type1 q{"x"};
-            BOOST_CHECK((q.table_sparsity() == s_type{{1u, 1u}}));
-            BOOST_CHECK(q.table_load_factor() != 0.);
-            BOOST_CHECK(q.table_bucket_count() != 0u);
+            CHECK((q.table_sparsity() == s_type{{1u, 1u}}));
+            CHECK(q.table_load_factor() != 0.);
+            CHECK(q.table_bucket_count() != 0u);
         }
     };
     template <typename Cf>
@@ -347,7 +345,7 @@ struct table_info_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(series_table_info_test)
+TEST_CASE("series_table_info_test")
 {
     tuple_for_each(cf_types{}, table_info_tester());
 }
@@ -416,30 +414,30 @@ struct pow_tester {
         {
             typedef g_series_type<Cf, Expo> p_type1;
             p_type1 p1;
-            BOOST_CHECK(p1.pow(0) == Cf(1));
-            BOOST_CHECK(p1.pow(1) == Cf(0));
+            CHECK(p1.pow(0) == Cf(1));
+            CHECK(p1.pow(1) == Cf(0));
             p1 = 2;
-            BOOST_CHECK(piranha::pow(p1, 4) == piranha::pow(Cf(2), 4));
-            BOOST_CHECK(piranha::pow(p1, -4) == piranha::pow(Cf(2), -4));
+            CHECK(piranha::pow(p1, 4) == piranha::pow(Cf(2), 4));
+            CHECK(piranha::pow(p1, -4) == piranha::pow(Cf(2), -4));
             p1 = p_type1("x");
             p1 += 1;
-            BOOST_CHECK(piranha::pow(p1, 1) == p1);
-            BOOST_CHECK(p1.pow(2u) == p1 * p1);
-            BOOST_CHECK(piranha::pow(p1, integer(3)) == p1 * p1 * p1);
-            BOOST_CHECK_THROW(p1.pow(-1), std::invalid_argument);
+            CHECK(piranha::pow(p1, 1) == p1);
+            CHECK(p1.pow(2u) == p1 * p1);
+            CHECK(piranha::pow(p1, integer(3)) == p1 * p1 * p1);
+            CHECK_THROWS_AS(p1.pow(-1), std::invalid_argument);
             // Coefficient series.
             typedef g_series_type<p_type1, Expo> p_type11;
             p_type11 p11;
-            BOOST_CHECK(p11.pow(0) == Cf(1));
-            BOOST_CHECK(p11.pow(1) == Cf(0));
+            CHECK(p11.pow(0) == Cf(1));
+            CHECK(p11.pow(1) == Cf(0));
             p11 = 2;
-            BOOST_CHECK(piranha::pow(p11, 4) == piranha::pow(p_type1(2), 4));
-            BOOST_CHECK(piranha::pow(p11, -4) == piranha::pow(p_type1(2), -4));
+            CHECK(piranha::pow(p11, 4) == piranha::pow(p_type1(2), 4));
+            CHECK(piranha::pow(p11, -4) == piranha::pow(p_type1(2), -4));
             p11 = p_type11("x");
             p11 += 1;
-            BOOST_CHECK(piranha::pow(p11, 1) == p11);
-            BOOST_CHECK(p11.pow(2u) == p11 * p11);
-            BOOST_CHECK(piranha::pow(p11, integer(3)) == p11 * p11 * p11);
+            CHECK(piranha::pow(p11, 1) == p11);
+            CHECK(p11.pow(2u) == p11 * p11);
+            CHECK(piranha::pow(p11, integer(3)) == p11 * p11 * p11);
         }
     };
     template <typename Cf>
@@ -449,59 +447,59 @@ struct pow_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(series_pow_test)
+TEST_CASE("series_pow_test")
 {
     tuple_for_each(cf_types{}, pow_tester());
     typedef g_series_type<double, int> p_type1;
     if (std::numeric_limits<double>::is_iec559) {
         // Test expo with float-float arguments.
-        BOOST_CHECK(p_type1{2.}.pow(0.5) == std::pow(2., 0.5));
-        BOOST_CHECK(p_type1{3.}.pow(-0.5) == std::pow(3., -0.5));
-        BOOST_CHECK_THROW(piranha::pow(p_type1{"x"} + 1, 0.5), std::invalid_argument);
+        CHECK(p_type1{2.}.pow(0.5) == std::pow(2., 0.5));
+        CHECK(p_type1{3.}.pow(-0.5) == std::pow(3., -0.5));
+        CHECK_THROWS_AS(piranha::pow(p_type1{"x"} + 1, 0.5), std::invalid_argument);
     }
     // Check division by zero error.
     typedef g_series_type<rational, int> p_type2;
-    BOOST_CHECK_THROW(piranha::pow(p_type2{}, -1), mppp::zero_division_error);
+    CHECK_THROWS_AS(piranha::pow(p_type2{}, -1), mppp::zero_division_error);
 #if defined(MPPP_WITH_MPFR)
     // Check the safe_cast mechanism.
     typedef g_series_type<real, int> p_type3;
     auto p = p_type3{"x"} + 1;
-    BOOST_CHECK_EQUAL(p.pow(3), p.pow(real{3}));
-    BOOST_CHECK_THROW(p.pow(real{-3}), std::invalid_argument);
-    BOOST_CHECK_THROW(p.pow(real{"1.5",100}), std::invalid_argument);
+    CHECK(p.pow(3) == p.pow(real{3}));
+    CHECK_THROWS_AS(p.pow(real{-3}), std::invalid_argument);
+    CHECK_THROWS_AS(p.pow(real{"1.5",100}), std::invalid_argument);
     if (std::numeric_limits<double>::is_iec559 && std::numeric_limits<double>::radix == 2) {
         auto pp = p_type1{"x"} + 1;
-        BOOST_CHECK_EQUAL(pp.pow(3), pp.pow(3.));
-        BOOST_CHECK_THROW(pp.pow(-3.), std::invalid_argument);
-        BOOST_CHECK_THROW(pp.pow(1.5), std::invalid_argument);
+        CHECK(pp.pow(3) == pp.pow(3.));
+        CHECK_THROWS_AS(pp.pow(-3.), std::invalid_argument);
+        CHECK_THROWS_AS(pp.pow(1.5), std::invalid_argument);
     }
-    BOOST_CHECK((is_exponentiable<p_type1, double>::value));
-    BOOST_CHECK((is_exponentiable<const p_type1, double>::value));
-    BOOST_CHECK((is_exponentiable<p_type1 &, double>::value));
-    BOOST_CHECK((is_exponentiable<p_type1 &, double &>::value));
-    BOOST_CHECK((is_exponentiable<const p_type1 &, double &>::value));
-    BOOST_CHECK((is_exponentiable<p_type1, integer>::value));
-    BOOST_CHECK((!is_exponentiable<p_type1, std::string>::value));
-    BOOST_CHECK((!is_exponentiable<p_type1 &, std::string>::value));
-    BOOST_CHECK((!is_exponentiable<p_type1 &, std::string &>::value));
-    BOOST_CHECK((is_exponentiable<p_type1, fake_int_01>::value));
-    BOOST_CHECK((!is_exponentiable<p_type1, fake_int_02>::value));
+    CHECK((is_exponentiable<p_type1, double>::value));
+    CHECK((is_exponentiable<const p_type1, double>::value));
+    CHECK((is_exponentiable<p_type1 &, double>::value));
+    CHECK((is_exponentiable<p_type1 &, double &>::value));
+    CHECK((is_exponentiable<const p_type1 &, double &>::value));
+    CHECK((is_exponentiable<p_type1, integer>::value));
+    CHECK((!is_exponentiable<p_type1, std::string>::value));
+    CHECK((!is_exponentiable<p_type1 &, std::string>::value));
+    CHECK((!is_exponentiable<p_type1 &, std::string &>::value));
+    CHECK((is_exponentiable<p_type1, fake_int_01>::value));
+    CHECK((!is_exponentiable<p_type1, fake_int_02>::value));
     // These are a couple of checks for the new pow() code, which is now able to deal with
     // exponentiation creating different types of coefficients.
-    BOOST_CHECK((is_exponentiable<g_series_type<short, int>, int>::value));
-    BOOST_CHECK((is_exponentiable<g_series_type<int, int>, int>::value));
-    BOOST_CHECK((std::is_same<decltype(g_series_type<short, int>{}.pow(3)), g_series_type<integer, int>>::value));
-    BOOST_CHECK((std::is_same<decltype(g_series_type<int, int>{}.pow(3)), g_series_type<integer, int>>::value));
-    BOOST_CHECK_EQUAL((g_series_type<int, int>{"x"}.pow(2)),
+    CHECK((is_exponentiable<g_series_type<short, int>, int>::value));
+    CHECK((is_exponentiable<g_series_type<int, int>, int>::value));
+    CHECK((std::is_same<decltype(g_series_type<short, int>{}.pow(3)), g_series_type<integer, int>>::value));
+    CHECK((std::is_same<decltype(g_series_type<int, int>{}.pow(3)), g_series_type<integer, int>>::value));
+    CHECK((g_series_type<int, int>{"x"}.pow(2)) ==
                       (g_series_type<integer, int>{"x"} * g_series_type<integer, int>{"x"}));
-    BOOST_CHECK((std::is_same<decltype(g_series_type<int, int>{}.pow(3.)), g_series_type<double, int>>::value));
-    BOOST_CHECK_EQUAL((g_series_type<int, int>{"x"}.pow(2.)),
+    CHECK((std::is_same<decltype(g_series_type<int, int>{}.pow(3.)), g_series_type<double, int>>::value));
+    CHECK((g_series_type<int, int>{"x"}.pow(2.)) ==
                       (g_series_type<double, int>{"x"} * g_series_type<integer, int>{"x"}));
-    BOOST_CHECK((std::is_same<decltype(g_series_type<real, int>{}.pow(3.)), g_series_type<real, int>>::value));
-    BOOST_CHECK_EQUAL((g_series_type<real, int>{"x"}.pow(2.)),
+    CHECK((std::is_same<decltype(g_series_type<real, int>{}.pow(3.)), g_series_type<real, int>>::value));
+    CHECK((g_series_type<real, int>{"x"}.pow(2.)) ==
                       (g_series_type<real, int>{"x"} * g_series_type<real, int>{"x"}));
-    BOOST_CHECK((std::is_same<decltype(g_series_type<rational, int>{}.pow(3_z)), g_series_type<rational, int>>::value));
-    BOOST_CHECK_EQUAL((g_series_type<rational, int>{"x"}.pow(2_z)),
+    CHECK((std::is_same<decltype(g_series_type<rational, int>{}.pow(3_z)), g_series_type<rational, int>>::value));
+    CHECK((g_series_type<rational, int>{"x"}.pow(2_z)) ==
                       (g_series_type<rational, int>{"x"} * g_series_type<rational, int>{"x"}));
 #endif
     // Some multi-threaded testing.
@@ -523,8 +521,8 @@ BOOST_AUTO_TEST_CASE(series_pow_test)
     });
     t0.join();
     t1.join();
-    BOOST_CHECK_EQUAL(ret0, p_type1{"x"}.pow(6).pow(8));
-    BOOST_CHECK_EQUAL(ret1, p_type1{"x"}.pow(5).pow(8));
+    CHECK(ret0 == p_type1{"x"}.pow(6).pow(8));
+    CHECK(ret1 == p_type1{"x"}.pow(5).pow(8));
     // Clear the caches.
     p_type1::clear_pow_cache();
     p_type2::clear_pow_cache();

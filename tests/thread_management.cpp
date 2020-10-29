@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/thread_management.hpp>
 
-#define BOOST_TEST_MODULE thread_management_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <mutex>
 
 #include <piranha/exceptions.hpp>
@@ -38,6 +35,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/settings.hpp>
 #include <piranha/thread_barrier.hpp>
 #include <piranha/thread_pool.hpp>
+
+#include "catch.hpp"
 
 static std::mutex mutex;
 
@@ -48,12 +47,12 @@ static inline void test_function()
         const auto retval = piranha::bound_proc();
         // Lock because Boost unit test is not thread-safe.
         std::lock_guard<std::mutex> lock(mutex);
-        BOOST_CHECK_EQUAL(retval.first, true);
-        BOOST_CHECK_EQUAL(retval.second, i);
+        CHECK(retval.first == true);
+        CHECK(retval.second == i);
     }
 }
 
-BOOST_AUTO_TEST_CASE(thread_management_new_threads_bind)
+TEST_CASE("thread_management_new_threads_bind")
 {
     for (unsigned i = 0u; i < piranha::runtime_info::get_hardware_concurrency(); ++i) {
         auto f = piranha::thread_pool::enqueue(i, []() { test_function(); });
@@ -68,7 +67,7 @@ BOOST_AUTO_TEST_CASE(thread_management_new_threads_bind)
 }
 
 // Check thread-safe binding using thread_pool.
-BOOST_AUTO_TEST_CASE(thread_management_task_group_bind)
+TEST_CASE("thread_management_task_group_bind")
 {
     piranha::future_list<void> f_list;
     for (unsigned i = 0u; i < piranha::runtime_info::get_hardware_concurrency(); ++i) {

@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/key_is_convertible.hpp>
 
-#define BOOST_TEST_MODULE key_is_convertible_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <cstddef>
 #include <functional>
 #include <iostream>
@@ -39,6 +36,7 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/key/key_is_one.hpp>
 #include <piranha/symbol_utils.hpp>
 
+#include "catch.hpp"
 using namespace piranha;
 
 // Mock key which is not convertible to other key types.
@@ -110,20 +108,20 @@ public:
 };
 }
 
-BOOST_AUTO_TEST_CASE(key_is_convertible_test_00)
+TEST_CASE("key_is_convertible_test_00")
 {
-    BOOST_CHECK(is_key<mock_key>::value);
-    BOOST_CHECK((!key_is_convertible<mock_key, mock_key>::value));
-    BOOST_CHECK((!key_is_convertible<const mock_key, mock_key &>::value));
-    BOOST_CHECK((!key_is_convertible<const mock_key &, mock_key &&>::value));
-    BOOST_CHECK(is_key<mock_key_00>::value);
-    BOOST_CHECK((!key_is_convertible<mock_key_00, mock_key_00>::value));
-    BOOST_CHECK((!key_is_convertible<const mock_key_00, mock_key_00 &>::value));
-    BOOST_CHECK((!key_is_convertible<const mock_key_00 &, mock_key_00 &&>::value));
-    BOOST_CHECK((!key_is_convertible<mock_key, mock_key_00>::value));
-    BOOST_CHECK((!key_is_convertible<const mock_key, mock_key_00 &>::value));
-    BOOST_CHECK((!key_is_convertible<const mock_key &, mock_key_00 &&>::value));
-    BOOST_CHECK((key_is_convertible<mock_key_00, mock_key>::value));
-    BOOST_CHECK((key_is_convertible<const mock_key_00, mock_key &>::value));
-    BOOST_CHECK((key_is_convertible<const mock_key_00 &, mock_key &&>::value));
+    CHECK(is_key<mock_key>::value);
+    CHECK((!key_is_convertible<mock_key, mock_key>::value));
+    CHECK((!key_is_convertible<const mock_key, mock_key &>::value));
+    CHECK((!key_is_convertible<const mock_key &, mock_key &&>::value));
+    CHECK(is_key<mock_key_00>::value);
+    CHECK((!key_is_convertible<mock_key_00, mock_key_00>::value));
+    CHECK((!key_is_convertible<const mock_key_00, mock_key_00 &>::value));
+    CHECK((!key_is_convertible<const mock_key_00 &, mock_key_00 &&>::value));
+    CHECK((!key_is_convertible<mock_key, mock_key_00>::value));
+    CHECK((!key_is_convertible<const mock_key, mock_key_00 &>::value));
+    CHECK((!key_is_convertible<const mock_key &, mock_key_00 &&>::value));
+    CHECK((key_is_convertible<mock_key_00, mock_key>::value));
+    CHECK((key_is_convertible<const mock_key_00, mock_key &>::value));
+    CHECK((key_is_convertible<const mock_key_00 &, mock_key &&>::value));
 }

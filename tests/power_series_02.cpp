@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/power_series.hpp>
 
-#define BOOST_TEST_MODULE power_series_02_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/vector.hpp>
 #include <cstddef>
@@ -63,6 +60,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/s11n.hpp>
 #include <piranha/series.hpp>
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -147,71 +146,71 @@ struct hash<fake_int> {
 };
 }
 
-BOOST_AUTO_TEST_CASE(power_series_test_02)
+TEST_CASE("power_series_test_02")
 {
     // Check the rational degree.
     typedef g_series_type<double, rational> stype0;
-    BOOST_CHECK((is_degree_type<stype0>::value));
-    BOOST_CHECK((is_ldegree_type<stype0>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype0>())), rational>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype0>())), rational>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype0>(), symbol_fset{})), rational>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype0>(), symbol_fset{})), rational>::value));
+    CHECK((is_degree_type<stype0>::value));
+    CHECK((is_ldegree_type<stype0>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype0>())), rational>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype0>())), rational>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype0>(), symbol_fset{})), rational>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype0>(), symbol_fset{})), rational>::value));
     typedef g_series_type<double, int> stype1;
-    BOOST_CHECK((is_degree_type<stype1>::value));
-    BOOST_CHECK((is_ldegree_type<stype1>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype1>())), int>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype1>())), int>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype1>(), symbol_fset{})), int>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype1>(), symbol_fset{})), int>::value));
+    CHECK((is_degree_type<stype1>::value));
+    CHECK((is_ldegree_type<stype1>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype1>())), int>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype1>())), int>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype1>(), symbol_fset{})), int>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype1>(), symbol_fset{})), int>::value));
     typedef g_series_type<stype1, long> stype2;
-    BOOST_CHECK((is_degree_type<stype2>::value));
-    BOOST_CHECK((is_ldegree_type<stype2>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype2>())), long>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype2>())), long>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype2>(), symbol_fset{})), long>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype2>(), symbol_fset{})), long>::value));
+    CHECK((is_degree_type<stype2>::value));
+    CHECK((is_ldegree_type<stype2>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype2>())), long>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype2>())), long>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype2>(), symbol_fset{})), long>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype2>(), symbol_fset{})), long>::value));
     typedef g_series_type2<double> stype3;
-    BOOST_CHECK((!is_degree_type<stype3>::value));
-    BOOST_CHECK((!is_ldegree_type<stype3>::value));
+    CHECK((!is_degree_type<stype3>::value));
+    CHECK((!is_ldegree_type<stype3>::value));
     typedef g_series_type2<g_series_type<g_series_type<double, int>, integer>> stype4;
-    BOOST_CHECK((is_degree_type<stype4>::value));
-    BOOST_CHECK((is_ldegree_type<stype4>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype4>())), integer>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype4>())), integer>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype4>(), symbol_fset{})), integer>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype4>(), symbol_fset{})), integer>::value));
+    CHECK((is_degree_type<stype4>::value));
+    CHECK((is_ldegree_type<stype4>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype4>())), integer>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype4>())), integer>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype4>(), symbol_fset{})), integer>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype4>(), symbol_fset{})), integer>::value));
     // Check actual instantiations as well.
     symbol_fset ss;
-    BOOST_CHECK_EQUAL(piranha::degree(stype1{}), 0);
-    BOOST_CHECK_EQUAL(piranha::ldegree(stype1{}), 0);
-    BOOST_CHECK_EQUAL(piranha::degree(stype1{}, ss), 0);
-    BOOST_CHECK_EQUAL(piranha::ldegree(stype1{}, ss), 0);
-    BOOST_CHECK_EQUAL(piranha::degree(stype2{}), 0);
-    BOOST_CHECK_EQUAL(piranha::ldegree(stype2{}), 0);
-    BOOST_CHECK_EQUAL(piranha::degree(stype2{}, ss), 0);
-    BOOST_CHECK_EQUAL(piranha::ldegree(stype2{}, ss), 0);
-    BOOST_CHECK_EQUAL(piranha::degree(stype4{}), 0);
-    BOOST_CHECK_EQUAL(piranha::ldegree(stype4{}), 0);
-    BOOST_CHECK_EQUAL(piranha::degree(stype4{}, ss), 0);
-    BOOST_CHECK_EQUAL(piranha::ldegree(stype4{}, ss), 0);
+    CHECK(piranha::degree(stype1{}) == 0);
+    CHECK(piranha::ldegree(stype1{}) == 0);
+    CHECK(piranha::degree(stype1{}, ss) == 0);
+    CHECK(piranha::ldegree(stype1{}, ss) == 0);
+    CHECK(piranha::degree(stype2{}) == 0);
+    CHECK(piranha::ldegree(stype2{}) == 0);
+    CHECK(piranha::degree(stype2{}, ss) == 0);
+    CHECK(piranha::ldegree(stype2{}, ss) == 0);
+    CHECK(piranha::degree(stype4{}) == 0);
+    CHECK(piranha::ldegree(stype4{}) == 0);
+    CHECK(piranha::degree(stype4{}, ss) == 0);
+    CHECK(piranha::ldegree(stype4{}, ss) == 0);
     // Tests with fake int.
     typedef g_series_type<double, fake_int> stype5;
-    BOOST_CHECK((is_degree_type<stype5>::value));
-    BOOST_CHECK((is_ldegree_type<stype5>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype5>())), fake_int>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype5>())), fake_int>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::degree(std::declval<stype5>(), symbol_fset{})), fake_int>::value));
-    BOOST_CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype5>(), symbol_fset{})), fake_int>::value));
+    CHECK((is_degree_type<stype5>::value));
+    CHECK((is_ldegree_type<stype5>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype5>())), fake_int>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype5>())), fake_int>::value));
+    CHECK((std::is_same<decltype(piranha::degree(std::declval<stype5>(), symbol_fset{})), fake_int>::value));
+    CHECK((std::is_same<decltype(piranha::ldegree(std::declval<stype5>(), symbol_fset{})), fake_int>::value));
     typedef g_series_type<stype5, int> stype6;
     // This does not have a degree type because fake_int cannot be added to integer.
-    BOOST_CHECK((!is_degree_type<stype6>::value));
-    BOOST_CHECK((!is_ldegree_type<stype6>::value));
+    CHECK((!is_degree_type<stype6>::value));
+    CHECK((!is_ldegree_type<stype6>::value));
 }
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
-BOOST_AUTO_TEST_CASE(power_series_serialization_test)
+TEST_CASE("power_series_serialization_test")
 {
     typedef g_series_type<polynomial<rational, monomial<rational>>, rational> stype;
     stype x("x"), y("y"), z = x + y, tmp;
@@ -224,158 +223,158 @@ BOOST_AUTO_TEST_CASE(power_series_serialization_test)
         boost::archive::text_iarchive ia(ss);
         ia >> tmp;
     }
-    BOOST_CHECK_EQUAL(z, tmp);
+    CHECK(z == tmp);
 }
 
 #endif
 
-BOOST_AUTO_TEST_CASE(power_series_truncation_test)
+TEST_CASE("power_series_truncation_test")
 {
     // A test with polynomial, degree only in the key.
     {
         typedef polynomial<double, monomial<rational>> stype0;
-        BOOST_CHECK((has_truncate_degree<stype0, int>::value));
-        BOOST_CHECK((has_truncate_degree<stype0, rational>::value));
-        BOOST_CHECK((has_truncate_degree<stype0, integer>::value));
-        BOOST_CHECK((!has_truncate_degree<stype0, std::string>::value));
+        CHECK((has_truncate_degree<stype0, int>::value));
+        CHECK((has_truncate_degree<stype0, rational>::value));
+        CHECK((has_truncate_degree<stype0, integer>::value));
+        CHECK((!has_truncate_degree<stype0, std::string>::value));
         stype0 x{"x"}, y{"y"}, z{"z"};
         stype0 s0;
-        BOOST_CHECK((std::is_same<stype0, decltype(s0.truncate_degree(5))>::value));
-        BOOST_CHECK_EQUAL(s0.truncate_degree(5), s0);
+        CHECK((std::is_same<stype0, decltype(s0.truncate_degree(5))>::value));
+        CHECK(s0.truncate_degree(5) == s0);
         s0 = x.pow(rational(10, 3));
-        BOOST_CHECK_EQUAL(s0.truncate_degree(5), s0);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(3 / 2_q), 0);
+        CHECK(s0.truncate_degree(5) == s0);
+        CHECK(s0.truncate_degree(3 / 2_q) == 0);
         // x**5*y+1/2*z**-5*x*y+x*y*z/4
         s0 = x.pow(5) * y + z.pow(-5) / 2 * x * y + x * y * z / 4;
-        BOOST_CHECK_EQUAL(s0.truncate_degree(3), z.pow(-5) / 2 * x * y + x * y * z / 4);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, -1), z.pow(-5) / 2 * x * y);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 2, {"x"}), z.pow(-5) / 2 * x * y + x * y * z / 4);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 5, {"x", "y"}), z.pow(-5) / 2 * x * y + x * y * z / 4);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 5, {"y", "x", "y"}), z.pow(-5) / 2 * x * y + x * y * z / 4);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 5, {"z", "x"}), s0);
+        CHECK(s0.truncate_degree(3) == z.pow(-5) / 2 * x * y + x * y * z / 4);
+        CHECK(math::truncate_degree(s0, -1) == z.pow(-5) / 2 * x * y);
+        CHECK(math::truncate_degree(s0, 2, {"x"}) == z.pow(-5) / 2 * x * y + x * y * z / 4);
+        CHECK(math::truncate_degree(s0, 5, {"x", "y"}) == z.pow(-5) / 2 * x * y + x * y * z / 4);
+        CHECK(math::truncate_degree(s0, 5, {"y", "x", "y"}) == z.pow(-5) / 2 * x * y + x * y * z / 4);
+        CHECK(math::truncate_degree(s0, 5, {"z", "x"}) == s0);
         // Test with non-existing variable.
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 0, {"a", "b"}), s0);
+        CHECK(math::truncate_degree(s0, 0, {"a", "b"}) == s0);
     }
     {
         // Poisson series, degree only in the coefficient.
         typedef poisson_series<polynomial<rational, monomial<rational>>> st;
-        BOOST_CHECK((has_truncate_degree<st, int>::value));
-        BOOST_CHECK((has_truncate_degree<st, rational>::value));
-        BOOST_CHECK((has_truncate_degree<st, integer>::value));
-        BOOST_CHECK((!has_truncate_degree<st, std::string>::value));
+        CHECK((has_truncate_degree<st, int>::value));
+        CHECK((has_truncate_degree<st, rational>::value));
+        CHECK((has_truncate_degree<st, integer>::value));
+        CHECK((!has_truncate_degree<st, std::string>::value));
         st x("x"), y("y"), z("z"), a("a"), b("b");
         // (x + y**2/4 + 3*x*y*z/7) * cos(a) + (x*y+y*z/3+3*z**2*x/8) * sin(a+b)
         st s0 = (x + y * y / 4 + 3 * z * x * y / 7) * piranha::cos(a)
                 + (x * y + z * y / 3 + 3 * z * z * x / 8) * piranha::sin(a + b);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(2),
+        CHECK(s0.truncate_degree(2) ==
                           (x + y * y / 4) * piranha::cos(a) + (x * y + z * y / 3) * piranha::sin(a + b));
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1l), x * piranha::cos(a));
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, -1ll), 0);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1l, {"x"}),
+        CHECK(math::truncate_degree(s0, 1l) == x * piranha::cos(a));
+        CHECK(math::truncate_degree(s0, -1ll) == 0);
+        CHECK(math::truncate_degree(s0, 1l, {"x"}) ==
                           (x + y * y / 4 + 3 * z * x * y / 7) * piranha::cos(a)
                               + (x * y + z * y / 3 + 3 * z * z * x / 8) * piranha::sin(a + b));
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, char(0), {"x"}),
+        CHECK(math::truncate_degree(s0, char(0), {"x"}) ==
                           y * y / 4 * piranha::cos(a) + z * y / 3 * piranha::sin(a + b));
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, char(1), {"y", "x"}),
+        CHECK(math::truncate_degree(s0, char(1), {"y", "x"}) ==
                           x * piranha::cos(a) + (z * y / 3 + 3 * z * z * x / 8) * piranha::sin(a + b));
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, integer(1), {"z"}),
+        CHECK(math::truncate_degree(s0, integer(1), {"z"}) ==
                           (x + y * y / 4 + 3 * z * x * y / 7) * piranha::cos(a)
                               + (x * y + z * y / 3) * piranha::sin(a + b));
         // Test with non-existing variable.
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 0, {"foo", "bar"}), s0);
+        CHECK(math::truncate_degree(s0, 0, {"foo", "bar"}) == s0);
     }
     {
         // Recursive poly.
         typedef polynomial<rational, monomial<rational>> st0;
         typedef polynomial<st0, monomial<rational>> st1;
-        BOOST_CHECK((has_truncate_degree<st1, int>::value));
-        BOOST_CHECK((has_truncate_degree<st1, rational>::value));
-        BOOST_CHECK((has_truncate_degree<st1, integer>::value));
-        BOOST_CHECK((!has_truncate_degree<st1, std::string>::value));
+        CHECK((has_truncate_degree<st1, int>::value));
+        CHECK((has_truncate_degree<st1, rational>::value));
+        CHECK((has_truncate_degree<st1, integer>::value));
+        CHECK((!has_truncate_degree<st1, std::string>::value));
         // (x*y+x**2+x+1/4)*z + (x+y**2+x**2*y)*z**2 + 3
         st0 x{"x"}, y{"y"};
         st1 z{"z"};
         auto s0 = (x * y + x * x + x + 1_q / 4) * z + (x + y * y + x * x * y) * z * z + 3;
-        BOOST_CHECK_EQUAL(s0.truncate_degree(1), 1 / 4_q * z + 3);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(0), 3);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(2), (x + 1_q / 4) * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, -3), 0);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 3_q), (x * y + x * x + x + 1_q / 4) * z + x * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1, {"x"}), (x * y + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1ll, {"x", "y"}), (x + 1_q / 4) * z + x * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1, {"x", "z"}), 1_q / 4 * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 2, {"x", "z"}), (x * y + x + 1_q / 4) * z + y * y * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 3, {"x", "z"}),
+        CHECK(s0.truncate_degree(1) == 1 / 4_q * z + 3);
+        CHECK(s0.truncate_degree(0) == 3);
+        CHECK(s0.truncate_degree(2) == (x + 1_q / 4) * z + 3);
+        CHECK(math::truncate_degree(s0, -3) == 0);
+        CHECK(math::truncate_degree(s0, 3_q) == (x * y + x * x + x + 1_q / 4) * z + x * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1, {"x"}) == (x * y + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1ll, {"x", "y"}) == (x + 1_q / 4) * z + x * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1, {"x", "z"}) == 1_q / 4 * z + 3);
+        CHECK(math::truncate_degree(s0, 2, {"x", "z"}) == (x * y + x + 1_q / 4) * z + y * y * z * z + 3);
+        CHECK(math::truncate_degree(s0, 3, {"x", "z"}) ==
                           (x * y + x * x + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
         // Test with non-existing variable.
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 0, {"foo", "bar"}), s0);
+        CHECK(math::truncate_degree(s0, 0, {"foo", "bar"}) == s0);
     }
     {
         // Recursive poly, integers and rational exponent mixed, same example as above.
         typedef polynomial<rational, monomial<integer>> st0;
         typedef polynomial<st0, monomial<rational>> st1;
-        BOOST_CHECK((has_truncate_degree<st1, int>::value));
-        BOOST_CHECK((has_truncate_degree<st1, rational>::value));
-        BOOST_CHECK((has_truncate_degree<st1, integer>::value));
-        BOOST_CHECK((!has_truncate_degree<st1, std::string>::value));
+        CHECK((has_truncate_degree<st1, int>::value));
+        CHECK((has_truncate_degree<st1, rational>::value));
+        CHECK((has_truncate_degree<st1, integer>::value));
+        CHECK((!has_truncate_degree<st1, std::string>::value));
         // (x*y+x**2+x+1/4)*z + (x+y**2+x**2*y)*z**2 + 3
         st0 x{"x"}, y{"y"};
         st1 z{"z"};
         auto s0 = (x * y + x * x + x + 1_q / 4) * z + (x + y * y + x * x * y) * z * z + 3;
-        BOOST_CHECK_EQUAL(s0.truncate_degree(1), 1 / 4_q * z + 3);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(0), 3);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(2), (x + 1_q / 4) * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, -3), 0);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 3_q), (x * y + x * x + x + 1_q / 4) * z + x * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1, {"x"}), (x * y + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1ll, {"x", "y"}), (x + 1_q / 4) * z + x * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1, {"x", "z"}), 1_q / 4 * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 2, {"x", "z"}), (x * y + x + 1_q / 4) * z + y * y * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 3, {"x", "z"}),
+        CHECK(s0.truncate_degree(1) == 1 / 4_q * z + 3);
+        CHECK(s0.truncate_degree(0) == 3);
+        CHECK(s0.truncate_degree(2) == (x + 1_q / 4) * z + 3);
+        CHECK(math::truncate_degree(s0, -3) == 0);
+        CHECK(math::truncate_degree(s0, 3_q) == (x * y + x * x + x + 1_q / 4) * z + x * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1, {"x"}) == (x * y + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1ll, {"x", "y"}) == (x + 1_q / 4) * z + x * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1, {"x", "z"}) == 1_q / 4 * z + 3);
+        CHECK(math::truncate_degree(s0, 2, {"x", "z"}) == (x * y + x + 1_q / 4) * z + y * y * z * z + 3);
+        CHECK(math::truncate_degree(s0, 3, {"x", "z"}) ==
                           (x * y + x * x + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
         // Test with non-existing variable.
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 0_q, {"foo", "bar"}), s0);
+        CHECK(math::truncate_degree(s0, 0_q, {"foo", "bar"}) == s0);
     }
     {
         // Recursive poly, integers and rational exponent mixed, same example as above but switched.
         typedef polynomial<rational, monomial<rational>> st0;
         typedef polynomial<st0, monomial<integer>> st1;
-        BOOST_CHECK((has_truncate_degree<st1, int>::value));
-        BOOST_CHECK((has_truncate_degree<st1, rational>::value));
-        BOOST_CHECK((has_truncate_degree<st1, integer>::value));
-        BOOST_CHECK((!has_truncate_degree<st1, std::string>::value));
+        CHECK((has_truncate_degree<st1, int>::value));
+        CHECK((has_truncate_degree<st1, rational>::value));
+        CHECK((has_truncate_degree<st1, integer>::value));
+        CHECK((!has_truncate_degree<st1, std::string>::value));
         // (x*y+x**2+x+1/4)*z + (x+y**2+x**2*y)*z**2 + 3
         st0 x{"x"}, y{"y"};
         st1 z{"z"};
         auto s0 = (x * y + x * x + x + 1_q / 4) * z + (x + y * y + x * x * y) * z * z + 3;
-        BOOST_CHECK_EQUAL(s0.truncate_degree(1), 1 / 4_q * z + 3);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(0), 3);
-        BOOST_CHECK_EQUAL(s0.truncate_degree(2), (x + 1_q / 4) * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, -3), 0);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 3_q), (x * y + x * x + x + 1_q / 4) * z + x * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1, {"x"}), (x * y + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1ll, {"x", "y"}), (x + 1_q / 4) * z + x * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 1, {"x", "z"}), 1_q / 4 * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 2, {"x", "z"}), (x * y + x + 1_q / 4) * z + y * y * z * z + 3);
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 3, {"x", "z"}),
+        CHECK(s0.truncate_degree(1) == 1 / 4_q * z + 3);
+        CHECK(s0.truncate_degree(0) == 3);
+        CHECK(s0.truncate_degree(2) == (x + 1_q / 4) * z + 3);
+        CHECK(math::truncate_degree(s0, -3) == 0);
+        CHECK(math::truncate_degree(s0, 3_q) == (x * y + x * x + x + 1_q / 4) * z + x * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1, {"x"}) == (x * y + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1ll, {"x", "y"}) == (x + 1_q / 4) * z + x * z * z + 3);
+        CHECK(math::truncate_degree(s0, 1, {"x", "z"}) == 1_q / 4 * z + 3);
+        CHECK(math::truncate_degree(s0, 2, {"x", "z"}) == (x * y + x + 1_q / 4) * z + y * y * z * z + 3);
+        CHECK(math::truncate_degree(s0, 3, {"x", "z"}) ==
                           (x * y + x * x + x + 1_q / 4) * z + (x + y * y) * z * z + 3);
         // Test with non-existing variable.
-        BOOST_CHECK_EQUAL(math::truncate_degree(s0, 0_z, {"foo", "bar"}), s0);
+        CHECK(math::truncate_degree(s0, 0_z, {"foo", "bar"}) == s0);
     }
 }
 
-BOOST_AUTO_TEST_CASE(power_series_degree_overflow_test)
+TEST_CASE("power_series_degree_overflow_test")
 {
     using p_type = polynomial<integer, monomial<int>>;
     using pp_type = polynomial<p_type, monomial<int>>;
     p_type x{"x"};
     pp_type y{"y"};
-    BOOST_CHECK_THROW((x * y.pow(std::numeric_limits<int>::max())).degree(), std::overflow_error);
-    BOOST_CHECK_THROW((x.pow(-1) * y.pow(std::numeric_limits<int>::min())).degree(), std::overflow_error);
-    BOOST_CHECK_EQUAL((x * y.pow(std::numeric_limits<int>::min())).degree(), std::numeric_limits<int>::min() + 1);
+    CHECK_THROWS_AS((x * y.pow(std::numeric_limits<int>::max())).degree(), std::overflow_error);
+    CHECK_THROWS_AS((x.pow(-1) * y.pow(std::numeric_limits<int>::min())).degree(), std::overflow_error);
+    CHECK((x * y.pow(std::numeric_limits<int>::min())).degree() == std::numeric_limits<int>::min() + 1);
 }
 
-BOOST_AUTO_TEST_CASE(power_series_mixed_degree_test)
+TEST_CASE("power_series_mixed_degree_test")
 {
     using p_type = polynomial<integer, monomial<int>>;
     using pp_type = polynomial<p_type, monomial<integer>>;
@@ -387,9 +386,9 @@ BOOST_AUTO_TEST_CASE(power_series_mixed_degree_test)
     pp_type2 z{"z"};
     pp_type3 a{"a"};
     pp_type4 b{"b"};
-    BOOST_CHECK((std::is_same<decltype(x.degree()), int>::value));
-    BOOST_CHECK((std::is_same<decltype(y.degree()), integer>::value));
-    BOOST_CHECK((std::is_same<decltype(z.degree()), long>::value));
-    BOOST_CHECK((std::is_same<decltype(a.degree()), int>::value));
-    BOOST_CHECK((std::is_same<decltype(b.degree()), rational>::value));
+    CHECK((std::is_same<decltype(x.degree()), int>::value));
+    CHECK((std::is_same<decltype(y.degree()), integer>::value));
+    CHECK((std::is_same<decltype(z.degree()), long>::value));
+    CHECK((std::is_same<decltype(a.degree()), int>::value));
+    CHECK((std::is_same<decltype(b.degree()), rational>::value));
 }

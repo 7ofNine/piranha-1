@@ -28,12 +28,11 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/key/key_is_one.hpp>
 
-#define BOOST_TEST_MODULE key_is_one_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <string>
 
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -75,25 +74,25 @@ public:
 };
 }
 
-BOOST_AUTO_TEST_CASE(key_is_one_test_00)
+TEST_CASE("key_is_one_test_00")
 {
-    BOOST_CHECK(!is_key_is_one_type<int>::value);
-    BOOST_CHECK(!is_key_is_one_type<const int>::value);
-    BOOST_CHECK(!is_key_is_one_type<const int &>::value);
-    BOOST_CHECK(!is_key_is_one_type<int &&>::value);
-    BOOST_CHECK(is_key_is_one_type<bar>::value);
-    BOOST_CHECK(is_key_is_one_type<const bar>::value);
-    BOOST_CHECK(is_key_is_one_type<const bar &>::value);
-    BOOST_CHECK(is_key_is_one_type<bar &&>::value);
-    BOOST_CHECK(!is_key_is_one_type<baz>::value);
-    BOOST_CHECK(!is_key_is_one_type<const baz>::value);
-    BOOST_CHECK(!is_key_is_one_type<const baz &>::value);
-    BOOST_CHECK(!is_key_is_one_type<baz &&>::value);
-    BOOST_CHECK(!is_key_is_one_type<void>::value);
-    BOOST_CHECK(is_key_is_one_type<foo>::value);
-    BOOST_CHECK(is_key_is_one_type<const foo>::value);
-    BOOST_CHECK(is_key_is_one_type<const foo &>::value);
-    BOOST_CHECK(is_key_is_one_type<foo &&>::value);
-    BOOST_CHECK(!is_key_is_one_type<foo &>::value);
-    BOOST_CHECK(!is_key_is_one_type<void>::value);
+    CHECK(!is_key_is_one_type<int>::value);
+    CHECK(!is_key_is_one_type<const int>::value);
+    CHECK(!is_key_is_one_type<const int &>::value);
+    CHECK(!is_key_is_one_type<int &&>::value);
+    CHECK(is_key_is_one_type<bar>::value);
+    CHECK(is_key_is_one_type<const bar>::value);
+    CHECK(is_key_is_one_type<const bar &>::value);
+    CHECK(is_key_is_one_type<bar &&>::value);
+    CHECK(!is_key_is_one_type<baz>::value);
+    CHECK(!is_key_is_one_type<const baz>::value);
+    CHECK(!is_key_is_one_type<const baz &>::value);
+    CHECK(!is_key_is_one_type<baz &&>::value);
+    CHECK(!is_key_is_one_type<void>::value);
+    CHECK(is_key_is_one_type<foo>::value);
+    CHECK(is_key_is_one_type<const foo>::value);
+    CHECK(is_key_is_one_type<const foo &>::value);
+    CHECK(is_key_is_one_type<foo &&>::value);
+    CHECK(!is_key_is_one_type<foo &>::value);
+    CHECK(!is_key_is_one_type<void>::value);
 }

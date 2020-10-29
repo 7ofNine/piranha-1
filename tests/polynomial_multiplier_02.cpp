@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/polynomial.hpp>
 
-#define BOOST_TEST_MODULE polynomial_multiplier_02_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/vector.hpp>
 #include <cstddef>
@@ -43,6 +40,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/monomial.hpp>
 #include <piranha/rational.hpp>
 #include <piranha/settings.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -78,7 +77,7 @@ struct st_vs_mt_tester {
             for (auto i = 2u; i <= 4u; ++i) {
                 settings::set_n_threads(i);
                 auto mt = f * g;
-                BOOST_CHECK(mt == st);
+                CHECK(mt == st);
             }
         }
     };
@@ -89,13 +88,13 @@ struct st_vs_mt_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_multiplier_st_vs_mt_test)
+TEST_CASE("polynomial_multiplier_st_vs_mt_test")
 {
     boost::mpl::for_each<cf_types>(st_vs_mt_tester());
     settings::reset_n_threads();
 }
 
-BOOST_AUTO_TEST_CASE(polynomial_multiplier_different_cf_test)
+TEST_CASE("polynomial_multiplier_different_cf_test")
 {
     settings::set_n_threads(1u);
     using p_type1 = polynomial<std::size_t, k_monomial>;
@@ -108,18 +107,18 @@ BOOST_AUTO_TEST_CASE(polynomial_multiplier_different_cf_test)
     }
     auto g = f + 1;
     auto st = f * g;
-    BOOST_CHECK_EQUAL(st.size(), 10626u);
+    CHECK(st.size() == 10626u);
 }
 
-BOOST_AUTO_TEST_CASE(polynomial_multiplier_multiplier_finalise_test)
+TEST_CASE("polynomial_multiplier_multiplier_finalise_test")
 {
     // Test proper handling of rational coefficients.
     using pt1 = polynomial<rational, k_monomial>;
     using pt2 = polynomial<integer, k_monomial>;
     {
         pt1 x{"x"}, y{"y"};
-        BOOST_CHECK_EQUAL(x * 4 / 3_q * y * 5 / 2_q, 10 / 3_q * x * y);
-        BOOST_CHECK_EQUAL((x * 4 / 3_q + y * 5 / 2_q) * (x.pow(2) * 4 / 13_q - y * 5 / 17_q),
+        CHECK(x * 4 / 3_q * y * 5 / 2_q == 10 / 3_q * x * y);
+        CHECK((x * 4 / 3_q + y * 5 / 2_q) * (x.pow(2) * 4 / 13_q - y * 5 / 17_q) ==
                           16 * x.pow(3) / 39 + 10 / 13_q * y * x * x - 20 * x * y / 51 - 25 * y * y / 34);
     }
     // Let's do a check with a fateman1-like: first compute the exact result using integers,
@@ -148,7 +147,7 @@ BOOST_AUTO_TEST_CASE(polynomial_multiplier_multiplier_finalise_test)
             auto g = f + 1;
             res = f / 2 * g / 3;
         }
-        BOOST_CHECK_EQUAL(cmp, res * 6);
+        CHECK(cmp == res * 6);
     }
     settings::reset_n_threads();
 }

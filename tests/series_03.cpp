@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/series.hpp>
 
-#define BOOST_TEST_MODULE series_03_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -40,6 +37,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/monomial.hpp>
 #include <piranha/polynomial.hpp>
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -171,36 +170,36 @@ public:
     PIRANHA_FORWARDING_ASSIGNMENT(g_series_type4, base)
 };
 
-BOOST_AUTO_TEST_CASE(series_generic_ctor_forwarding_test)
+TEST_CASE("series_generic_ctor_forwarding_test")
 {
     using st0 = g_series_type<mock_cf, int>;
-    BOOST_CHECK(is_series<st0>::value);
+    CHECK(is_series<st0>::value);
     // Test we are using copy ctor and copy assignment.
     st0 s0, s1(s0);
     s1 = s0;
     using st1 = g_series_type2<mock_cf, int>;
-    BOOST_CHECK(is_series<st1>::value);
+    CHECK(is_series<st1>::value);
     st1 s2, s3(s2);
     s3 = s2;
     using st2 = g_series_type3<mock_cf, int>;
-    BOOST_CHECK(is_series<st2>::value);
+    CHECK(is_series<st2>::value);
     st2 s4, s5(s4);
     s5 = s4;
     using st3 = g_series_type4<mock_cf, int>;
-    BOOST_CHECK(is_series<st3>::value);
+    CHECK(is_series<st3>::value);
     st3 s6, s7(s6);
     s7 = s6;
 }
 
-BOOST_AUTO_TEST_CASE(series_symbol_set_test)
+TEST_CASE("series_symbol_set_test")
 {
     using st0 = g_series_type<double, int>;
     symbol_fset ss{"x", "y"};
     st0 s;
     s.set_symbol_set(ss);
-    BOOST_CHECK(ss == s.get_symbol_set());
+    CHECK(ss == s.get_symbol_set());
     s += 1;
-    BOOST_CHECK_THROW(s.set_symbol_set(ss), std::invalid_argument);
+    CHECK_THROWS_AS(s.set_symbol_set(ss), std::invalid_argument);
 }
 
 // Series type with valid invert() override.
@@ -240,19 +239,19 @@ public:
     int invert();
 };
 
-BOOST_AUTO_TEST_CASE(series_invert_test)
+TEST_CASE("series_invert_test")
 {
     using st0 = g_series_type<double, int>;
-    BOOST_CHECK(is_invertible<st0>::value);
-    BOOST_CHECK((std::is_same<decltype(math::invert(st0{1.23})), st0>::value));
-    BOOST_CHECK_EQUAL(math::invert(st0{1.23}), math::invert(1.23));
-    BOOST_CHECK_EQUAL(math::invert(st0{0.}), math::invert(0.));
+    CHECK(is_invertible<st0>::value);
+    CHECK((std::is_same<decltype(math::invert(st0{1.23})), st0>::value));
+    CHECK(math::invert(st0{1.23}) == math::invert(1.23));
+    CHECK(math::invert(st0{0.}) == math::invert(0.));
     using st1 = g_series_type5<double, int>;
-    BOOST_CHECK(is_invertible<st1>::value);
-    BOOST_CHECK((std::is_same<decltype(math::invert(st1{1})), int>::value));
-    BOOST_CHECK_EQUAL(math::invert(st1{1.23}), 42);
+    CHECK(is_invertible<st1>::value);
+    CHECK((std::is_same<decltype(math::invert(st1{1})), int>::value));
+    CHECK(math::invert(st1{1.23}) == 42);
     using st2 = g_series_type6<double, int>;
-    BOOST_CHECK(is_invertible<st2>::value);
-    BOOST_CHECK((std::is_same<decltype(math::invert(st2{1})), st2>::value));
-    BOOST_CHECK_EQUAL(math::invert(st2{1.23}), math::invert(1.23));
+    CHECK(is_invertible<st2>::value);
+    CHECK((std::is_same<decltype(math::invert(st2{1})), st2>::value));
+    CHECK(math::invert(st2{1.23}) == math::invert(1.23));
 }

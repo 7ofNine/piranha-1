@@ -28,17 +28,16 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/runtime_info.hpp>
 
-#define BOOST_TEST_MODULE runtime_info_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <iostream>
 
 #include <piranha/memory.hpp>
 #include <piranha/settings.hpp>
 
+#include "catch.hpp"
+
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(runtime_info_print_test)
+TEST_CASE("runtime_info_print_test")
 {
     std::cout << "Concurrency: " << runtime_info::get_hardware_concurrency() << '\n';
     std::cout << "Cache line size: " << runtime_info::get_cache_line_size() << '\n';
@@ -51,9 +50,9 @@ BOOST_AUTO_TEST_CASE(runtime_info_print_test)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(runtime_info_settings_test)
+TEST_CASE("runtime_info_settings_test")
 {
-    BOOST_CHECK(runtime_info::get_hardware_concurrency() == settings::get_n_threads()
-                || runtime_info::get_hardware_concurrency() == 0u);
-    BOOST_CHECK_EQUAL(runtime_info::get_cache_line_size(), settings::get_cache_line_size());
+    CHECK((runtime_info::get_hardware_concurrency() == settings::get_n_threads()
+                || runtime_info::get_hardware_concurrency() == 0u));
+    CHECK(runtime_info::get_cache_line_size() == settings::get_cache_line_size());
 }

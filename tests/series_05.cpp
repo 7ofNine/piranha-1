@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/series.hpp>
 
-#define BOOST_TEST_MODULE series_05_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -47,6 +44,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/polynomial.hpp>
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -95,125 +94,125 @@ struct mock_cf {
 };
 
 // A few extra tests for division after the recent changes in implementation.
-BOOST_AUTO_TEST_CASE(series_division_test)
+TEST_CASE("series_division_test")
 {
     {
         // Equal rec index, no type changes.
         using s_type = g_series_type<integer, int>;
-        BOOST_CHECK((is_divisible<s_type>::value));
-        BOOST_CHECK((is_divisible_in_place<s_type>::value));
+        CHECK((is_divisible<s_type>::value));
+        CHECK((is_divisible_in_place<s_type>::value));
         s_type x{"x"}, y{"y"};
-        BOOST_CHECK((std::is_same<s_type, decltype(x / y)>::value));
-        BOOST_CHECK_EQUAL(s_type{4} / s_type{-3}, -1);
-        BOOST_CHECK_THROW(s_type{4} / s_type{}, mppp::zero_division_error);
-        BOOST_CHECK_EQUAL(s_type{0} / s_type{-3}, 0);
-        BOOST_CHECK_THROW(x / y, std::invalid_argument);
+        CHECK((std::is_same<s_type, decltype(x / y)>::value));
+        CHECK(s_type{4} / s_type{-3} == -1);
+        CHECK_THROWS_AS(s_type{4} / s_type{}, mppp::zero_division_error);
+        CHECK(s_type{0} / s_type{-3} == 0);
+        CHECK_THROWS_AS(x / y, std::invalid_argument);
         s_type tmp{4};
-        BOOST_CHECK_THROW(tmp /= s_type{}, mppp::zero_division_error);
+        CHECK_THROWS_AS(tmp /= s_type{}, mppp::zero_division_error);
         tmp /= s_type{-3};
-        BOOST_CHECK_EQUAL(tmp, -1);
-        BOOST_CHECK_THROW(x /= y, std::invalid_argument);
-        BOOST_CHECK((!is_divisible<g_series_type<mock_cf, int>>::value));
-        BOOST_CHECK((!is_divisible_in_place<g_series_type<mock_cf, int>>::value));
+        CHECK(tmp == -1);
+        CHECK_THROWS_AS(x /= y, std::invalid_argument);
+        CHECK((!is_divisible<g_series_type<mock_cf, int>>::value));
+        CHECK((!is_divisible_in_place<g_series_type<mock_cf, int>>::value));
     }
     {
         // Equal rec index, first coefficient wins.
         using s_type1 = g_series_type<integer, int>;
         using s_type2 = g_series_type<int, int>;
-        BOOST_CHECK((is_divisible<s_type1, s_type2>::value));
-        BOOST_CHECK((is_divisible_in_place<s_type1, s_type2>::value));
+        CHECK((is_divisible<s_type1, s_type2>::value));
+        CHECK((is_divisible_in_place<s_type1, s_type2>::value));
         s_type1 x{"x"};
         s_type2 y{"y"};
-        BOOST_CHECK((std::is_same<s_type1, decltype(x / y)>::value));
-        BOOST_CHECK_EQUAL(s_type1{4} / s_type2{-3}, -1);
-        BOOST_CHECK_THROW(s_type1{4} / s_type2{}, mppp::zero_division_error);
-        BOOST_CHECK_EQUAL(s_type1{0} / s_type2{-3}, 0);
-        BOOST_CHECK_THROW(x / y, std::invalid_argument);
+        CHECK((std::is_same<s_type1, decltype(x / y)>::value));
+        CHECK(s_type1{4} / s_type2{-3} == -1);
+        CHECK_THROWS_AS(s_type1{4} / s_type2{}, mppp::zero_division_error);
+        CHECK(s_type1{0} / s_type2{-3} == 0);
+        CHECK_THROWS_AS(x / y, std::invalid_argument);
         s_type1 tmp{4};
-        BOOST_CHECK_THROW(tmp /= s_type2{}, mppp::zero_division_error);
+        CHECK_THROWS_AS(tmp /= s_type2{}, mppp::zero_division_error);
         tmp /= s_type2{-3};
-        BOOST_CHECK_EQUAL(tmp, -1);
-        BOOST_CHECK_THROW(x /= y, std::invalid_argument);
-        BOOST_CHECK((!is_divisible<g_series_type<mock_cf, int>, s_type2>::value));
-        BOOST_CHECK((!is_divisible_in_place<g_series_type<mock_cf, int>, s_type2>::value));
+        CHECK(tmp == -1);
+        CHECK_THROWS_AS(x /= y, std::invalid_argument);
+        CHECK((!is_divisible<g_series_type<mock_cf, int>, s_type2>::value));
+        CHECK((!is_divisible_in_place<g_series_type<mock_cf, int>, s_type2>::value));
     }
     {
         // Equal rec index, second coefficient wins.
         using s_type1 = g_series_type<int, int>;
         using s_type2 = g_series_type<integer, int>;
-        BOOST_CHECK((is_divisible<s_type1, s_type2>::value));
-        BOOST_CHECK((is_divisible_in_place<s_type1, s_type2>::value));
+        CHECK((is_divisible<s_type1, s_type2>::value));
+        CHECK((is_divisible_in_place<s_type1, s_type2>::value));
         s_type1 x{"x"};
         s_type2 y{"y"};
-        BOOST_CHECK((std::is_same<s_type2, decltype(x / y)>::value));
-        BOOST_CHECK_EQUAL(s_type1{4} / s_type2{-3}, -1);
-        BOOST_CHECK_THROW(s_type1{4} / s_type2{}, mppp::zero_division_error);
-        BOOST_CHECK_EQUAL(s_type1{0} / s_type2{-3}, 0);
-        BOOST_CHECK_THROW(x / y, std::invalid_argument);
+        CHECK((std::is_same<s_type2, decltype(x / y)>::value));
+        CHECK(s_type1{4} / s_type2{-3} == -1);
+        CHECK_THROWS_AS(s_type1{4} / s_type2{}, mppp::zero_division_error);
+        CHECK(s_type1{0} / s_type2{-3} == 0);
+        CHECK_THROWS_AS(x / y, std::invalid_argument);
         s_type1 tmp{4};
-        BOOST_CHECK_THROW(tmp /= s_type2{}, mppp::zero_division_error);
+        CHECK_THROWS_AS(tmp /= s_type2{}, mppp::zero_division_error);
         tmp /= s_type2{-3};
-        BOOST_CHECK_EQUAL(tmp, -1);
-        BOOST_CHECK_THROW(x /= y, std::invalid_argument);
-        BOOST_CHECK((!is_divisible<s_type2, g_series_type<mock_cf, int>>::value));
-        BOOST_CHECK((!is_divisible_in_place<s_type2, g_series_type<mock_cf, int>>::value));
+        CHECK(tmp == -1);
+        CHECK_THROWS_AS(x /= y, std::invalid_argument);
+        CHECK((!is_divisible<s_type2, g_series_type<mock_cf, int>>::value));
+        CHECK((!is_divisible_in_place<s_type2, g_series_type<mock_cf, int>>::value));
     }
     {
         // Equal rec index, need a new coefficient.
         using s_type1 = g_series_type<short, int>;
         using s_type2 = g_series_type<signed char, int>;
         using s_type3 = g_series_type<int, int>;
-        BOOST_CHECK((is_divisible<s_type1, s_type2>::value));
-        BOOST_CHECK((is_divisible_in_place<s_type1, s_type2>::value));
+        CHECK((is_divisible<s_type1, s_type2>::value));
+        CHECK((is_divisible_in_place<s_type1, s_type2>::value));
         s_type1 x{"x"};
         s_type2 y{"y"};
-        BOOST_CHECK((std::is_same<s_type3, decltype(x / y)>::value));
-        BOOST_CHECK_EQUAL(s_type1{4} / s_type2{-3}, -1);
-        BOOST_CHECK_EQUAL(s_type1{0} / s_type2{-3}, 0);
+        CHECK((std::is_same<s_type3, decltype(x / y)>::value));
+        CHECK(s_type1{4} / s_type2{-3} == -1);
+        CHECK(s_type1{0} / s_type2{-3} == 0);
         s_type1 tmp{4};
         tmp /= s_type2{-3};
-        BOOST_CHECK_EQUAL(tmp, -1);
-        BOOST_CHECK_THROW(x /= y, std::invalid_argument);
-        BOOST_CHECK_THROW(x / y, std::invalid_argument);
+        CHECK(tmp == -1);
+        CHECK_THROWS_AS(x /= y, std::invalid_argument);
+        CHECK_THROWS_AS(x / y, std::invalid_argument);
     }
     {
         // Second has higher recursion index, result is second.
         using s_type1 = g_series_type<int, int>;
         using s_type2 = g_series_type<s_type1, int>;
-        BOOST_CHECK((is_divisible<s_type1, s_type2>::value));
-        BOOST_CHECK((!is_divisible_in_place<s_type1, s_type2>::value));
+        CHECK((is_divisible<s_type1, s_type2>::value));
+        CHECK((!is_divisible_in_place<s_type1, s_type2>::value));
         s_type1 x{"x"};
         s_type2 y{"y"};
-        BOOST_CHECK((std::is_same<s_type2, decltype(x / y)>::value));
-        BOOST_CHECK_EQUAL(s_type1{4} / s_type2{-3}, -1);
-        BOOST_CHECK_EQUAL(s_type1{0} / s_type2{-3}, 0);
-        BOOST_CHECK_THROW(x / y, std::invalid_argument);
+        CHECK((std::is_same<s_type2, decltype(x / y)>::value));
+        CHECK(s_type1{4} / s_type2{-3} == -1);
+        CHECK(s_type1{0} / s_type2{-3} == 0);
+        CHECK_THROWS_AS(x / y, std::invalid_argument);
         // Try with scalar as well.
-        BOOST_CHECK((is_divisible<int, s_type2>::value));
-        BOOST_CHECK((std::is_same<s_type2, decltype(1 / y)>::value));
-        BOOST_CHECK_EQUAL(4 / s_type2{-3}, -1);
-        BOOST_CHECK_EQUAL(0 / s_type2{-3}, 0);
-        BOOST_CHECK((!is_divisible<g_series_type<mock_cf, int>, s_type2>::value));
-        BOOST_CHECK((!is_divisible_in_place<g_series_type<mock_cf, int>, s_type2>::value));
+        CHECK((is_divisible<int, s_type2>::value));
+        CHECK((std::is_same<s_type2, decltype(1 / y)>::value));
+        CHECK(4 / s_type2{-3} == -1);
+        CHECK(0 / s_type2{-3} == 0);
+        CHECK((!is_divisible<g_series_type<mock_cf, int>, s_type2>::value));
+        CHECK((!is_divisible_in_place<g_series_type<mock_cf, int>, s_type2>::value));
     }
     {
         // Second has higher recursion index, result is a new coefficient.
         using s_type1 = g_series_type<signed char, int>;
         using s_type2 = g_series_type<g_series_type<short, int>, int>;
         using s_type3 = g_series_type<g_series_type<int, int>, int>;
-        BOOST_CHECK((is_divisible<s_type1, s_type2>::value));
-        BOOST_CHECK((!is_divisible_in_place<s_type1, s_type2>::value));
+        CHECK((is_divisible<s_type1, s_type2>::value));
+        CHECK((!is_divisible_in_place<s_type1, s_type2>::value));
         s_type1 x{"x"};
         s_type2 y{"y"};
-        BOOST_CHECK((std::is_same<s_type3, decltype(x / y)>::value));
-        BOOST_CHECK_EQUAL(s_type1{4} / s_type2{-3}, -1);
-        BOOST_CHECK_EQUAL(s_type1{0} / s_type2{-3}, 0);
-        BOOST_CHECK_THROW(x / y, std::invalid_argument);
+        CHECK((std::is_same<s_type3, decltype(x / y)>::value));
+        CHECK(s_type1{4} / s_type2{-3} == -1);
+        CHECK(s_type1{0} / s_type2{-3} == 0);
+        CHECK_THROWS_AS(x / y, std::invalid_argument);
         // Try with scalar as well.
-        BOOST_CHECK((is_divisible<short, s_type1>::value));
-        BOOST_CHECK((std::is_same<g_series_type<int, int>, decltype(1 / x)>::value));
-        BOOST_CHECK_EQUAL(4 / s_type1{-3}, -1);
-        BOOST_CHECK_EQUAL(0 / s_type1{-3}, 0);
+        CHECK((is_divisible<short, s_type1>::value));
+        CHECK((std::is_same<g_series_type<int, int>, decltype(1 / x)>::value));
+        CHECK(4 / s_type1{-3} == -1);
+        CHECK(0 / s_type1{-3} == 0);
     }
 }
 
@@ -251,49 +250,49 @@ public:
 };
 
 // Check that sin/cos methods that return unreturnable types on a series are disabled.
-BOOST_AUTO_TEST_CASE(series_sin_cos_test)
+TEST_CASE("series_sin_cos_test")
 {
-    BOOST_CHECK_EQUAL(piranha::sin(g_series_type2<double, int>{}), piranha::sin(0.));
-    BOOST_CHECK_EQUAL(piranha::cos(g_series_type2<double, int>{}), piranha::cos(0.));
+    CHECK(piranha::sin(g_series_type2<double, int>{}) == piranha::sin(0.));
+    CHECK(piranha::cos(g_series_type2<double, int>{}) == piranha::cos(0.));
 }
 
 // Some evaluation tests after we added the improved checking + error message logic in series.
-BOOST_AUTO_TEST_CASE(series_evaluation_test)
+TEST_CASE("series_evaluation_test")
 {
     using math::evaluate;
     using p_type = polynomial<integer, monomial<int>>;
     p_type x{"x"}, y{"y"}, z{"z"};
-    BOOST_CHECK_EQUAL(math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}, {"z", 3_z}}), 1 + 2 + 3);
-    BOOST_CHECK_EQUAL(math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}, {"z", 3_z}, {"t", 4_z}}), 1 + 2 + 3);
-    BOOST_CHECK_THROW(math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}}), std::invalid_argument);
+    CHECK(math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}, {"z", 3_z}}) == 1 + 2 + 3);
+    CHECK(math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}, {"z", 3_z}, {"t", 4_z}}) == 1 + 2 + 3);
+    CHECK_THROWS_AS(math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}}), std::invalid_argument);
     try {
         (void)math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}});
     } catch (const std::invalid_argument &ia) {
-        BOOST_CHECK(std::string(ia.what()).find("the symbol 'z' is missing from the series evaluation dictionary")
+        CHECK(std::string(ia.what()).find("the symbol 'z' is missing from the series evaluation dictionary")
                     != std::string::npos);
     }
     try {
         (void)math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"y", 2_z}, {"a", 4_z}});
     } catch (const std::invalid_argument &ia) {
-        BOOST_CHECK(std::string(ia.what()).find("the symbol 'z' is missing from the series evaluation dictionary")
+        CHECK(std::string(ia.what()).find("the symbol 'z' is missing from the series evaluation dictionary")
                     != std::string::npos);
     }
     try {
         (void)math::evaluate<integer>(x + y + z, {{"y", 2_z}, {"t", 7_z}});
     } catch (const std::invalid_argument &ia) {
-        BOOST_CHECK(std::string(ia.what()).find("the symbol 'x' is missing from the series evaluation dictionary")
+        CHECK(std::string(ia.what()).find("the symbol 'x' is missing from the series evaluation dictionary")
                     != std::string::npos);
     }
     try {
         (void)math::evaluate<integer>(x + y + z, {{"x", 1_z}, {"z", 2_z}});
     } catch (const std::invalid_argument &ia) {
-        BOOST_CHECK(std::string(ia.what()).find("the symbol 'y' is missing from the series evaluation dictionary")
+        CHECK(std::string(ia.what()).find("the symbol 'y' is missing from the series evaluation dictionary")
                     != std::string::npos);
     }
     try {
         (void)math::evaluate<integer>(x + y + z, {{"a", 2_z}, {"b", 3_z}});
     } catch (const std::invalid_argument &ia) {
-        BOOST_CHECK(std::string(ia.what()).find("the symbol 'x' is missing from the series evaluation dictionary")
+        CHECK(std::string(ia.what()).find("the symbol 'x' is missing from the series evaluation dictionary")
                     != std::string::npos);
     }
 }

@@ -506,7 +506,8 @@ inline void save(Archive &ar, const mppp::integer<SSize> &n, unsigned)
     // Maybe we should consider providing an API from mp++ to interact directly with strings
     // rather than vectors of chars.
     PIRANHA_MAYBE_TLS std::vector<char> tmp_v;
-    mppp::mpz_to_str(tmp_v, n.get_mpz_view());
+    mppp::detail::mpz_to_str(tmp_v, n.get_mpz_view());     //TODO:: this was one not in the detail namespace. How to chANGE???
+    //mppp::detail::mpz_to_str(tmp_v, n.get_mpz_view().m_ptr);   
     PIRANHA_MAYBE_TLS std::string tmp_s;
     tmp_s.assign(tmp_v.data());
     piranha::boost_save(ar, tmp_s);

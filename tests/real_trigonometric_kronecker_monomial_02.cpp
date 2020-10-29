@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/real_trigonometric_kronecker_monomial.hpp>
 
-#define BOOST_TEST_MODULE real_trigonometric_kronecker_monomial_02_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <initializer_list>
@@ -54,6 +51,9 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
 
+#include "catch.hpp"
+#include "exception_matcher.hpp"
+
 using namespace piranha;
 
 using int_types = std::tuple<signed char, int, long, long long>;
@@ -63,7 +63,7 @@ static const int ntries = 1000;
 static std::mutex mut;
 #endif
 
-BOOST_AUTO_TEST_CASE(kronecker_monomial_empty_test) {}
+TEST_CASE("kronecker_monomial_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -85,9 +85,9 @@ static inline void boost_roundtrip(const T &x, const symbol_fset &args, bool mt 
         }
         if (mt) {
             std::lock_guard<std::mutex> lock(mut);
-            BOOST_CHECK(x == retval);
+            CHECK(x == retval);
         } else {
-            BOOST_CHECK(x == retval);
+            CHECK(x == retval);
         }
     }
     {
@@ -105,9 +105,9 @@ static inline void boost_roundtrip(const T &x, const symbol_fset &args, bool mt 
         }
         if (mt) {
             std::lock_guard<std::mutex> lock(mut);
-            BOOST_CHECK(x == retval);
+            CHECK(x == retval);
         } else {
-            BOOST_CHECK(x == retval);
+            CHECK(x == retval);
         }
     }
 }
@@ -118,18 +118,18 @@ struct boost_s11n_tester {
     {
         using k_type = real_trigonometric_kronecker_monomial<T>;
         using w_type = boost_s11n_key_wrapper<k_type>;
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, w_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::text_oarchive, w_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, w_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::text_iarchive, w_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::xml_oarchive, w_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::xml_iarchive, w_type>::value));
-        BOOST_CHECK((!has_boost_save<boost::archive::text_iarchive, w_type>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::text_oarchive, w_type>::value));
-        BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive const, w_type>::value));
-        BOOST_CHECK((!has_boost_save<void, w_type>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive const, w_type>::value));
-        BOOST_CHECK((!has_boost_load<void, w_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive, w_type>::value));
+        CHECK((has_boost_save<boost::archive::text_oarchive, w_type>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive, w_type>::value));
+        CHECK((has_boost_load<boost::archive::text_iarchive, w_type>::value));
+        CHECK((has_boost_save<boost::archive::xml_oarchive, w_type>::value));
+        CHECK((has_boost_load<boost::archive::xml_iarchive, w_type>::value));
+        CHECK((!has_boost_save<boost::archive::text_iarchive, w_type>::value));
+        CHECK((!has_boost_load<boost::archive::text_oarchive, w_type>::value));
+        CHECK((!has_boost_save<boost::archive::binary_oarchive const, w_type>::value));
+        CHECK((!has_boost_save<void, w_type>::value));
+        CHECK((!has_boost_load<boost::archive::binary_iarchive const, w_type>::value));
+        CHECK((!has_boost_load<void, w_type>::value));
         const std::vector<std::string> names = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "l"};
         auto t_func = [&names](unsigned n) {
             std::uniform_int_distribution<unsigned> sdist(0, 10);
@@ -174,20 +174,19 @@ struct boost_s11n_tester {
                 boost::archive::text_iarchive ia(ss);
                 symbol_fset new_ss{"x"};
                 w_type w{retval, new_ss};
-                BOOST_CHECK_EXCEPTION(boost_load(ia, w), std::invalid_argument, [](const std::invalid_argument &iae) {
-                    return boost::contains(
-                        iae.what(),
+                CHECK_THROWS_MATCHES(boost_load(ia, w), std::invalid_argument, 
+                    test::ExceptionMatcher<std::invalid_argument>(std::string(
                         "invalid size detected in the deserialization of a real Kronercker "
                         "trigonometric monomial: the deserialized size is 0 but the reference symbol set has a "
-                        "size of 1");
-                });
+                        "size of 1"))
+                );
             }
-            BOOST_CHECK((retval == k_type{T(1), T(2)}));
+            CHECK((retval == k_type{T(1), T(2)}));
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(rtkm_boost_s11n_test)
+TEST_CASE("rtkm_boost_s11n_test")
 {
     tuple_for_each(int_types{}, boost_s11n_tester());
 }
@@ -207,9 +206,9 @@ static inline void msgpack_roundtrip(const T &x, const symbol_fset &args, msgpac
     retval.msgpack_convert(oh.get(), f, args);
     if (mt) {
         std::lock_guard<std::mutex> lock(mut);
-        BOOST_CHECK(x == retval);
+        CHECK(x == retval);
     } else {
-        BOOST_CHECK(x == retval);
+        CHECK(x == retval);
     }
 }
 
@@ -218,12 +217,12 @@ struct msgpack_s11n_tester {
     void operator()(const T &) const
     {
         using k_type = real_trigonometric_kronecker_monomial<T>;
-        BOOST_CHECK((key_has_msgpack_pack<msgpack::sbuffer, k_type>::value));
-        BOOST_CHECK((!key_has_msgpack_pack<msgpack::sbuffer &, k_type>::value));
-        BOOST_CHECK((!key_has_msgpack_pack<int, k_type>::value));
-        BOOST_CHECK((!key_has_msgpack_pack<void, k_type>::value));
-        BOOST_CHECK((key_has_msgpack_convert<k_type>::value));
-        BOOST_CHECK((!key_has_msgpack_convert<k_type const &>::value));
+        CHECK((key_has_msgpack_pack<msgpack::sbuffer, k_type>::value));
+        CHECK((!key_has_msgpack_pack<msgpack::sbuffer &, k_type>::value));
+        CHECK((!key_has_msgpack_pack<int, k_type>::value));
+        CHECK((!key_has_msgpack_pack<void, k_type>::value));
+        CHECK((key_has_msgpack_convert<k_type>::value));
+        CHECK((!key_has_msgpack_convert<k_type const &>::value));
         const std::vector<std::string> names = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "l"};
         auto t_func = [&names](unsigned n) {
             std::uniform_int_distribution<unsigned> sdist(0, 10);
@@ -265,21 +264,19 @@ struct msgpack_s11n_tester {
             msgpack_pack(p, true, msgpack_format::portable);
             k_type retval{T(2)};
             auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
-            BOOST_CHECK_EXCEPTION(
+            CHECK_THROWS_MATCHES(
                 retval.msgpack_convert(oh.get(), msgpack_format::portable, symbol_fset{}), std::invalid_argument,
-                [](const std::invalid_argument &ia) {
-                    return boost::contains(
-                        ia.what(),
+                test::ExceptionMatcher<std::invalid_argument>(std::string(
                         "incompatible symbol set in trigonometric monomial serialization: the reference "
                         "symbol set has a size of 0, while the trigonometric monomial being deserialized has "
-                        "a size of 1");
-                });
-            BOOST_CHECK((retval == k_type{T(2)}));
+                        "a size of 1"))
+            );
+            CHECK((retval == k_type{T(2)}));
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(kronecker_monomial_msgpack_s11n_test)
+TEST_CASE("kronecker_monomial_msgpack_s11n_test")
 {
     tuple_for_each(int_types{}, msgpack_s11n_tester());
 }

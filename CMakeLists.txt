@@ -199,7 +199,7 @@ endif()
 
 # Find mp++.
 #set(PIRANHA_MINIMUM_MPPP_VERSION 0.9)
-set(PIRANHA_MINIMUM_MPPP_VERSION 0.20)
+set(PIRANHA_MINIMUM_MPPP_VERSION 0.22)
 find_package(mp++ ${PIRANHA_MINIMUM_MPPP_VERSION} REQUIRED)
 target_link_libraries(piranha INTERFACE mp++::mp++)
 

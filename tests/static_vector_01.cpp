@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/static_vector.hpp>
 
-#define BOOST_TEST_MODULE static_vector_01_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/integer_traits.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/mpl/for_each.hpp>
@@ -47,6 +44,8 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/integer.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 // NOTE: here we define a custom string class base on std::string that respects nothrow requirements in hash_set:
 // in the current GCC (4.6) the destructor of std::string does not have nothrow, so we cannot use it.
@@ -103,32 +102,32 @@ struct constructor_tester {
             {
                 // Default constructor.
                 vector_type v;
-                BOOST_CHECK_EQUAL(v.size(), 0u);
-                BOOST_CHECK_EQUAL(vector_type(v).size(), 0u);
-                BOOST_CHECK_EQUAL(vector_type(std::move(v)).size(), 0u);
+                CHECK(v.size() == 0u);
+                CHECK(vector_type(v).size() == 0u);
+                CHECK(vector_type(std::move(v)).size() == 0u);
                 v = vector_type();
                 v.push_back(boost::lexical_cast<T>(1));
-                BOOST_CHECK_EQUAL(v.size(), 1u);
-                BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(1));
+                CHECK(v.size() == 1u);
+                CHECK(v[0] == boost::lexical_cast<T>(1));
                 // Copy constructor.
-                BOOST_CHECK_EQUAL(vector_type(v).size(), 1u);
-                BOOST_CHECK_EQUAL(vector_type(v)[0], boost::lexical_cast<T>(1));
+                CHECK(vector_type(v).size() == 1u);
+                CHECK(vector_type(v)[0] == boost::lexical_cast<T>(1));
                 // Move constructor.
-                BOOST_CHECK_EQUAL(vector_type(std::move(v))[0], boost::lexical_cast<T>(1));
+                CHECK(vector_type(std::move(v))[0] == boost::lexical_cast<T>(1));
                 // Copy assignment.
                 vector_type tmp;
                 tmp.push_back(boost::lexical_cast<T>(1));
                 v = tmp;
-                BOOST_CHECK_EQUAL(v.size(), 1u);
-                BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(1));
+                CHECK(v.size() == 1u);
+                CHECK(v[0] == boost::lexical_cast<T>(1));
                 // Move assignment.
                 v = vector_type();
                 v.push_back(boost::lexical_cast<T>(1));
-                BOOST_CHECK_EQUAL(v.size(), 1u);
-                BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(1));
+                CHECK(v.size() == 1u);
+                CHECK(v[0] == boost::lexical_cast<T>(1));
                 // Mutating accessor.
                 v[0] = boost::lexical_cast<T>(2);
-                BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(2));
+                CHECK(v[0] == boost::lexical_cast<T>(2));
             }
             if (U::value > 1u) {
                 // Move Assignment with different sizes.
@@ -137,25 +136,25 @@ struct constructor_tester {
                 v.push_back(boost::lexical_cast<T>(2));
                 u.push_back(boost::lexical_cast<T>(3));
                 v = std::move(u);
-                BOOST_CHECK_EQUAL(v.size(), 1u);
-                BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(3));
+                CHECK(v.size() == 1u);
+                CHECK(v[0] == boost::lexical_cast<T>(3));
                 u = vector_type();
                 v = vector_type();
                 v.push_back(boost::lexical_cast<T>(1));
                 v.push_back(boost::lexical_cast<T>(2));
                 u.push_back(boost::lexical_cast<T>(3));
                 u = std::move(v);
-                BOOST_CHECK_EQUAL(u.size(), 2u);
-                BOOST_CHECK_EQUAL(u[0], boost::lexical_cast<T>(1));
-                BOOST_CHECK_EQUAL(u[1], boost::lexical_cast<T>(2));
+                CHECK(u.size() == 2u);
+                CHECK(u[0] == boost::lexical_cast<T>(1));
+                CHECK(u[1] == boost::lexical_cast<T>(2));
             }
             // Constructor from copies.
             vector_type v(0u, boost::lexical_cast<T>(1));
-            BOOST_CHECK_EQUAL(v.size(), 0u);
+            CHECK(v.size() == 0u);
             v = vector_type(1u, boost::lexical_cast<T>(2));
-            BOOST_CHECK_EQUAL(v.size(), 1u);
-            BOOST_CHECK(v[0u] == boost::lexical_cast<T>(2));
-            BOOST_CHECK_THROW(v = vector_type(1u + U::value, boost::lexical_cast<T>(2)), std::bad_alloc);
+            CHECK(v.size() == 1u);
+            CHECK(v[0u] == boost::lexical_cast<T>(2));
+            CHECK_THROWS_AS(v = vector_type(1u + U::value, boost::lexical_cast<T>(2)), std::bad_alloc);
         }
     };
     template <typename T>
@@ -165,7 +164,7 @@ struct constructor_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_constructor_test)
+TEST_CASE("static_vector_constructor_test")
 {
     boost::mpl::for_each<value_types>(constructor_tester());
 }
@@ -178,12 +177,12 @@ struct iterator_tester {
         {
             typedef static_vector<T, U::value> vector_type;
             vector_type v;
-            BOOST_CHECK(v.begin() == v.end());
+            CHECK(v.begin() == v.end());
             v.push_back(boost::lexical_cast<T>(1));
             auto it = v.begin();
             ++it;
-            BOOST_CHECK(it == v.end());
-            BOOST_CHECK_EQUAL(std::distance(v.begin(), v.end()), 1);
+            CHECK(it == v.end());
+            CHECK(std::distance(v.begin(), v.end()) == 1);
         }
     };
     template <typename T>
@@ -193,21 +192,21 @@ struct iterator_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_iterator_test)
+TEST_CASE("static_vector_iterator_test")
 {
     boost::mpl::for_each<value_types>(iterator_tester());
 }
 
-BOOST_AUTO_TEST_CASE(static_vector_size_type_test)
+TEST_CASE("static_vector_size_type_test")
 {
-    BOOST_CHECK((std::is_same<detail::static_vector_size_type<10u>::type, unsigned char>::value));
-    BOOST_CHECK((std::is_same<detail::static_vector_size_type<255u>::type, unsigned char>::value));
-    BOOST_CHECK((std::is_same<detail::static_vector_size_type<10000u>::type, unsigned char>::value)
-                || (std::is_same<detail::static_vector_size_type<10000u>::type, unsigned short>::value));
-    BOOST_CHECK((std::is_same<detail::static_vector_size_type<4294967295ul>::type, unsigned char>::value)
+    CHECK((std::is_same<detail::static_vector_size_type<10u>::type, unsigned char>::value));
+    CHECK((std::is_same<detail::static_vector_size_type<255u>::type, unsigned char>::value));
+    CHECK(((std::is_same<detail::static_vector_size_type<10000u>::type, unsigned char>::value)
+                || (std::is_same<detail::static_vector_size_type<10000u>::type, unsigned short>::value)));
+    CHECK(((std::is_same<detail::static_vector_size_type<4294967295ul>::type, unsigned char>::value)
                 || (std::is_same<detail::static_vector_size_type<4294967295ul>::type, unsigned short>::value)
                 || (std::is_same<detail::static_vector_size_type<4294967295ul>::type, unsigned>::value)
-                || (std::is_same<detail::static_vector_size_type<4294967295ul>::type, unsigned long>::value));
+                || (std::is_same<detail::static_vector_size_type<4294967295ul>::type, unsigned long>::value)));
 }
 
 struct equality_tester {
@@ -217,18 +216,18 @@ struct equality_tester {
         void operator()(const U &)
         {
             typedef static_vector<T, U::value> vector_type;
-            BOOST_CHECK(vector_type() == vector_type());
+            CHECK(vector_type() == vector_type());
             vector_type v1, v2;
             v1.push_back(boost::lexical_cast<T>(1));
-            BOOST_CHECK(!(v1 == v2));
-            BOOST_CHECK(v1 != v2);
+            CHECK(!(v1 == v2));
+            CHECK(v1 != v2);
             v2.push_back(boost::lexical_cast<T>(1));
-            BOOST_CHECK(v1 == v2);
-            BOOST_CHECK(!(v1 != v2));
+            CHECK(v1 == v2);
+            CHECK(!(v1 != v2));
             v1 = vector_type();
             v1.push_back(boost::lexical_cast<T>(2));
-            BOOST_CHECK(!(v1 == v2));
-            BOOST_CHECK(v1 != v2);
+            CHECK(!(v1 == v2));
+            CHECK(v1 != v2);
         }
     };
     template <typename T>
@@ -238,7 +237,7 @@ struct equality_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_equality_test)
+TEST_CASE("static_vector_equality_test")
 {
     boost::mpl::for_each<value_types>(equality_tester());
 }
@@ -253,20 +252,20 @@ struct push_back_tester {
             vector_type v;
             // Move-pushback.
             v.push_back(boost::lexical_cast<T>(1));
-            BOOST_CHECK_EQUAL(v.size(), 1u);
-            BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(1));
+            CHECK(v.size() == 1u);
+            CHECK(v[0] == boost::lexical_cast<T>(1));
             // Copy-pushback.
             auto tmp = boost::lexical_cast<T>(1);
             v = vector_type();
             v.push_back(tmp);
-            BOOST_CHECK_EQUAL(v.size(), 1u);
-            BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(1));
+            CHECK(v.size() == 1u);
+            CHECK(v[0] == boost::lexical_cast<T>(1));
             // Check for throw.
             for (auto i = v.size(); i < U::value; ++i) {
                 v.push_back(tmp);
             }
-            BOOST_CHECK_THROW(v.push_back(tmp), std::bad_alloc);
-            BOOST_CHECK_THROW(v.push_back(std::move(tmp)), std::bad_alloc);
+            CHECK_THROWS_AS(v.push_back(tmp), std::bad_alloc);
+            CHECK_THROWS_AS(v.push_back(std::move(tmp)), std::bad_alloc);
         }
     };
     template <typename T>
@@ -276,7 +275,7 @@ struct push_back_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_push_back_test)
+TEST_CASE("static_vector_push_back_test")
 {
     boost::mpl::for_each<value_types>(push_back_tester());
 }
@@ -290,13 +289,13 @@ struct emplace_back_tester {
             typedef static_vector<T, U::value> vector_type;
             vector_type v;
             v.emplace_back(boost::lexical_cast<T>(1));
-            BOOST_CHECK_EQUAL(v.size(), 1u);
-            BOOST_CHECK_EQUAL(v[0], boost::lexical_cast<T>(1));
+            CHECK(v.size() == 1u);
+            CHECK(v[0] == boost::lexical_cast<T>(1));
             // Check for throw.
             for (auto i = v.size(); i < U::value; ++i) {
                 v.emplace_back(boost::lexical_cast<T>(1));
             }
-            BOOST_CHECK_THROW(v.emplace_back(boost::lexical_cast<T>(1)), std::bad_alloc);
+            CHECK_THROWS_AS(v.emplace_back(boost::lexical_cast<T>(1)), std::bad_alloc);
         }
     };
     template <typename T>
@@ -306,7 +305,7 @@ struct emplace_back_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_emplace_back_test)
+TEST_CASE("static_vector_emplace_back_test")
 {
     boost::mpl::for_each<value_types>(emplace_back_tester());
 }
@@ -348,14 +347,14 @@ struct resize_tester {
             typedef static_vector<T, U::value> vector_type;
             vector_type v;
             v.resize(1u);
-            BOOST_CHECK_THROW(v.resize(U::value + 1u), std::bad_alloc);
-            BOOST_CHECK_EQUAL(v.size(), 1u);
-            BOOST_CHECK_EQUAL(v[0], T());
+            CHECK_THROWS_AS(v.resize(U::value + 1u), std::bad_alloc);
+            CHECK(v.size() == 1u);
+            CHECK(v[0] == T());
             v.resize(1u);
-            BOOST_CHECK_EQUAL(v.size(), 1u);
-            BOOST_CHECK_EQUAL(v[0], T());
+            CHECK(v.size() == 1u);
+            CHECK(v[0] == T());
             v.resize(0u);
-            BOOST_CHECK_EQUAL(v.size(), 0u);
+            CHECK(v.size() == 0u);
             if (U::value < 3u) {
                 return;
             }
@@ -364,11 +363,11 @@ struct resize_tester {
             vector_type2 v2;
             v2.resize(1);
             v2.resize(2);
-            BOOST_CHECK_THROW(v2.resize(3), std::runtime_error);
-            BOOST_CHECK_EQUAL(v2.size(), 2u);
+            CHECK_THROWS_AS(v2.resize(3), std::runtime_error);
+            CHECK(v2.size() == 2u);
             time_bomb::s_counter = 0u;
-            BOOST_CHECK(v2[0] == time_bomb());
-            BOOST_CHECK(v2[1] == time_bomb());
+            CHECK(v2[0] == time_bomb());
+            CHECK(v2[1] == time_bomb());
         }
     };
     template <typename T>
@@ -378,7 +377,7 @@ struct resize_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_resize_test)
+TEST_CASE("static_vector_resize_test")
 {
     boost::mpl::for_each<value_types>(resize_tester());
 }
@@ -393,14 +392,14 @@ struct stream_tester {
             vector_type v;
             std::ostringstream oss1;
             oss1 << v;
-            BOOST_CHECK(!oss1.str().empty());
+            CHECK(!oss1.str().empty());
             v.push_back(boost::lexical_cast<T>(1));
             if (U::value > 1u) {
                 v.push_back(boost::lexical_cast<T>(1));
             }
             std::ostringstream oss2;
             oss2 << v;
-            BOOST_CHECK(!oss2.str().empty());
+            CHECK(!oss2.str().empty());
         }
     };
     template <typename T>
@@ -410,7 +409,7 @@ struct stream_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_stream_test)
+TEST_CASE("static_vector_stream_test")
 {
     boost::mpl::for_each<value_types>(stream_tester());
 }
@@ -422,10 +421,10 @@ struct type_traits_tester {
         void operator()(const U &)
         {
             typedef static_vector<T, U::value> vector_type;
-            BOOST_CHECK(is_container_element<vector_type>::value);
-            BOOST_CHECK(is_ostreamable<vector_type>::value);
-            BOOST_CHECK(is_equality_comparable<const vector_type &>::value);
-            BOOST_CHECK(!is_addable<vector_type>::value);
+            CHECK(is_container_element<vector_type>::value);
+            CHECK(is_ostreamable<vector_type>::value);
+            CHECK(is_equality_comparable<const vector_type &>::value);
+            CHECK(!is_addable<vector_type>::value);
         }
     };
     template <typename T>
@@ -435,7 +434,7 @@ struct type_traits_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_type_traits_test)
+TEST_CASE("static_vector_type_traits_test")
 {
     boost::mpl::for_each<value_types>(type_traits_tester());
 }
@@ -448,9 +447,9 @@ struct hash_tester {
         {
             typedef static_vector<T, U::value> vector_type;
             vector_type v1;
-            BOOST_CHECK(v1.hash() == 0u);
+            CHECK(v1.hash() == 0u);
             v1.push_back(T());
-            BOOST_CHECK(v1.hash() == std::hash<T>()(T()));
+            CHECK(v1.hash() == std::hash<T>()(T()));
         }
     };
     template <typename T>
@@ -460,7 +459,7 @@ struct hash_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_hash_test)
+TEST_CASE("static_vector_hash_test")
 {
     boost::mpl::for_each<value_types>(hash_tester());
 }
@@ -476,30 +475,30 @@ struct move_tester {
             vector_type v1;
             v1.push_back(T());
             vector_type v2(std::move(v1));
-            BOOST_CHECK_EQUAL(T(), v2[0u]);
-            BOOST_CHECK_EQUAL(v1.size(), 0u);
-            BOOST_CHECK(v1.begin() == v1.end());
+            CHECK(T() == v2[0u]);
+            CHECK(v1.size() == 0u);
+            CHECK(v1.begin() == v1.end());
             v1 = std::move(v2);
-            BOOST_CHECK_EQUAL(T(), v1[0u]);
-            BOOST_CHECK_EQUAL(v2.size(), 0u);
-            BOOST_CHECK(v2.begin() == v2.end());
+            CHECK(T() == v1[0u]);
+            CHECK(v2.size() == 0u);
+            CHECK(v2.begin() == v2.end());
             if (U::value > 1u) {
                 v1.push_back(boost::lexical_cast<T>("2"));
                 v1.push_back(boost::lexical_cast<T>("3"));
                 vector_type v3(std::move(v1));
-                BOOST_CHECK_EQUAL(v3.size(), 3u);
-                BOOST_CHECK_EQUAL(v3[0u], T());
-                BOOST_CHECK_EQUAL(v3[1u], boost::lexical_cast<T>("2"));
-                BOOST_CHECK_EQUAL(v3[2u], boost::lexical_cast<T>("3"));
-                BOOST_CHECK_EQUAL(v1.size(), 0u);
-                BOOST_CHECK(v1.begin() == v1.end());
+                CHECK(v3.size() == 3u);
+                CHECK(v3[0u] == T());
+                CHECK(v3[1u] == boost::lexical_cast<T>("2"));
+                CHECK(v3[2u] == boost::lexical_cast<T>("3"));
+                CHECK(v1.size() == 0u);
+                CHECK(v1.begin() == v1.end());
                 v1 = std::move(v3);
-                BOOST_CHECK_EQUAL(v1.size(), 3u);
-                BOOST_CHECK_EQUAL(v1[0u], T());
-                BOOST_CHECK_EQUAL(v1[1u], boost::lexical_cast<T>("2"));
-                BOOST_CHECK_EQUAL(v1[2u], boost::lexical_cast<T>("3"));
-                BOOST_CHECK_EQUAL(v3.size(), 0u);
-                BOOST_CHECK(v3.begin() == v3.end());
+                CHECK(v1.size() == 3u);
+                CHECK(v1[0u] == T());
+                CHECK(v1[1u] == boost::lexical_cast<T>("2"));
+                CHECK(v1[2u] == boost::lexical_cast<T>("3"));
+                CHECK(v3.size() == 0u);
+                CHECK(v3.begin() == v3.end());
             }
         }
     };
@@ -510,7 +509,7 @@ struct move_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_move_semantics_test)
+TEST_CASE("static_vector_move_semantics_test")
 {
     boost::mpl::for_each<value_types>(move_tester());
 }
@@ -523,11 +522,11 @@ struct empty_tester {
         {
             typedef static_vector<T, U::value> vector_type;
             vector_type v1;
-            BOOST_CHECK(v1.empty());
+            CHECK(v1.empty());
             v1.push_back(T());
-            BOOST_CHECK(!v1.empty());
+            CHECK(!v1.empty());
             v1.resize(0u);
-            BOOST_CHECK(v1.empty());
+            CHECK(v1.empty());
         }
     };
     template <typename T>
@@ -537,7 +536,7 @@ struct empty_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_empty_test)
+TEST_CASE("static_vector_empty_test")
 {
     boost::mpl::for_each<value_types>(empty_tester());
 }
@@ -555,48 +554,48 @@ struct erase_tester {
             vector_type v1;
             v1.push_back(boost::lexical_cast<T>(1));
             auto it = v1.erase(v1.begin());
-            BOOST_CHECK(v1.empty());
-            BOOST_CHECK(it == v1.end());
+            CHECK(v1.empty());
+            CHECK(it == v1.end());
             v1.push_back(boost::lexical_cast<T>(1));
             v1.push_back(boost::lexical_cast<T>(2));
             it = v1.erase(v1.begin());
-            BOOST_CHECK_EQUAL(v1.size(), 1u);
-            BOOST_CHECK(it == v1.begin());
-            BOOST_CHECK_EQUAL(v1[0u], boost::lexical_cast<T>(2));
+            CHECK(v1.size() == 1u);
+            CHECK(it == v1.begin());
+            CHECK(v1[0u] == boost::lexical_cast<T>(2));
             it = v1.erase(v1.begin());
-            BOOST_CHECK(v1.empty());
-            BOOST_CHECK(it == v1.end());
+            CHECK(v1.empty());
+            CHECK(it == v1.end());
             v1.push_back(boost::lexical_cast<T>(1));
             v1.push_back(boost::lexical_cast<T>(2));
             it = v1.erase(v1.begin() + 1);
-            BOOST_CHECK_EQUAL(v1.size(), 1u);
-            BOOST_CHECK(it == v1.end());
-            BOOST_CHECK_EQUAL(v1[0u], boost::lexical_cast<T>(1));
+            CHECK(v1.size() == 1u);
+            CHECK(it == v1.end());
+            CHECK(v1[0u] == boost::lexical_cast<T>(1));
             it = v1.erase(v1.begin());
-            BOOST_CHECK(v1.empty());
-            BOOST_CHECK(it == v1.end());
+            CHECK(v1.empty());
+            CHECK(it == v1.end());
             v1.push_back(boost::lexical_cast<T>(1));
             v1.push_back(boost::lexical_cast<T>(2));
             v1.push_back(boost::lexical_cast<T>(3));
             v1.push_back(boost::lexical_cast<T>(4));
             it = v1.erase(v1.begin());
-            BOOST_CHECK_EQUAL(v1.size(), 3u);
-            BOOST_CHECK(it == v1.begin());
-            BOOST_CHECK_EQUAL(v1[0u], boost::lexical_cast<T>(2));
-            BOOST_CHECK_EQUAL(v1[1u], boost::lexical_cast<T>(3));
-            BOOST_CHECK_EQUAL(v1[2u], boost::lexical_cast<T>(4));
+            CHECK(v1.size() == 3u);
+            CHECK(it == v1.begin());
+            CHECK(v1[0u] == boost::lexical_cast<T>(2));
+            CHECK(v1[1u] == boost::lexical_cast<T>(3));
+            CHECK(v1[2u] == boost::lexical_cast<T>(4));
             it = v1.erase(v1.begin() + 1);
-            BOOST_CHECK_EQUAL(v1.size(), 2u);
-            BOOST_CHECK(it == v1.begin() + 1);
-            BOOST_CHECK_EQUAL(v1[0u], boost::lexical_cast<T>(2));
-            BOOST_CHECK_EQUAL(v1[1u], boost::lexical_cast<T>(4));
+            CHECK(v1.size() == 2u);
+            CHECK(it == v1.begin() + 1);
+            CHECK(v1[0u] == boost::lexical_cast<T>(2));
+            CHECK(v1[1u] == boost::lexical_cast<T>(4));
             it = v1.erase(v1.begin());
-            BOOST_CHECK_EQUAL(v1.size(), 1u);
-            BOOST_CHECK(it == v1.begin());
-            BOOST_CHECK_EQUAL(v1[0u], boost::lexical_cast<T>(4));
+            CHECK(v1.size() == 1u);
+            CHECK(it == v1.begin());
+            CHECK(v1[0u] == boost::lexical_cast<T>(4));
             it = v1.erase(v1.begin());
-            BOOST_CHECK_EQUAL(v1.size(), 0u);
-            BOOST_CHECK(it == v1.end());
+            CHECK(v1.size() == 0u);
+            CHECK(it == v1.end());
         }
     };
     template <typename T>
@@ -606,7 +605,7 @@ struct erase_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_erase_test)
+TEST_CASE("static_vector_erase_test")
 {
     boost::mpl::for_each<value_types>(erase_tester());
 }
@@ -624,12 +623,12 @@ struct clear_tester {
             vector_type v1;
             v1.push_back(boost::lexical_cast<T>(1));
             v1.clear();
-            BOOST_CHECK(v1.empty());
+            CHECK(v1.empty());
             v1.push_back(boost::lexical_cast<T>(1));
             v1.push_back(boost::lexical_cast<T>(2));
-            BOOST_CHECK_EQUAL(v1.size(), 2u);
+            CHECK(v1.size() == 2u);
             v1.clear();
-            BOOST_CHECK(v1.empty());
+            CHECK(v1.empty());
         }
     };
     template <typename T>
@@ -639,7 +638,7 @@ struct clear_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(static_vector_clear_test)
+TEST_CASE("static_vector_clear_test")
 {
     boost::mpl::for_each<value_types>(clear_tester());
 }

@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/exceptions.hpp>
 
-#define BOOST_TEST_MODULE exceptions_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <new>
 #include <stdexcept>
@@ -39,6 +37,9 @@ see https://www.gnu.org/licenses/. */
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <piranha/config.hpp>
+
+#include "catch.hpp"
+#include "exception_matcher.hpp"
 
 using namespace piranha;
 
@@ -62,38 +63,38 @@ inline void foo<0>()
     piranha_throw(std::runtime_error, "here we are!");
 }
 
-BOOST_AUTO_TEST_CASE(exception_test_00)
+TEST_CASE("exception_test_00")
 {
     // not_implemented_error.
-    BOOST_CHECK((std::is_constructible<not_implemented_error, std::string>::value));
-    BOOST_CHECK((std::is_constructible<not_implemented_error, char *>::value));
-    BOOST_CHECK((std::is_constructible<not_implemented_error, const char *>::value));
-    BOOST_CHECK((!std::is_constructible<not_implemented_error>::value));
-    BOOST_CHECK_EXCEPTION(piranha_throw(not_implemented_error, "foobar"), not_implemented_error,
-                          [](const not_implemented_error &e) { return boost::contains(e.what(), "foobar"); });
-    BOOST_CHECK_EXCEPTION(piranha_throw(not_implemented_error, std::string("foobar")), not_implemented_error,
-                          [](const not_implemented_error &e) { return boost::contains(e.what(), "foobar"); });
-    BOOST_CHECK_EXCEPTION(piranha_throw(not_implemented_error, "foobar"), std::runtime_error,
-                          [](const std::runtime_error &e) { return boost::contains(e.what(), "foobar"); });
-    BOOST_CHECK_EXCEPTION(piranha_throw(not_implemented_error, std::string("foobar")), std::runtime_error,
-                          [](const std::runtime_error &e) { return boost::contains(e.what(), "foobar"); });
+    CHECK((std::is_constructible<not_implemented_error, std::string>::value));
+    CHECK((std::is_constructible<not_implemented_error, char *>::value));
+    CHECK((std::is_constructible<not_implemented_error, const char *>::value));
+    CHECK((!std::is_constructible<not_implemented_error>::value));
+    CHECK_THROWS_MATCHES(piranha_throw(not_implemented_error, "foobar"), not_implemented_error,
+                          test::ExceptionMatcher<not_implemented_error>(std::string("foobar")));
+    CHECK_THROWS_MATCHES(piranha_throw(not_implemented_error, std::string("foobar")), not_implemented_error,
+                          test::ExceptionMatcher<not_implemented_error>(std::string("foobar")));
+    CHECK_THROWS_MATCHES(piranha_throw(not_implemented_error, "foobar"), std::runtime_error,
+                          test::ExceptionMatcher<std::runtime_error>(std::string("foobar")));
+    CHECK_THROWS_MATCHES(piranha_throw(not_implemented_error, std::string("foobar")), std::runtime_error,
+                          test::ExceptionMatcher<std::runtime_error>(std::string("foobar")));
     // A couple of tests with exceptions that do not accept string ctor.
-    BOOST_CHECK_THROW(piranha_throw(std::bad_alloc, ), std::bad_alloc);
-    BOOST_CHECK_THROW(piranha_throw(exc0, 1, 2.3), exc0);
-    BOOST_CHECK_THROW(piranha_throw(exc1, 1), exc1);
+    CHECK_THROWS_AS(piranha_throw(std::bad_alloc, ), std::bad_alloc);
+    CHECK_THROWS_AS(piranha_throw(exc0, 1, 2.3), exc0);
+    CHECK_THROWS_AS(piranha_throw(exc1, 1), exc1);
 #if defined(PIRANHA_WITH_BOOST_STACKTRACE)
-    BOOST_CHECK(!stacktrace_statics<>::enabled.load());
+    CHECK(!stacktrace_statics<>::enabled.load());
     stacktrace_statics<>::enabled.store(true);
-    BOOST_CHECK_THROW(piranha_throw(exc1, 1), exc1);
+    CHECK_THROWS_AS(piranha_throw(exc1, 1), exc1);
     bool caught = false;
     try {
         foo<100>();
     } catch (const std::runtime_error &re) {
         std::cout << re.what() << '\n';
-        BOOST_CHECK(boost::contains(re.what(), "here we are!"));
+        CHECK(boost::contains(re.what(), "here we are!"));
         caught = true;
     }
-    BOOST_CHECK(caught);
+    CHECK(caught);
 #endif
 }
 
@@ -115,7 +116,7 @@ inline void signal_handler(int)
 }
 }
 
-BOOST_AUTO_TEST_CASE(assert_test_00)
+TEST_CASE("assert_test_00")
 {
     // Here are going to trigger an assertion failure to verify
     // visually that the stacktrace is actually printed. We need to
