@@ -347,6 +347,7 @@ TEST_CASE("subs_series_serialization_test")
     {
         boost::archive::text_oarchive oa(ss);
         oa << z;
+        
     }
     {
         boost::archive::text_iarchive ia(ss);

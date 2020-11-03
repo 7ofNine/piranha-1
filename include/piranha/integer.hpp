@@ -599,7 +599,7 @@ using integer_msgpack_pack_enabler
 
 template <typename T>
 using integer_msgpack_convert_enabler
-    = enable_if_t<conjunction<mppp::is_integer<T>, has_msgpack_convert<std::string>>::value>;
+    = enable_if_t<conjunction<mppp::detail::is_integer<T>, has_msgpack_convert<std::string>>::value>;
 }
 
 /// Specialisation of piranha::msgpack_pack() for mp++'s integers.
@@ -646,7 +646,7 @@ struct msgpack_pack_impl<Stream, mppp::integer<SSize>, integer_msgpack_pack_enab
             // Maybe we should consider providing an API from mp++ to interact directly with strings
             // rather than vectors of chars.
             PIRANHA_MAYBE_TLS std::vector<char> tmp_v;
-            mppp::mpz_to_str(tmp_v, n.get_mpz_view());
+            mppp::detail::mpz_to_str(tmp_v, n.get_mpz_view());
             PIRANHA_MAYBE_TLS std::string tmp_s;
             tmp_s.assign(tmp_v.data());
             piranha::msgpack_pack(p, tmp_s, f);

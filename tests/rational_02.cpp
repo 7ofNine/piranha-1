@@ -143,7 +143,7 @@ struct boost_s11n_tester {
             binary_iarchive ia(ss);
             CHECK_THROWS_MATCHES(
                 boost_load(ia, q0), mppp::zero_division_error,
-                test::ExceptionMatcher<mpp::zero_division_error>(std::string("a zero denominator was encountered during the deserialisation of a rational"))
+                test::ExceptionMatcher<mppp::zero_division_error>(std::string("a zero denominator was encountered during the deserialisation of a rational"))
                 );
         }
         CHECK(q0 == 0);
@@ -231,7 +231,7 @@ struct msgpack_s11n_tester {
             q_type q{42};
             CHECK_THROWS_MATCHES(
                 msgpack_convert(q, oh.get(), msgpack_format::portable), mppp::zero_division_error,
-                test::ExceptionMatcher<mpp::zero_division_error>(std::string("a zero denominator was encountered during the deserialisation of a rational"))
+                test::ExceptionMatcher<mppp::zero_division_error>(std::string("a zero denominator was encountered during the deserialisation of a rational"))
             );
             CHECK(q == 0);
         }

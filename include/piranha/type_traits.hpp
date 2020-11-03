@@ -40,7 +40,7 @@ see https://www.gnu.org/licenses/. */
 #include <tuple>
 #include <type_traits>
 #include <utility>
-
+#include <string>
 #include "mp++/concepts.hpp"
 #include "mp++/detail/type_traits.hpp"
 

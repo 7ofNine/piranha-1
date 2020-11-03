@@ -105,7 +105,7 @@ TEST_CASE("polynomial_boost_s11n_test")
         p_type retval;
         boost::archive::binary_iarchive ia(ss);
         boost_load(ia, retval);
-        CHECK(tmp, retval);
+        CHECK(tmp == retval);
     }
     ss.str("");
     ss.clear();
@@ -119,7 +119,7 @@ TEST_CASE("polynomial_boost_s11n_test")
         pp_type retval;
         boost::archive::binary_iarchive ia(ss);
         boost_load(ia, retval);
-        CHECK(ttmp, retval);
+        CHECK(ttmp == retval);
     }
 }
 

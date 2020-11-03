@@ -311,7 +311,7 @@ TEST_CASE("real_msgpack_s11n_test")
                                                   "of serialized limbs (")
                                           + std::to_string(std::uint32_t(s_from_prec + 1))
                                           + ") is not consistent with the number of limbs inferred from the precision ("
-                                          + std::to_string(s_from_prec) + ")");
+                                          + std::to_string(s_from_prec) + ")"))
         );
         CHECK(retval == 0);
     }

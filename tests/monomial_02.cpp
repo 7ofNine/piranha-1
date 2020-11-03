@@ -51,6 +51,7 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/type_traits.hpp>
 
 #include "catch.hpp"
+#include "exception_matcher.hpp"
 
 using namespace piranha;
 
@@ -165,13 +166,12 @@ struct boost_s11n_tester {
             std::stringstream ss;
             {
                 boost::archive::text_oarchive oa(ss);
-                CHECK_EXCEPTION(
-                    boost_save(oa, w_type{m, s}), std::invalid_argument, [](const std::invalid_argument &ia) {
-                        return boost::contains(
-                            ia.what(),
-                            "incompatible symbol set in monomial serialization: the reference "
-                            "symbol set has a size of 1, while the monomial being serialized has a size of 0");
-                    });
+                CHECK_THROWS_MATCHES(
+                    boost_save(oa, w_type{m, s}), std::invalid_argument,
+                    test::ExceptionMatcher<std::invalid_argument>(std::string(
+                        "incompatible symbol set in monomial serialization: the reference "
+                        "symbol set has a size of 1, while the monomial being serialized has a size of 0"))
+               );
             }
             ss.str("");
             ss.clear();
@@ -184,12 +184,11 @@ struct boost_s11n_tester {
                 boost::archive::text_iarchive ia(ss);
                 symbol_fset s2;
                 w_type w{m, s2};
-                CHECK_EXCEPTION(boost_load(ia, w), std::invalid_argument, [](const std::invalid_argument &iae) {
-                    return boost::contains(
-                        iae.what(),
+                CHECK_THROWS_MATCHES(boost_load(ia, w), std::invalid_argument,
+                    test::ExceptionMatcher<std::invalid_argument>(std::string(
                         "incompatible symbol set in monomial serialization: the reference "
-                        "symbol set has a size of 0, while the monomial being deserialized has a size of 1");
-                });
+                        "symbol set has a size of 0, while the monomial being deserialized has a size of 1"))
+                );
             }
             // A few simple tests.
             m = monomial_type{};
@@ -379,23 +378,20 @@ struct msgpack_tester {
                 // Test exceptions.
                 sbuffer sbuf;
                 packer<sbuffer> p(sbuf);
-                CHECK_EXCEPTION(
-                    m.msgpack_pack(p, f, symbol_fset{}), std::invalid_argument, [](const std::invalid_argument &ia) {
-                        return boost::contains(
-                            ia.what(),
+                CHECK_THROWS_MATCHES(
+                    m.msgpack_pack(p, f, symbol_fset{}), std::invalid_argument,
+                    test::ExceptionMatcher<std::invalid_argument>(std::string(
                             "incompatible symbol set in monomial serialization: the reference "
-                            "symbol set has a size of 0, while the monomial being serialized has a size of 2");
-                    });
+                            "symbol set has a size of 0, while the monomial being serialized has a size of 2"))
+                );
                 m.msgpack_pack(p, f, s);
                 auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
-                CHECK_EXCEPTION(
+                CHECK_THROWS_MATCHES(
                     m.msgpack_convert(oh.get(), f, symbol_fset{}), std::invalid_argument,
-                    [](const std::invalid_argument &ia) {
-                        return boost::contains(
-                            ia.what(),
+                    test::ExceptionMatcher<std::invalid_argument>(std::string(
                             "incompatible symbol set in monomial serialization: the reference "
-                            "symbol set has a size of 0, while the monomial being deserialized has a size of 2");
-                    });
+                            "symbol set has a size of 0, while the monomial being deserialized has a size of 2"))
+                );
             }
             // Random checks.
             random_test<U>();

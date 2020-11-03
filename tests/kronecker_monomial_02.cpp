@@ -52,6 +52,7 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/type_traits.hpp>
 
 #include "catch.hpp"
+#include "exception_matcher.hpp"
 
 using namespace piranha;
 

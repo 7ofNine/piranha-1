@@ -44,7 +44,7 @@ TEST_CASE("divisor_series_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
-BOOST_AUTO_TEST_CASE(divisor_series_boost_s11n_test)
+TEST_CASE("divisor_series_boost_s11n_test")
 {
     using p_type = divisor_series<polynomial<rational, monomial<char>>, divisor<short>>;
     CHECK((has_boost_save<boost::archive::binary_oarchive, p_type>::value));
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(divisor_series_boost_s11n_test)
 
 #if defined(PIRANHA_WITH_MSGPACK)
 
-BOOST_AUTO_TEST_CASE(divisor_series_msgpack_s11n_test)
+TEST_CASE("divisor_series_msgpack_s11n_test")
 {
     using p_type = divisor_series<polynomial<rational, monomial<char>>, divisor<short>>;
     CHECK((has_msgpack_pack<msgpack::sbuffer, p_type>::value));

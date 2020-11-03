@@ -45,6 +45,7 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/type_traits.hpp>
 
 #include "catch.hpp"
+#include "exception_matcher.hpp"
 
 #if defined(PIRANHA_WITH_BOOST_S11N) || defined(PIRANHA_WITH_MSGPACK)
 static const int ntries = 1000;
@@ -195,13 +196,11 @@ struct msgpack_s11n_tester {
             msgpack_pack(p, T(42), msgpack_format::binary);
             h_type h;
             auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
-            CHECK_EXCEPTION(
+            CHECK_THROWS_MATCHES(
                 msgpack_convert(h, oh.get(), msgpack_format::binary), std::invalid_argument,
-                [](const std::invalid_argument &iae) {
-                    return boost::contains(
-                        iae.what(),
-                        "while deserializing a hash_set from a msgpack object a duplicate value was encountered");
-                });
+                test::ExceptionMatcher<std::invalid_argument>(std::string(
+                        "while deserializing a hash_set from a msgpack object a duplicate value was encountered"))
+            );
         }
     }
 };
