@@ -29,6 +29,10 @@
 
 from __future__ import absolute_import as _ai
 
+import os;
+os.add_dll_directory("C:\\Python38\Lib\site-packages\pyranha") # needed since 3.8 to be able to load dependency dll's
+                                                               # temporary only. This should be properly configured  
+
 from ._version import __version__
 
 #: List of Pyranha submodules.
