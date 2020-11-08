@@ -41,6 +41,7 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
 
+#include "expose_utils.hpp"
 #include "type_system.hpp"
 
 namespace pyranha
