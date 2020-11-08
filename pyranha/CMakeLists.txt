@@ -114,7 +114,7 @@ target_compile_options(_core PRIVATE "$<$<CONFIG:DEBUG>:${PIRANHA_CXX_FLAGS_DEBU
 #target_link_libraries(_core PRIVATE piranha ${PYRANHA_BP_TARGET})
 target_link_libraries(_core PRIVATE piranha)
 target_link_libraries(_core  PRIVATE ${Boost_PYTHON3_LIBRARY_RELEASE})
-MESSAGE(STATUS "python library: ${Boost_PYTHON3_LIBRARY_RELEASE}")
+MESSAGE(STATUS "boost python library: ${Boost_PYTHON3_LIBRARY_RELEASE}")
 # NOTE: for clang-cl, cmake tries to set -std=c++11 here, which makes
 # it error out. Disable it as MSVC 2015 is implicitly C++14 anyway.
 if(NOT (YACMA_COMPILER_IS_MSVC AND YACMA_COMPILER_IS_CLANGXX))
