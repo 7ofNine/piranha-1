@@ -27,6 +27,7 @@ SET(PYRANHA_PYTHON
     celmec.py
     math.py
     test.py
+    test.py.in
     types.py
     )
 YACMA_PYTHON_MODULE(_core
@@ -84,6 +85,8 @@ YACMA_PYTHON_MODULE(_core
 
 SOURCE_GROUP(TREE ${CMAKE_SOURCE_DIR}/pyranha PREFIX "Header Files" FILES ${PYRANHA_HEADERS})
 SOURCE_GROUP(TREE ${CMAKE_SOURCE_DIR}/pyranha PREFIX "Python" FILES ${PYRANHA_PYTHON})
+MESSAGE (STATUS "CONFIGURE test.py.in")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/test.py.in" "${CMAKE_CURRENT_SOURCE_DIR}/test.py" @ONLY)
 
  # Setup the installation path.
 set(PYRANHA_INSTALL_PATH "${YACMA_PYTHON_MODULES_INSTALL_PATH}/pyranha")  # is that a good idea to directly install into python sitelibs???
