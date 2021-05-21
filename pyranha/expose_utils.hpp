@@ -65,6 +65,7 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/math/cos.hpp>
 #include <piranha/math/pow.hpp>
 #include <piranha/math/sin.hpp>
+#include "piranha/math/degree.hpp"
 #include <piranha/power_series.hpp>
 #include <piranha/rational.hpp>
 #include <piranha/s11n.hpp>
@@ -75,6 +76,42 @@ see https://www.gnu.org/licenses/. */
 
 #include "type_system.hpp"
 #include "utils.hpp"
+
+
+
+
+// This is taken from an old type_traits.h
+// temporarily to identify how to re-implement all the pyranha . Just makr it work for tests.
+//
+/// Macro to test if class has type definition.
+/**
+ * This macro will declare a struct template parametrized over one type \p T and called <tt>has_typedef_type_name</tt>,
+ * whose static const bool member \p value will be \p true if \p T contains a \p typedef called \p type_name, \p false
+ * otherwise.
+ *
+ * For instance:
+ * @code
+ * PIRANHA_DECLARE_HAS_TYPEDEF(foo_type);
+ * struct foo
+ * {
+ * 	typedef int foo_type;
+ * };
+ * struct bar {};
+ * @endcode
+ * \p has_typedef_foo_type<foo>::value will be true and \p has_typedef_foo_type<bar>::value will be false.
+ */
+#define PIRANHA_DECLARE_HAS_TYPEDEF(type_name)                                                                         \
+    template <typename PIRANHA_DECLARE_HAS_TYPEDEF_ARGUMENT>                                                           \
+    class has_typedef_##type_name                                                                                      \
+    {                                                                                                                  \
+        using Td_ = piranha::uncvref_t<PIRANHA_DECLARE_HAS_TYPEDEF_ARGUMENT>;                                          \
+        template <typename U>                                                                                          \
+        using type_t = typename U::type_name;                                                                          \
+                                                                                                                       \
+    public:                                                                                                            \
+        static const bool value = piranha::is_detected<type_t, Td_>::value;                                            \
+    }
+
 
 namespace pyranha
 {
@@ -359,31 +396,31 @@ inline auto generic_pbracket_wrapper(const S &s1, const S &s2, bp::list p_list, 
 
 // Generic degree wrappers.
 template <typename S>
-inline auto generic_degree_wrapper(const S &s) -> decltype(piranha::math::degree(s))
+inline auto generic_degree_wrapper(const S &s) -> decltype(piranha::degree(s))
 {
-    return piranha::math::degree(s);
+    return piranha::degree(s);
 }
 
 template <typename S>
 inline auto generic_partial_degree_wrapper(const S &s, bp::list l)
-    -> decltype(piranha::math::degree(s, piranha::symbol_fset{}))
+    -> decltype(piranha::degree(s, piranha::symbol_fset{}))
 {
     bp::stl_input_iterator<std::string> begin(l), end;
-    return piranha::math::degree(s, piranha::symbol_fset(begin, end));
+    return piranha::degree(s, piranha::symbol_fset(begin, end));
 }
 
 template <typename S>
-inline auto generic_ldegree_wrapper(const S &s) -> decltype(piranha::math::ldegree(s))
+inline auto generic_ldegree_wrapper(const S &s) -> decltype(piranha::ldegree(s))
 {
-    return piranha::math::ldegree(s);
+    return piranha::ldegree(s);
 }
 
 template <typename S>
 inline auto generic_partial_ldegree_wrapper(const S &s, bp::list l)
-    -> decltype(piranha::math::ldegree(s, piranha::symbol_fset{}))
+    -> decltype(piranha::ldegree(s, piranha::symbol_fset{}))
 {
     bp::stl_input_iterator<std::string> begin(l), end;
-    return piranha::math::ldegree(s, piranha::symbol_fset(begin, end));
+    return piranha::ldegree(s, piranha::symbol_fset(begin, end));
 }
 
 // Generic latex representation wrapper.
@@ -938,7 +975,7 @@ class series_exposer
     template <typename T>
     static void expose_degree(
         bp::class_<T> &,
-        typename std::enable_if<piranha::has_degree<T>::value && piranha::has_ldegree<T>::value>::type * = nullptr)
+        typename std::enable_if<piranha::is_degree_type<T>::value && piranha::is_ldegree_type<T>::value>::type * = nullptr)
     {
         bp::def("_degree", generic_degree_wrapper<T>);
         bp::def("_degree", generic_partial_degree_wrapper<T>);
@@ -948,7 +985,7 @@ class series_exposer
     template <typename T>
     static void expose_degree(
         bp::class_<T> &,
-        typename std::enable_if<!piranha::has_degree<T>::value || !piranha::has_ldegree<T>::value>::type * = nullptr)
+        typename std::enable_if<!piranha::is_degree_type<T>::value || !piranha::is_ldegree_type<T>::value>::type * = nullptr)
     {
     }
     // Truncation.
@@ -1220,5 +1257,7 @@ inline bp::list get_exposed_types_list()
     return retval;
 }
 }
+
+
 
 #endif

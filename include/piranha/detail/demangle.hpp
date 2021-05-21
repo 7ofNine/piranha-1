@@ -29,7 +29,7 @@ see https://www.gnu.org/licenses/. */
 #ifndef PIRANHA_DETAIL_DEMANGLE_HPP
 #define PIRANHA_DETAIL_DEMANGLE_HPP
 
-#include <mp++/detail/demangle.hpp>
+#include <mp++/type_name.hpp>
 
 namespace piranha
 {
@@ -38,7 +38,7 @@ inline namespace impl
 {
 
 // Just use mp++'s demangle.
-using mppp::demangle;
+using mppp::type_name;             //TODO:: restructure no using in includes
 }
 }
 

@@ -62,7 +62,7 @@ using is_safely_castable
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename From, typename To>
-concept bool SafelyCastable = is_safely_castable<From, To>::value;
+concept SafelyCastable = is_safely_castable<From, To>::value;
 
 #endif
 
@@ -77,8 +77,8 @@ inline To safe_cast(From &&x)
     if (likely(piranha::safe_convert(retval, std::forward<From>(x)))) {
         return retval;
     }
-    piranha_throw(safe_cast_failure, "the safe conversion of a value of type '" + demangle<decltype(x)>()
-                                         + "' to the type '" + demangle<To>() + "' failed");
+    piranha_throw(safe_cast_failure, "the safe conversion of a value of type '" + type_name<decltype(x)>()
+                                         + "' to the type '" + type_name<To>() + "' failed");
 }
 
 // Input iterator whose ref type is safely castable to To.
@@ -93,7 +93,7 @@ using is_safely_castable_input_iterator = conjunction<is_input_iterator<T>, is_s
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename To>
-concept bool SafelyCastableInputIterator = is_safely_castable_input_iterator<T, To>::value;
+concept SafelyCastableInputIterator = is_safely_castable_input_iterator<T, To>::value;
 
 #endif
 
@@ -104,7 +104,7 @@ using is_safely_castable_forward_iterator = conjunction<is_forward_iterator<T>, 
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename To>
-concept bool SafelyCastableForwardIterator = is_safely_castable_forward_iterator<T, To>::value;
+concept SafelyCastableForwardIterator = is_safely_castable_forward_iterator<T, To>::value;
 
 #endif
 
@@ -116,7 +116,7 @@ using is_safely_castable_mutable_forward_iterator
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename To>
-concept bool SafelyCastableMutableForwardIterator = is_safely_castable_mutable_forward_iterator<T, To>::value;
+concept SafelyCastableMutableForwardIterator = is_safely_castable_mutable_forward_iterator<T, To>::value;
 
 #endif
 
@@ -131,7 +131,7 @@ using is_safely_castable_input_range
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename To>
-concept bool SafelyCastableInputRange = is_safely_castable_input_range<T, To>::value;
+concept SafelyCastableInputRange = is_safely_castable_input_range<T, To>::value;
 
 #endif
 
@@ -143,7 +143,7 @@ using is_safely_castable_forward_range
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename To>
-concept bool SafelyCastableForwardRange = is_safely_castable_forward_range<T, To>::value;
+concept SafelyCastableForwardRange = is_safely_castable_forward_range<T, To>::value;
 
 #endif
 
@@ -155,7 +155,7 @@ using is_safely_castable_mutable_forward_range
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename To>
-concept bool SafelyCastableMutableForwardRange = is_safely_castable_mutable_forward_range<T, To>::value;
+concept SafelyCastableMutableForwardRange = is_safely_castable_mutable_forward_range<T, To>::value;
 
 #endif
 } // namespace piranha

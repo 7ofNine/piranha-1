@@ -28,12 +28,12 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/math/degree.hpp>
 
-#define BOOST_TEST_MODULE degree_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <utility>
 
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -96,33 +96,33 @@ public:
 };
 }
 
-BOOST_AUTO_TEST_CASE(degree_test_00)
+TEST_CASE("degree_test_00")
 {
-    BOOST_CHECK(!is_degree_type<void>::value);
-    BOOST_CHECK(!is_degree_type<int>::value);
-    BOOST_CHECK(!is_degree_type<const int>::value);
-    BOOST_CHECK(!is_degree_type<const int &&>::value);
-    BOOST_CHECK(!is_degree_type<int &&>::value);
-    BOOST_CHECK(is_degree_type<foo>::value);
-    BOOST_CHECK(is_degree_type<foo &>::value);
-    BOOST_CHECK(is_degree_type<const foo>::value);
-    BOOST_CHECK(is_degree_type<const foo &>::value);
-    BOOST_CHECK(is_degree_type<foo &&>::value);
-    BOOST_CHECK_EQUAL(piranha::degree(foo{}), 0);
-    BOOST_CHECK_EQUAL(piranha::degree(foo{}, symbol_fset{}), 1);
-    BOOST_CHECK(!is_degree_type<bar>::value);
-    BOOST_CHECK(!is_degree_type<bar &>::value);
-    BOOST_CHECK(!is_degree_type<const bar>::value);
-    BOOST_CHECK(!is_degree_type<const bar &>::value);
-    BOOST_CHECK(!is_degree_type<bar &&>::value);
-    BOOST_CHECK(is_degree_type<mbar>::value);
-    BOOST_CHECK_EQUAL(piranha::degree(mbar{}), 0);
-    BOOST_CHECK_EQUAL(piranha::degree(mbar{}, symbol_fset{}), 1);
+    CHECK(!is_degree_type<void>::value);
+    CHECK(!is_degree_type<int>::value);
+    CHECK(!is_degree_type<const int>::value);
+    CHECK(!is_degree_type<const int &&>::value);
+    CHECK(!is_degree_type<int &&>::value);
+    CHECK(is_degree_type<foo>::value);
+    CHECK(is_degree_type<foo &>::value);
+    CHECK(is_degree_type<const foo>::value);
+    CHECK(is_degree_type<const foo &>::value);
+    CHECK(is_degree_type<foo &&>::value);
+    CHECK(piranha::degree(foo{}) == 0);
+    CHECK(piranha::degree(foo{}, symbol_fset{}) == 1);
+    CHECK(!is_degree_type<bar>::value);
+    CHECK(!is_degree_type<bar &>::value);
+    CHECK(!is_degree_type<const bar>::value);
+    CHECK(!is_degree_type<const bar &>::value);
+    CHECK(!is_degree_type<bar &&>::value);
+    CHECK(is_degree_type<mbar>::value);
+    CHECK(piranha::degree(mbar{}) == 0);
+    CHECK(piranha::degree(mbar{}, symbol_fset{}) == 1);
     mbar m1, m2;
-    BOOST_CHECK_EQUAL(m1.value, 0);
-    BOOST_CHECK_EQUAL(m2.value, 0);
+    CHECK(m1.value == 0);
+    CHECK(m2.value == 0);
     piranha::degree(std::move(m1));
     piranha::degree(std::move(m2), symbol_fset{});
-    BOOST_CHECK_EQUAL(m1.value, 1);
-    BOOST_CHECK_EQUAL(m2.value, 1);
+    CHECK(m1.value == 1);
+    CHECK(m2.value == 1);
 }

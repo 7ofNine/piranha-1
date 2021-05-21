@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/series.hpp>
 
-#define BOOST_TEST_MODULE series_07_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <limits>
 
 #include <mp++/config.hpp>
@@ -47,293 +44,295 @@ see https://www.gnu.org/licenses/. */
 #endif
 #include <piranha/type_traits.hpp>
 
+#include "catch.hpp"
+
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(series_zero_is_absorbing_test)
+TEST_CASE("series_zero_is_absorbing_test")
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+//    mppp::real_set_default_prec(100);// Is that used anywhere. is there a mppp::real in use????
 #endif
     {
         using pt1 = polynomial<double, monomial<int>>;
         using pt2 = polynomial<pt1, monomial<int>>;
         if (std::numeric_limits<double>::has_quiet_NaN || std::numeric_limits<double>::has_signaling_NaN) {
-            BOOST_CHECK((!zero_is_absorbing<pt1>::value));
-            BOOST_CHECK((!zero_is_absorbing<pt1 &>::value));
-            BOOST_CHECK((!zero_is_absorbing<const pt1 &>::value));
-            BOOST_CHECK((!zero_is_absorbing<const pt1>::value));
-            BOOST_CHECK((!zero_is_absorbing<pt1 &&>::value));
-            BOOST_CHECK((!zero_is_absorbing<pt2>::value));
-            BOOST_CHECK((!zero_is_absorbing<pt2 &>::value));
-            BOOST_CHECK((!zero_is_absorbing<const pt2 &>::value));
-            BOOST_CHECK((!zero_is_absorbing<const pt2>::value));
-            BOOST_CHECK((!zero_is_absorbing<pt2 &&>::value));
+            CHECK((!zero_is_absorbing<pt1>::value));
+            CHECK((!zero_is_absorbing<pt1 &>::value));
+            CHECK((!zero_is_absorbing<const pt1 &>::value));
+            CHECK((!zero_is_absorbing<const pt1>::value));
+            CHECK((!zero_is_absorbing<pt1 &&>::value));
+            CHECK((!zero_is_absorbing<pt2>::value));
+            CHECK((!zero_is_absorbing<pt2 &>::value));
+            CHECK((!zero_is_absorbing<const pt2 &>::value));
+            CHECK((!zero_is_absorbing<const pt2>::value));
+            CHECK((!zero_is_absorbing<pt2 &&>::value));
         }
     }
 #if defined(MPPP_WITH_MPFR)
     {
         using pt1 = polynomial<real, monomial<int>>;
         using pt2 = polynomial<pt1, monomial<int>>;
-        BOOST_CHECK((!zero_is_absorbing<pt1>::value));
-        BOOST_CHECK((!zero_is_absorbing<pt1 &>::value));
-        BOOST_CHECK((!zero_is_absorbing<const pt1 &>::value));
-        BOOST_CHECK((!zero_is_absorbing<const pt1>::value));
-        BOOST_CHECK((!zero_is_absorbing<pt1 &&>::value));
-        BOOST_CHECK((!zero_is_absorbing<pt2>::value));
-        BOOST_CHECK((!zero_is_absorbing<pt2 &>::value));
-        BOOST_CHECK((!zero_is_absorbing<const pt2 &>::value));
-        BOOST_CHECK((!zero_is_absorbing<const pt2>::value));
-        BOOST_CHECK((!zero_is_absorbing<pt2 &&>::value));
+        CHECK((!zero_is_absorbing<pt1>::value));
+        CHECK((!zero_is_absorbing<pt1 &>::value));
+        CHECK((!zero_is_absorbing<const pt1 &>::value));
+        CHECK((!zero_is_absorbing<const pt1>::value));
+        CHECK((!zero_is_absorbing<pt1 &&>::value));
+        CHECK((!zero_is_absorbing<pt2>::value));
+        CHECK((!zero_is_absorbing<pt2 &>::value));
+        CHECK((!zero_is_absorbing<const pt2 &>::value));
+        CHECK((!zero_is_absorbing<const pt2>::value));
+        CHECK((!zero_is_absorbing<pt2 &&>::value));
     }
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(series_fp_coefficient_test)
+TEST_CASE("series_fp_coefficient_test")
 {
     {
         using pt1 = polynomial<double, monomial<int>>;
         pt1 x{"x"};
         if (std::numeric_limits<double>::is_iec559) {
-            BOOST_CHECK((pt1(0.) * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((0. * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((0. * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((pt1(std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) * std::numeric_limits<double>::infinity()).size() == 1u);
-            BOOST_CHECK((pt1(0.) * std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK((std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((0. * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((0. * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((pt1(-std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(-std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) * -std::numeric_limits<double>::infinity()).size() == 1u);
-            BOOST_CHECK((pt1(0.) * -std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK((-std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((-std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(0.)).size() == 0u);
-            BOOST_CHECK((pt1(0.) * pt1(1.)).size() == 0u);
-            BOOST_CHECK((pt1(1.) * pt1(0.)).size() == 0u);
-            BOOST_CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::infinity()) + x)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(std::numeric_limits<double>::infinity()) - x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
-            BOOST_CHECK(((pt1(std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
-            BOOST_CHECK(((pt1(std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::infinity()) + x)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(-std::numeric_limits<double>::infinity()) - x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(-std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
-            BOOST_CHECK(((pt1(-std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
-            BOOST_CHECK(((pt1(-std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) / pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(0.) / pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((pt1(0.) / 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) / std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) / pt1(0.)).size() == 1u);
-            BOOST_CHECK((0. / pt1(0.)).size() == 1u);
-            BOOST_CHECK((std::numeric_limits<double>::quiet_NaN() / pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(1.) / pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(1.) / 0.).size() == 1u);
-            BOOST_CHECK((1. / pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((pt1(0.) * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((0. * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((0. * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((pt1(std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
+            CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
+            CHECK((pt1(0.) * std::numeric_limits<double>::infinity()).size() == 1u);
+            CHECK((pt1(0.) * std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK((std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
+            CHECK((std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((0. * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((0. * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((pt1(-std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
+            CHECK((pt1(-std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
+            CHECK((pt1(0.) * -std::numeric_limits<double>::infinity()).size() == 1u);
+            CHECK((pt1(0.) * -std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK((-std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
+            CHECK((-std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) * pt1(0.)).size() == 0u);
+            CHECK((pt1(0.) * pt1(1.)).size() == 0u);
+            CHECK((pt1(1.) * pt1(0.)).size() == 0u);
+            CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::infinity()) + x)).size() == 1u);
+            CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
+            CHECK((0. * (pt1(std::numeric_limits<double>::infinity()) - x)).size() == 1u);
+            CHECK((0. * (pt1(std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
+            CHECK(((pt1(std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
+            CHECK(((pt1(std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
+            CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::infinity()) + x)).size() == 1u);
+            CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
+            CHECK((0. * (pt1(-std::numeric_limits<double>::infinity()) - x)).size() == 1u);
+            CHECK((0. * (pt1(-std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
+            CHECK(((pt1(-std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
+            CHECK(((pt1(-std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
+            CHECK((pt1(0.) / pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) / pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((pt1(0.) / 0.).size() == 1u);
+            CHECK((pt1(0.) / std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) / pt1(0.)).size() == 1u);
+            CHECK((0. / pt1(0.)).size() == 1u);
+            CHECK((std::numeric_limits<double>::quiet_NaN() / pt1(0.)).size() == 1u);
+            CHECK((pt1(1.) / pt1(0.)).size() == 1u);
+            CHECK((pt1(1.) / 0.).size() == 1u);
+            CHECK((1. / pt1(0.)).size() == 1u);
             pt1 tmp(0);
             tmp /= 0.;
-            BOOST_CHECK((tmp.size() == 1u));
+            CHECK((tmp.size() == 1u));
             tmp = 0.;
             tmp /= pt1(0.);
-            BOOST_CHECK((tmp.size() == 1u));
+            CHECK((tmp.size() == 1u));
             tmp = 1.;
             tmp /= pt1(0.);
-            BOOST_CHECK((tmp.size() == 1u));
+            CHECK((tmp.size() == 1u));
             tmp = 1.;
             tmp /= 0.;
-            BOOST_CHECK((tmp.size() == 1u));
-            BOOST_CHECK(piranha::pow(pt1(0.), std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK(piranha::pow(pt1(0.), -1).size() == 1u);
+            CHECK((tmp.size() == 1u));
+            CHECK(piranha::pow(pt1(0.), std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK(piranha::pow(pt1(0.), -1).size() == 1u);
         }
     }
 #if defined(MPPP_WITH_MPFR)
     {
         using pt2 = polynomial<real, monomial<int>>;
         pt2 x{"x"};
-        BOOST_CHECK((pt2(0.) * pt2(real{"inf"})).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(real{"nan"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(real{"inf"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(real{"nan"})).size() == 1u);
-        BOOST_CHECK((pt2(real{"inf"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(real{"nan"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(0.) * real{"inf"}).size() == 1u);
-        BOOST_CHECK((pt2(0.) * real{"nan"}).size() == 1u);
-        BOOST_CHECK((real{"inf"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((real{"nan"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(-real{"inf"})).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(-real{"nan"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(-real{"inf"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(-real{"nan"})).size() == 1u);
-        BOOST_CHECK((pt2(-real{"inf"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(-real{"nan"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(0.) * -real{"inf"}).size() == 1u);
-        BOOST_CHECK((pt2(0.) * -real{"nan"}).size() == 1u);
-        BOOST_CHECK((-real{"inf"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((-real{"nan"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(0.)).size() == 0u);
-        BOOST_CHECK((pt2(0.) * pt2(1.)).size() == 0u);
-        BOOST_CHECK((pt2(1.) * pt2(0.)).size() == 0u);
-        BOOST_CHECK((pt2(0.) * (pt2(real{"inf"}) + x)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * (pt2(real{"nan"}) + x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(real{"inf"}) - x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(real{"nan"}) - x)).size() == 1u);
-        BOOST_CHECK(((pt2(real{"inf"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK(((pt2(real{"nan"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(0.) * (pt2(-real{"inf"}) + x)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * (pt2(-real{"nan"}) + x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(-real{"inf"}) - x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(-real{"nan"}) - x)).size() == 1u);
-        BOOST_CHECK(((pt2(-real{"inf"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK(((pt2(-real{"nan"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(1.) / pt2(0.)).size() == 1u);
-        BOOST_CHECK((pt2(1.) / 0.).size() == 1u);
-        BOOST_CHECK((1. / pt2(0.)).size() == 1u);
+        CHECK((pt2(0.) * pt2(real{"inf",100})).size() == 1u);
+        CHECK((pt2(0.) * pt2(real{"nan",100})).size() == 1u);
+        CHECK((0. * pt2(real{"inf",100})).size() == 1u);
+        CHECK((0. * pt2(real{"nan",100})).size() == 1u);
+        CHECK((pt2(real{"inf",100}) * 0.).size() == 1u);
+        CHECK((pt2(real{"nan",100}) * 0.).size() == 1u);
+        CHECK((pt2(0.) * real{"inf",100}).size() == 1u);
+        CHECK((pt2(0.) * real{"nan",100}).size() == 1u);
+        CHECK((real{"inf",100} * pt2(0.)).size() == 1u);
+        CHECK((real{"nan",100} * pt2(0.)).size() == 1u);
+        CHECK((pt2(0.) * pt2(-real{"inf",100})).size() == 1u);
+        CHECK((pt2(0.) * pt2(-real{"nan",100})).size() == 1u);
+        CHECK((0. * pt2(-real{"inf",100})).size() == 1u);
+        CHECK((0. * pt2(-real{"nan",100})).size() == 1u);
+        CHECK((pt2(-real{"inf",100}) * 0.).size() == 1u);
+        CHECK((pt2(-real{"nan",100}) * 0.).size() == 1u);
+        CHECK((pt2(0.) * -real{"inf",100}).size() == 1u);
+        CHECK((pt2(0.) * -real{"nan",100}).size() == 1u);
+        CHECK((-real{"inf",100} * pt2(0.)).size() == 1u);
+        CHECK((-real{"nan",100} * pt2(0.)).size() == 1u);
+        CHECK((pt2(0.) * pt2(0.)).size() == 0u);
+        CHECK((pt2(0.) * pt2(1.)).size() == 0u);
+        CHECK((pt2(1.) * pt2(0.)).size() == 0u);
+        CHECK((pt2(0.) * (pt2(real{"inf",100}) + x)).size() == 1u);
+        CHECK((pt2(0.) * (pt2(real{"nan",100}) + x)).size() == 1u);
+        CHECK((0. * (pt2(real{"inf",100}) - x)).size() == 1u);
+        CHECK((0. * (pt2(real{"nan",100}) - x)).size() == 1u);
+        CHECK(((pt2(real{"inf",100}) + x) * 0.).size() == 1u);
+        CHECK(((pt2(real{"nan",100}) + x) * 0.).size() == 1u);
+        CHECK((pt2(0.) * (pt2(-real{"inf",100}) + x)).size() == 1u);
+        CHECK((pt2(0.) * (pt2(-real{"nan",100}) + x)).size() == 1u);
+        CHECK((0. * (pt2(-real{"inf",100}) - x)).size() == 1u);
+        CHECK((0. * (pt2(-real{"nan",100}) - x)).size() == 1u);
+        CHECK(((pt2(-real{"inf",100}) + x) * 0.).size() == 1u);
+        CHECK(((pt2(-real{"nan",100}) + x) * 0.).size() == 1u);
+        CHECK((pt2(1.) / pt2(0.)).size() == 1u);
+        CHECK((pt2(1.) / 0.).size() == 1u);
+        CHECK((1. / pt2(0.)).size() == 1u);
         pt2 tmp(0);
         tmp /= 0.;
-        BOOST_CHECK((tmp.size() == 1u));
+        CHECK((tmp.size() == 1u));
         tmp = 0.;
         tmp /= pt2(0.);
-        BOOST_CHECK((tmp.size() == 1u));
+        CHECK((tmp.size() == 1u));
         tmp = 1.;
         tmp /= pt2(0.);
-        BOOST_CHECK((tmp.size() == 1u));
+        CHECK((tmp.size() == 1u));
         tmp = 1.;
         tmp /= 0.;
-        BOOST_CHECK((tmp.size() == 1u));
-        BOOST_CHECK(piranha::pow(pt2(0.), real{"nan"}).size() == 1u);
-        BOOST_CHECK(piranha::pow(pt2(0.), -1).size() == 1u);
+        CHECK((tmp.size() == 1u));
+        CHECK(piranha::pow(pt2(0.), real{"nan",100}).size() == 1u);
+        CHECK(piranha::pow(pt2(0.), -1).size() == 1u);
     }
 #endif
     {
         using pt1 = polynomial<polynomial<double, monomial<int>>, monomial<int>>;
         pt1 x{"x"};
         if (std::numeric_limits<double>::is_iec559) {
-            BOOST_CHECK((pt1(0.) * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((0. * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((0. * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((pt1(std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) * std::numeric_limits<double>::infinity()).size() == 1u);
-            BOOST_CHECK((pt1(0.) * std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK((std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((0. * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
-            BOOST_CHECK((0. * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((pt1(-std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(-std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) * -std::numeric_limits<double>::infinity()).size() == 1u);
-            BOOST_CHECK((pt1(0.) * -std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK((-std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((-std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * pt1(0.)).size() == 0u);
-            BOOST_CHECK((pt1(0.) * pt1(1.)).size() == 0u);
-            BOOST_CHECK((pt1(1.) * pt1(0.)).size() == 0u);
-            BOOST_CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::infinity()) + x)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(std::numeric_limits<double>::infinity()) - x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
-            BOOST_CHECK(((pt1(std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
-            BOOST_CHECK(((pt1(std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::infinity()) + x)).size() == 1u);
-            BOOST_CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(-std::numeric_limits<double>::infinity()) - x)).size() == 1u);
-            BOOST_CHECK((0. * (pt1(-std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
-            BOOST_CHECK(((pt1(-std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
-            BOOST_CHECK(((pt1(-std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) / pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(0.) / pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
-            BOOST_CHECK((pt1(0.) / 0.).size() == 1u);
-            BOOST_CHECK((pt1(0.) / std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) / pt1(0.)).size() == 1u);
-            BOOST_CHECK((0. / pt1(0.)).size() == 1u);
-            BOOST_CHECK((std::numeric_limits<double>::quiet_NaN() / pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(1.) / pt1(0.)).size() == 1u);
-            BOOST_CHECK((pt1(1.) / 0.).size() == 1u);
-            BOOST_CHECK((1. / pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((pt1(0.) * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((0. * pt1(std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((0. * pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((pt1(std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
+            CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
+            CHECK((pt1(0.) * std::numeric_limits<double>::infinity()).size() == 1u);
+            CHECK((pt1(0.) * std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK((std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
+            CHECK((std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((pt1(0.) * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((0. * pt1(-std::numeric_limits<double>::infinity())).size() == 1u);
+            CHECK((0. * pt1(-std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((pt1(-std::numeric_limits<double>::infinity()) * 0.).size() == 1u);
+            CHECK((pt1(-std::numeric_limits<double>::quiet_NaN()) * 0.).size() == 1u);
+            CHECK((pt1(0.) * -std::numeric_limits<double>::infinity()).size() == 1u);
+            CHECK((pt1(0.) * -std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK((-std::numeric_limits<double>::infinity() * pt1(0.)).size() == 1u);
+            CHECK((-std::numeric_limits<double>::quiet_NaN() * pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) * pt1(0.)).size() == 0u);
+            CHECK((pt1(0.) * pt1(1.)).size() == 0u);
+            CHECK((pt1(1.) * pt1(0.)).size() == 0u);
+            CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::infinity()) + x)).size() == 1u);
+            CHECK((pt1(0.) * (pt1(std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
+            CHECK((0. * (pt1(std::numeric_limits<double>::infinity()) - x)).size() == 1u);
+            CHECK((0. * (pt1(std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
+            CHECK(((pt1(std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
+            CHECK(((pt1(std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
+            CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::infinity()) + x)).size() == 1u);
+            CHECK((pt1(0.) * (pt1(-std::numeric_limits<double>::quiet_NaN()) + x)).size() == 1u);
+            CHECK((0. * (pt1(-std::numeric_limits<double>::infinity()) - x)).size() == 1u);
+            CHECK((0. * (pt1(-std::numeric_limits<double>::quiet_NaN()) - x)).size() == 1u);
+            CHECK(((pt1(-std::numeric_limits<double>::infinity()) + x) * 0.).size() == 1u);
+            CHECK(((pt1(-std::numeric_limits<double>::quiet_NaN()) + x) * 0.).size() == 1u);
+            CHECK((pt1(0.) / pt1(0.)).size() == 1u);
+            CHECK((pt1(0.) / pt1(std::numeric_limits<double>::quiet_NaN())).size() == 1u);
+            CHECK((pt1(0.) / 0.).size() == 1u);
+            CHECK((pt1(0.) / std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK((pt1(std::numeric_limits<double>::quiet_NaN()) / pt1(0.)).size() == 1u);
+            CHECK((0. / pt1(0.)).size() == 1u);
+            CHECK((std::numeric_limits<double>::quiet_NaN() / pt1(0.)).size() == 1u);
+            CHECK((pt1(1.) / pt1(0.)).size() == 1u);
+            CHECK((pt1(1.) / 0.).size() == 1u);
+            CHECK((1. / pt1(0.)).size() == 1u);
             pt1 tmp(0);
             tmp /= 0.;
-            BOOST_CHECK((tmp.size() == 1u));
+            CHECK((tmp.size() == 1u));
             tmp = 0.;
             tmp /= pt1(0.);
-            BOOST_CHECK((tmp.size() == 1u));
+            CHECK((tmp.size() == 1u));
             tmp = 1.;
             tmp /= pt1(0.);
-            BOOST_CHECK((tmp.size() == 1u));
+            CHECK((tmp.size() == 1u));
             tmp = 1.;
             tmp /= 0.;
-            BOOST_CHECK((tmp.size() == 1u));
-            BOOST_CHECK(piranha::pow(pt1(0.), std::numeric_limits<double>::quiet_NaN()).size() == 1u);
-            BOOST_CHECK(piranha::pow(pt1(0.), -1).size() == 1u);
+            CHECK((tmp.size() == 1u));
+            CHECK(piranha::pow(pt1(0.), std::numeric_limits<double>::quiet_NaN()).size() == 1u);
+            CHECK(piranha::pow(pt1(0.), -1).size() == 1u);
         }
     }
 #if defined(MPPP_WITH_MPFR)
     {
         using pt2 = polynomial<polynomial<real, monomial<int>>, monomial<int>>;
         pt2 x{"x"};
-        BOOST_CHECK((pt2(0.) * pt2(real{"inf"})).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(real{"nan"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(real{"inf"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(real{"nan"})).size() == 1u);
-        BOOST_CHECK((pt2(real{"inf"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(real{"nan"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(0.) * real{"inf"}).size() == 1u);
-        BOOST_CHECK((pt2(0.) * real{"nan"}).size() == 1u);
-        BOOST_CHECK((real{"inf"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((real{"nan"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(-real{"inf"})).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(-real{"nan"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(-real{"inf"})).size() == 1u);
-        BOOST_CHECK((0. * pt2(-real{"nan"})).size() == 1u);
-        BOOST_CHECK((pt2(-real{"inf"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(-real{"nan"}) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(0.) * -real{"inf"}).size() == 1u);
-        BOOST_CHECK((pt2(0.) * -real{"nan"}).size() == 1u);
-        BOOST_CHECK((-real{"inf"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((-real{"nan"} * pt2(0.)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * pt2(0.)).size() == 0u);
-        BOOST_CHECK((pt2(0.) * pt2(1.)).size() == 0u);
-        BOOST_CHECK((pt2(1.) * pt2(0.)).size() == 0u);
-        BOOST_CHECK((pt2(0.) * (pt2(real{"inf"}) + x)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * (pt2(real{"nan"}) + x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(real{"inf"}) - x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(real{"nan"}) - x)).size() == 1u);
-        BOOST_CHECK(((pt2(real{"inf"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK(((pt2(real{"nan"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(0.) * (pt2(-real{"inf"}) + x)).size() == 1u);
-        BOOST_CHECK((pt2(0.) * (pt2(-real{"nan"}) + x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(-real{"inf"}) - x)).size() == 1u);
-        BOOST_CHECK((0. * (pt2(-real{"nan"}) - x)).size() == 1u);
-        BOOST_CHECK(((pt2(-real{"inf"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK(((pt2(-real{"nan"}) + x) * 0.).size() == 1u);
-        BOOST_CHECK((pt2(1.) / pt2(0.)).size() == 1u);
-        BOOST_CHECK((pt2(1.) / 0.).size() == 1u);
-        BOOST_CHECK((1. / pt2(0.)).size() == 1u);
+        CHECK((pt2(0.) * pt2(real{"inf",100})).size() == 1u);
+        CHECK((pt2(0.) * pt2(real{"nan", 100})).size() == 1u);
+        CHECK((0. * pt2(real{"inf", 100})).size() == 1u);
+        CHECK((0. * pt2(real{"nan", 100})).size() == 1u);
+        CHECK((pt2(real{"inf", 100}) * 0.).size() == 1u);
+        CHECK((pt2(real{"nan", 100}) * 0.).size() == 1u);
+        CHECK((pt2(0.) * real{"inf", 100}).size() == 1u);
+        CHECK((pt2(0.) * real{"nan", 100}).size() == 1u);
+        CHECK((real{"inf", 100} * pt2(0.)).size() == 1u);
+        CHECK((real{"nan", 100} * pt2(0.)).size() == 1u);
+        CHECK((pt2(0.) * pt2(-real{"inf", 100})).size() == 1u);
+        CHECK((pt2(0.) * pt2(-real{"nan", 100})).size() == 1u);
+        CHECK((0. * pt2(-real{"inf", 100})).size() == 1u);
+        CHECK((0. * pt2(-real{"nan", 100})).size() == 1u);
+        CHECK((pt2(-real{"inf", 100}) * 0.).size() == 1u);
+        CHECK((pt2(-real{"nan", 100}) * 0.).size() == 1u);
+        CHECK((pt2(0.) * -real{"inf", 100}).size() == 1u);
+        CHECK((pt2(0.) * -real{"nan", 100}).size() == 1u);
+        CHECK((-real{"inf", 100} * pt2(0.)).size() == 1u);
+        CHECK((-real{"nan", 100} * pt2(0.)).size() == 1u);
+        CHECK((pt2(0.) * pt2(0.)).size() == 0u);
+        CHECK((pt2(0.) * pt2(1.)).size() == 0u);
+        CHECK((pt2(1.) * pt2(0.)).size() == 0u);
+        CHECK((pt2(0.) * (pt2(real{"inf", 100}) + x)).size() == 1u);
+        CHECK((pt2(0.) * (pt2(real{"nan", 100}) + x)).size() == 1u);
+        CHECK((0. * (pt2(real{"inf", 100}) - x)).size() == 1u);
+        CHECK((0. * (pt2(real{"nan", 100}) - x)).size() == 1u);
+        CHECK(((pt2(real{"inf", 100}) + x) * 0.).size() == 1u);
+        CHECK(((pt2(real{"nan", 100}) + x) * 0.).size() == 1u);
+        CHECK((pt2(0.) * (pt2(-real{"inf", 100}) + x)).size() == 1u);
+        CHECK((pt2(0.) * (pt2(-real{"nan", 100}) + x)).size() == 1u);
+        CHECK((0. * (pt2(-real{"inf", 100}) - x)).size() == 1u);
+        CHECK((0. * (pt2(-real{"nan", 100}) - x)).size() == 1u);
+        CHECK(((pt2(-real{"inf", 100}) + x) * 0.).size() == 1u);
+        CHECK(((pt2(-real{"nan", 100}) + x) * 0.).size() == 1u);
+        CHECK((pt2(1.) / pt2(0.)).size() == 1u);
+        CHECK((pt2(1.) / 0.).size() == 1u);
+        CHECK((1. / pt2(0.)).size() == 1u);
         pt2 tmp(0);
         tmp /= 0.;
-        BOOST_CHECK((tmp.size() == 1u));
+        CHECK((tmp.size() == 1u));
         tmp = 0.;
         tmp /= pt2(0.);
-        BOOST_CHECK((tmp.size() == 1u));
+        CHECK((tmp.size() == 1u));
         tmp = 1.;
         tmp /= pt2(0.);
-        BOOST_CHECK((tmp.size() == 1u));
+        CHECK((tmp.size() == 1u));
         tmp = 1.;
         tmp /= 0.;
-        BOOST_CHECK((tmp.size() == 1u));
-        BOOST_CHECK(piranha::pow(pt2(0.), real{"nan"}).size() == 1u);
-        BOOST_CHECK(piranha::pow(pt2(0.), -1).size() == 1u);
+        CHECK((tmp.size() == 1u));
+        CHECK(piranha::pow(pt2(0.), real{"nan", 100}).size() == 1u);
+        CHECK(piranha::pow(pt2(0.), -1).size() == 1u);
     }
 #endif
 }

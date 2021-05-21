@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/s11n.hpp>
 
-#define BOOST_TEST_MODULE s11n_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -60,6 +57,9 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/key/key_is_one.hpp>
 #include <piranha/symbol_utils.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
+#include "exception_matcher.hpp"
 
 // Uniform int distribution wrapper, from min to max value for type T.
 template <typename T, typename = void>
@@ -124,7 +124,7 @@ using fp_types = std::tuple<float, double, long double>;
 
 // NOTE: make an empty test in order to have something to run
 // even if no s11n support has been enabled.
-BOOST_AUTO_TEST_CASE(s11n_empty_test) {}
+TEST_CASE("s11n_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -444,120 +444,120 @@ struct hash<keyb> {
 };
 } // namespace std
 
-BOOST_AUTO_TEST_CASE(s11n_test_boost_tt)
+TEST_CASE("s11n_test_boost_tt")
 {
     // Saving archive.
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, std::string>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int *>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int const *>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int &&>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, const int &>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &, int>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &, int &>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &, const int &>::value));
-    BOOST_CHECK((!is_boost_saving_archive<const boost::archive::binary_oarchive &, int>::value));
-    BOOST_CHECK((!is_boost_saving_archive<const boost::archive::binary_oarchive, int>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &&, int>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::text_oarchive, int>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::text_oarchive &, int>::value));
-    BOOST_CHECK((!is_boost_saving_archive<const boost::archive::text_oarchive &, int>::value));
-    BOOST_CHECK((is_boost_saving_archive<boost::archive::text_oarchive &&, int>::value));
-    BOOST_CHECK((!is_boost_saving_archive<boost::archive::binary_oarchive, void>::value));
-    BOOST_CHECK((!is_boost_saving_archive<void, void>::value));
-    BOOST_CHECK((!is_boost_saving_archive<void, int>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, std::string>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int *>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int const *>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, int &&>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive, const int &>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &, int>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &, int &>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &, const int &>::value));
+    CHECK((!is_boost_saving_archive<const boost::archive::binary_oarchive &, int>::value));
+    CHECK((!is_boost_saving_archive<const boost::archive::binary_oarchive, int>::value));
+    CHECK((is_boost_saving_archive<boost::archive::binary_oarchive &&, int>::value));
+    CHECK((is_boost_saving_archive<boost::archive::text_oarchive, int>::value));
+    CHECK((is_boost_saving_archive<boost::archive::text_oarchive &, int>::value));
+    CHECK((!is_boost_saving_archive<const boost::archive::text_oarchive &, int>::value));
+    CHECK((is_boost_saving_archive<boost::archive::text_oarchive &&, int>::value));
+    CHECK((!is_boost_saving_archive<boost::archive::binary_oarchive, void>::value));
+    CHECK((!is_boost_saving_archive<void, void>::value));
+    CHECK((!is_boost_saving_archive<void, int>::value));
     // Loading archive.
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, std::string>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, int *>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, int &&>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &&, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &, int &>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &, int &>::value));
-    BOOST_CHECK((!is_boost_loading_archive<const boost::archive::binary_iarchive &, int &>::value));
-    BOOST_CHECK((!is_boost_loading_archive<boost::archive::binary_iarchive &, const int &>::value));
-    BOOST_CHECK((!is_boost_loading_archive<boost::archive::binary_iarchive, const int &>::value));
-    BOOST_CHECK((!is_boost_loading_archive<const boost::archive::binary_iarchive &, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &&, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::text_iarchive, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::text_iarchive &, int>::value));
-    BOOST_CHECK((!is_boost_loading_archive<const boost::archive::text_iarchive &, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<boost::archive::text_iarchive &&, int>::value));
-    BOOST_CHECK((!is_boost_loading_archive<boost::archive::binary_iarchive, void>::value));
-    BOOST_CHECK((!is_boost_loading_archive<void, void>::value));
-    BOOST_CHECK((!is_boost_loading_archive<void, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, std::string>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, int *>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive, int &&>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &&, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &, int &>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &, int &>::value));
+    CHECK((!is_boost_loading_archive<const boost::archive::binary_iarchive &, int &>::value));
+    CHECK((!is_boost_loading_archive<boost::archive::binary_iarchive &, const int &>::value));
+    CHECK((!is_boost_loading_archive<boost::archive::binary_iarchive, const int &>::value));
+    CHECK((!is_boost_loading_archive<const boost::archive::binary_iarchive &, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::binary_iarchive &&, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::text_iarchive, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::text_iarchive &, int>::value));
+    CHECK((!is_boost_loading_archive<const boost::archive::text_iarchive &, int>::value));
+    CHECK((is_boost_loading_archive<boost::archive::text_iarchive &&, int>::value));
+    CHECK((!is_boost_loading_archive<boost::archive::binary_iarchive, void>::value));
+    CHECK((!is_boost_loading_archive<void, void>::value));
+    CHECK((!is_boost_loading_archive<void, int>::value));
     // Test custom archives.
-    BOOST_CHECK((is_boost_saving_archive<sa0, int>::value));
-    BOOST_CHECK((!is_boost_saving_archive<sa0, unserial>::value));
-    BOOST_CHECK((!is_boost_saving_archive<sa1, int>::value));
-    BOOST_CHECK((!is_boost_saving_archive<sa2, int>::value));
-    BOOST_CHECK((!is_boost_saving_archive<sa3, int>::value));
-    BOOST_CHECK((!is_boost_saving_archive<sa4, int>::value));
-    BOOST_CHECK((is_boost_loading_archive<la0, int>::value));
-    BOOST_CHECK((!is_boost_loading_archive<la0, unserial>::value));
-    BOOST_CHECK((!is_boost_loading_archive<la1, int>::value));
-    BOOST_CHECK((!is_boost_loading_archive<la2, int>::value));
-    BOOST_CHECK((!is_boost_loading_archive<la3, int>::value));
-    BOOST_CHECK((!is_boost_loading_archive<la4, int>::value));
-    BOOST_CHECK((!is_boost_loading_archive<la5, int>::value));
+    CHECK((is_boost_saving_archive<sa0, int>::value));
+    CHECK((!is_boost_saving_archive<sa0, unserial>::value));
+    CHECK((!is_boost_saving_archive<sa1, int>::value));
+    CHECK((!is_boost_saving_archive<sa2, int>::value));
+    CHECK((!is_boost_saving_archive<sa3, int>::value));
+    CHECK((!is_boost_saving_archive<sa4, int>::value));
+    CHECK((is_boost_loading_archive<la0, int>::value));
+    CHECK((!is_boost_loading_archive<la0, unserial>::value));
+    CHECK((!is_boost_loading_archive<la1, int>::value));
+    CHECK((!is_boost_loading_archive<la2, int>::value));
+    CHECK((!is_boost_loading_archive<la3, int>::value));
+    CHECK((!is_boost_loading_archive<la4, int>::value));
+    CHECK((!is_boost_loading_archive<la5, int>::value));
     // Serialization funcs type traits.
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, int>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, long double>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, int &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, const int &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const int &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &&, const int &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &&, std::string>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &&, std::string &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &&, std::string const &>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive const &, const int &>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive const &, std::string>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive const, const int &>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive, wchar_t>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, int>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, void>::value));
-    BOOST_CHECK((!has_boost_save<void, void>::value));
-    BOOST_CHECK((!has_boost_save<void, int>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, int>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, long double>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, int &>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, std::string>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, std::string &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, const std::string>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, const std::string &>::value));
-    BOOST_CHECK((!has_boost_load<const boost::archive::binary_iarchive, int &>::value));
-    BOOST_CHECK((!has_boost_load<const boost::archive::binary_iarchive &, int &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, const int &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const int &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &&, const int &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive const &, const int &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive const, const int &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, wchar_t>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, int>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, void>::value));
-    BOOST_CHECK((!has_boost_load<void, void>::value));
-    BOOST_CHECK((!has_boost_load<void, int>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, int>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, long double>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, int &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, const int &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, const int &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &&, const int &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &&, std::string>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &&, std::string &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &&, std::string const &>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive const &, const int &>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive const &, std::string>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive const, const int &>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive, wchar_t>::value));
+    CHECK((!has_boost_save<boost::archive::binary_iarchive, int>::value));
+    CHECK((!has_boost_save<boost::archive::binary_iarchive, void>::value));
+    CHECK((!has_boost_save<void, void>::value));
+    CHECK((!has_boost_save<void, int>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, int>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, long double>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, int &>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, std::string>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, std::string &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, const std::string>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, const std::string &>::value));
+    CHECK((!has_boost_load<const boost::archive::binary_iarchive, int &>::value));
+    CHECK((!has_boost_load<const boost::archive::binary_iarchive &, int &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, const int &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive &, const int &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive &&, const int &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive const &, const int &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive const, const int &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, wchar_t>::value));
+    CHECK((!has_boost_load<boost::archive::binary_oarchive, int>::value));
+    CHECK((!has_boost_load<boost::archive::binary_oarchive, void>::value));
+    CHECK((!has_boost_load<void, void>::value));
+    CHECK((!has_boost_load<void, int>::value));
     // Key type traits.
-    BOOST_CHECK(is_key<keya>::value);
-    BOOST_CHECK(is_key<keyb>::value);
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, boost_s11n_key_wrapper<keya>>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive, boost_s11n_key_wrapper<keyb>>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, boost_s11n_key_wrapper<keya>>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const boost_s11n_key_wrapper<keya>>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const boost_s11n_key_wrapper<keya> &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, boost_s11n_key_wrapper<keya> &>::value));
-    BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, boost_s11n_key_wrapper<keya> &>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive &, boost_s11n_key_wrapper<keya> &>::value));
-    BOOST_CHECK((!has_boost_save<void, boost_s11n_key_wrapper<keya> &>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, boost_s11n_key_wrapper<keya>>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, boost_s11n_key_wrapper<keyb>>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, boost_s11n_key_wrapper<keya>>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, boost_s11n_key_wrapper<keya> &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const boost_s11n_key_wrapper<keya> &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const boost_s11n_key_wrapper<keya>>::value));
-    BOOST_CHECK((!has_boost_load<void, boost_s11n_key_wrapper<keya>>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, boost_s11n_key_wrapper<keya>>::value));
+    CHECK(is_key<keya>::value);
+    CHECK(is_key<keyb>::value);
+    CHECK((has_boost_save<boost::archive::binary_oarchive, boost_s11n_key_wrapper<keya>>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive, boost_s11n_key_wrapper<keyb>>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, boost_s11n_key_wrapper<keya>>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, const boost_s11n_key_wrapper<keya>>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, const boost_s11n_key_wrapper<keya> &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, boost_s11n_key_wrapper<keya> &>::value));
+    CHECK((!has_boost_save<const boost::archive::binary_oarchive &, boost_s11n_key_wrapper<keya> &>::value));
+    CHECK((!has_boost_save<boost::archive::binary_iarchive &, boost_s11n_key_wrapper<keya> &>::value));
+    CHECK((!has_boost_save<void, boost_s11n_key_wrapper<keya> &>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, boost_s11n_key_wrapper<keya>>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, boost_s11n_key_wrapper<keyb>>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, boost_s11n_key_wrapper<keya>>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, boost_s11n_key_wrapper<keya> &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive &, const boost_s11n_key_wrapper<keya> &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive &, const boost_s11n_key_wrapper<keya>>::value));
+    CHECK((!has_boost_load<void, boost_s11n_key_wrapper<keya>>::value));
+    CHECK((!has_boost_load<boost::archive::binary_oarchive, boost_s11n_key_wrapper<keya>>::value));
 }
 
 struct boost_int_tester {
@@ -581,11 +581,11 @@ struct boost_int_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
-BOOST_AUTO_TEST_CASE(s11n_test_boost_int)
+TEST_CASE("s11n_test_boost_int")
 {
     tuple_for_each(integral_types{}, boost_int_tester{});
 }
@@ -625,16 +625,16 @@ struct boost_fp_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
-BOOST_AUTO_TEST_CASE(s11n_test_boost_float)
+TEST_CASE("s11n_test_boost_float")
 {
     tuple_for_each(fp_types{}, boost_fp_tester{});
 }
 
-BOOST_AUTO_TEST_CASE(s11n_test_boost_string)
+TEST_CASE("s11n_test_boost_string")
 {
     std::atomic<bool> status(true);
     auto checker = [&status](int n) {
@@ -660,7 +660,7 @@ BOOST_AUTO_TEST_CASE(s11n_test_boost_string)
     t1.join();
     t2.join();
     t3.join();
-    BOOST_CHECK(status.load());
+    CHECK(status.load());
 }
 
 #endif
@@ -796,74 +796,74 @@ static inline T msgpack_roundtrip_sstream(const T &x, msgpack_format f)
     return retval;
 }
 
-BOOST_AUTO_TEST_CASE(s11n_test_msgpack_tt)
+TEST_CASE("s11n_test_msgpack_tt")
 {
-    BOOST_CHECK(is_msgpack_stream<std::ostringstream>::value);
-    BOOST_CHECK(!is_msgpack_stream<std::ostringstream &>::value);
-    BOOST_CHECK(!is_msgpack_stream<void>::value);
-    BOOST_CHECK(!is_msgpack_stream<const std::ostringstream &>::value);
-    BOOST_CHECK(!is_msgpack_stream<const std::ostringstream>::value);
-    BOOST_CHECK(is_msgpack_stream<sbuffer>::value);
-    BOOST_CHECK(!is_msgpack_stream<float>::value);
-    BOOST_CHECK(!is_msgpack_stream<const double>::value);
-    BOOST_CHECK(is_msgpack_stream<sw<std::ostringstream>>::value);
-    BOOST_CHECK(!is_msgpack_stream<sw<std::ostringstream> &>::value);
-    BOOST_CHECK((has_msgpack_pack<sbuffer, int>::value));
-    BOOST_CHECK((!has_msgpack_pack<sbuffer, void>::value));
-    BOOST_CHECK((!has_msgpack_pack<void, void>::value));
-    BOOST_CHECK((!has_msgpack_pack<void, int>::value));
-    BOOST_CHECK((!has_msgpack_pack<sbuffer, no_msgpack>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, int>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, bool>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, bool &>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, const bool &>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, const bool>::value));
-    BOOST_CHECK((!has_msgpack_pack<std::ostringstream &, const bool>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, std::string>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, std::string &>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, const std::string &>::value));
-    BOOST_CHECK((has_msgpack_pack<std::ostringstream, const std::string>::value));
-    BOOST_CHECK((has_msgpack_pack<sw<std::ostringstream>, int>::value));
-    BOOST_CHECK((!has_msgpack_pack<sbuffer &, int>::value));
-    BOOST_CHECK((!has_msgpack_pack<const std::ostringstream, int>::value));
-    BOOST_CHECK((!has_msgpack_pack<const std::ostringstream &, int>::value));
-    BOOST_CHECK((!has_msgpack_pack<const std::ostringstream &&, int>::value));
-    BOOST_CHECK((!has_msgpack_pack<std::ostringstream &&, int>::value));
-    BOOST_CHECK((has_msgpack_convert<int>::value));
-    BOOST_CHECK((!has_msgpack_convert<void>::value));
-    BOOST_CHECK((has_msgpack_convert<bool>::value));
-    BOOST_CHECK((has_msgpack_convert<bool &>::value));
-    BOOST_CHECK((!has_msgpack_convert<const bool>::value));
-    BOOST_CHECK((has_msgpack_convert<double>::value));
-    BOOST_CHECK((has_msgpack_convert<int &>::value));
-    BOOST_CHECK((has_msgpack_convert<double &>::value));
-    BOOST_CHECK((!has_msgpack_convert<no_msgpack>::value));
-    BOOST_CHECK((!has_msgpack_convert<const int>::value));
-    BOOST_CHECK((!has_msgpack_convert<const double>::value));
-    BOOST_CHECK((has_msgpack_convert<int &&>::value));
-    BOOST_CHECK((has_msgpack_convert<std::string>::value));
-    BOOST_CHECK((has_msgpack_convert<std::string &>::value));
-    BOOST_CHECK((has_msgpack_convert<std::string &&>::value));
-    BOOST_CHECK((!has_msgpack_convert<const std::string>::value));
-    BOOST_CHECK((!has_msgpack_convert<const std::string &>::value));
-    BOOST_CHECK((has_msgpack_convert<double &&>::value));
-    BOOST_CHECK((!has_msgpack_convert<const int &&>::value));
-    BOOST_CHECK((!has_msgpack_convert<const double &&>::value));
-    BOOST_CHECK(is_key<key01>::value);
-    BOOST_CHECK((key_has_msgpack_pack<sbuffer, key01>::value));
-    BOOST_CHECK((!key_has_msgpack_pack<void, key01>::value));
-    BOOST_CHECK((key_has_msgpack_pack<sbuffer, key01 &>::value));
-    BOOST_CHECK((key_has_msgpack_pack<sbuffer, const key01 &>::value));
-    BOOST_CHECK((key_has_msgpack_pack<sbuffer, const key01>::value));
-    BOOST_CHECK((!key_has_msgpack_pack<sbuffer &, key01>::value));
-    BOOST_CHECK((!key_has_msgpack_pack<const sbuffer, key01>::value));
-    BOOST_CHECK(is_key<key02>::value);
-    BOOST_CHECK((!key_has_msgpack_pack<sbuffer, key02>::value));
-    BOOST_CHECK((!key_has_msgpack_convert<key02>::value));
-    BOOST_CHECK((key_has_msgpack_convert<key01>::value));
-    BOOST_CHECK((key_has_msgpack_convert<key01 &>::value));
-    BOOST_CHECK((!key_has_msgpack_convert<const key01 &>::value));
-    BOOST_CHECK((!key_has_msgpack_convert<const key01>::value));
+    CHECK(is_msgpack_stream<std::ostringstream>::value);
+    CHECK(!is_msgpack_stream<std::ostringstream &>::value);
+    CHECK(!is_msgpack_stream<void>::value);
+    CHECK(!is_msgpack_stream<const std::ostringstream &>::value);
+    CHECK(!is_msgpack_stream<const std::ostringstream>::value);
+    CHECK(is_msgpack_stream<sbuffer>::value);
+    CHECK(!is_msgpack_stream<float>::value);
+    CHECK(!is_msgpack_stream<const double>::value);
+    CHECK(is_msgpack_stream<sw<std::ostringstream>>::value);
+    CHECK(!is_msgpack_stream<sw<std::ostringstream> &>::value);
+    CHECK((has_msgpack_pack<sbuffer, int>::value));
+    CHECK((!has_msgpack_pack<sbuffer, void>::value));
+    CHECK((!has_msgpack_pack<void, void>::value));
+    CHECK((!has_msgpack_pack<void, int>::value));
+    CHECK((!has_msgpack_pack<sbuffer, no_msgpack>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, int>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, bool>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, bool &>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, const bool &>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, const bool>::value));
+    CHECK((!has_msgpack_pack<std::ostringstream &, const bool>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, std::string>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, std::string &>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, const std::string &>::value));
+    CHECK((has_msgpack_pack<std::ostringstream, const std::string>::value));
+    CHECK((has_msgpack_pack<sw<std::ostringstream>, int>::value));
+    CHECK((!has_msgpack_pack<sbuffer &, int>::value));
+    CHECK((!has_msgpack_pack<const std::ostringstream, int>::value));
+    CHECK((!has_msgpack_pack<const std::ostringstream &, int>::value));
+    CHECK((!has_msgpack_pack<const std::ostringstream &&, int>::value));
+    CHECK((!has_msgpack_pack<std::ostringstream &&, int>::value));
+    CHECK((has_msgpack_convert<int>::value));
+    CHECK((!has_msgpack_convert<void>::value));
+    CHECK((has_msgpack_convert<bool>::value));
+    CHECK((has_msgpack_convert<bool &>::value));
+    CHECK((!has_msgpack_convert<const bool>::value));
+    CHECK((has_msgpack_convert<double>::value));
+    CHECK((has_msgpack_convert<int &>::value));
+    CHECK((has_msgpack_convert<double &>::value));
+    CHECK((!has_msgpack_convert<no_msgpack>::value));
+    CHECK((!has_msgpack_convert<const int>::value));
+    CHECK((!has_msgpack_convert<const double>::value));
+    CHECK((has_msgpack_convert<int &&>::value));
+    CHECK((has_msgpack_convert<std::string>::value));
+    CHECK((has_msgpack_convert<std::string &>::value));
+    CHECK((has_msgpack_convert<std::string &&>::value));
+    CHECK((!has_msgpack_convert<const std::string>::value));
+    CHECK((!has_msgpack_convert<const std::string &>::value));
+    CHECK((has_msgpack_convert<double &&>::value));
+    CHECK((!has_msgpack_convert<const int &&>::value));
+    CHECK((!has_msgpack_convert<const double &&>::value));
+    CHECK(is_key<key01>::value);
+    CHECK((key_has_msgpack_pack<sbuffer, key01>::value));
+    CHECK((!key_has_msgpack_pack<void, key01>::value));
+    CHECK((key_has_msgpack_pack<sbuffer, key01 &>::value));
+    CHECK((key_has_msgpack_pack<sbuffer, const key01 &>::value));
+    CHECK((key_has_msgpack_pack<sbuffer, const key01>::value));
+    CHECK((!key_has_msgpack_pack<sbuffer &, key01>::value));
+    CHECK((!key_has_msgpack_pack<const sbuffer, key01>::value));
+    CHECK(is_key<key02>::value);
+    CHECK((!key_has_msgpack_pack<sbuffer, key02>::value));
+    CHECK((!key_has_msgpack_convert<key02>::value));
+    CHECK((key_has_msgpack_convert<key01>::value));
+    CHECK((key_has_msgpack_convert<key01 &>::value));
+    CHECK((!key_has_msgpack_convert<const key01 &>::value));
+    CHECK((!key_has_msgpack_convert<const key01>::value));
 }
 
 struct int_tester {
@@ -893,17 +893,17 @@ struct int_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
-BOOST_AUTO_TEST_CASE(s11n_test_msgpack_int)
+TEST_CASE("s11n_test_msgpack_int")
 {
     tuple_for_each(integral_types{}, int_tester{});
     // Test bool as well.
     for (auto f : {0, 1}) {
-        BOOST_CHECK_EQUAL(true, msgpack_roundtrip(true, static_cast<msgpack_format>(f)));
-        BOOST_CHECK_EQUAL(false, msgpack_roundtrip(false, static_cast<msgpack_format>(f)));
+        CHECK(true == msgpack_roundtrip(true, static_cast<msgpack_format>(f)));
+        CHECK(false == msgpack_roundtrip(false, static_cast<msgpack_format>(f)));
     }
 }
 
@@ -934,28 +934,28 @@ struct fp_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
         // Additional checking for non-finite values.
         if (std::numeric_limits<T>::has_quiet_NaN && std::numeric_limits<T>::has_infinity) {
             for (auto f : {0, 1}) {
                 auto tmp = std::numeric_limits<T>::quiet_NaN();
                 tmp = std::copysign(tmp, T(1.));
                 auto cmp = msgpack_roundtrip(tmp, static_cast<msgpack_format>(f));
-                BOOST_CHECK(std::isnan(cmp));
-                BOOST_CHECK(!std::signbit(cmp));
+                CHECK(std::isnan(cmp));
+                CHECK(!std::signbit(cmp));
                 tmp = std::copysign(tmp, T(-1.));
                 cmp = msgpack_roundtrip(tmp, static_cast<msgpack_format>(f));
-                BOOST_CHECK(std::isnan(cmp));
-                BOOST_CHECK(std::signbit(cmp));
+                CHECK(std::isnan(cmp));
+                CHECK(std::signbit(cmp));
                 tmp = std::numeric_limits<T>::infinity();
                 cmp = msgpack_roundtrip(tmp, static_cast<msgpack_format>(f));
-                BOOST_CHECK(std::isinf(cmp));
-                BOOST_CHECK(!std::signbit(cmp));
+                CHECK(std::isinf(cmp));
+                CHECK(!std::signbit(cmp));
                 tmp = std::numeric_limits<T>::infinity();
                 tmp = std::copysign(tmp, T(-1.));
                 cmp = msgpack_roundtrip(tmp, static_cast<msgpack_format>(f));
-                BOOST_CHECK(std::isinf(cmp));
-                BOOST_CHECK(std::signbit(cmp));
+                CHECK(std::isinf(cmp));
+                CHECK(std::signbit(cmp));
             }
         }
         if (std::is_same<T, long double>::value) {
@@ -967,21 +967,20 @@ struct fp_tester {
             std::size_t offset = 0;
             auto oh = msgpack::unpack(sbuf.data(), sbuf.size(), offset);
             long double tmp;
-            auto msg_checker = [](const std::invalid_argument &ia) -> bool {
-                return boost::contains(ia.what(), "failed to parse the string 'hello world' as a long double");
-            };
-            BOOST_CHECK_EXCEPTION(msgpack_convert(tmp, oh.get(), msgpack_format::portable), std::invalid_argument,
+            auto msg_checker = test::ExceptionMatcher<std::invalid_argument>(std::string("failed to parse the string 'hello world' as a long double"));
+            
+            CHECK_THROWS_MATCHES(msgpack_convert(tmp, oh.get(), msgpack_format::portable), std::invalid_argument,
                                   msg_checker);
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(s11n_test_msgpack_float)
+TEST_CASE("s11n_test_msgpack_float")
 {
     tuple_for_each(fp_types{}, fp_tester{});
 }
 
-BOOST_AUTO_TEST_CASE(s11n_test_msgpack_string)
+TEST_CASE("s11n_test_msgpack_string")
 {
     std::atomic<bool> status(true);
     auto checker = [&status](int n) {
@@ -1007,7 +1006,7 @@ BOOST_AUTO_TEST_CASE(s11n_test_msgpack_string)
     t1.join();
     t2.join();
     t3.join();
-    BOOST_CHECK(status.load());
+    CHECK(status.load());
 }
 
 #endif
@@ -1070,7 +1069,7 @@ struct int_save_load_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
@@ -1123,7 +1122,7 @@ struct fp_save_load_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
@@ -1201,63 +1200,62 @@ static inline void string_save_load_tester()
     t1.join();
     t2.join();
     t3.join();
-    BOOST_CHECK(status.load());
+    CHECK(status.load());
 }
 
-BOOST_AUTO_TEST_CASE(s11n_test_get_cdf_from_filename)
+TEST_CASE("s11n_test_get_cdf_from_filename")
 {
-    BOOST_CHECK(get_cdf_from_filename("foo.boostb") == std::make_pair(compression::none, data_format::boost_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.boostp") == std::make_pair(compression::none, data_format::boost_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackb") == std::make_pair(compression::none, data_format::msgpack_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackp")
+    CHECK(get_cdf_from_filename("foo.boostb") == std::make_pair(compression::none, data_format::boost_binary));
+    CHECK(get_cdf_from_filename("foo.boostp") == std::make_pair(compression::none, data_format::boost_portable));
+    CHECK(get_cdf_from_filename("foo.mpackb") == std::make_pair(compression::none, data_format::msgpack_binary));
+    CHECK(get_cdf_from_filename("foo.mpackp")
                 == std::make_pair(compression::none, data_format::msgpack_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.boostb.bz2")
+    CHECK(get_cdf_from_filename("foo.boostb.bz2")
                 == std::make_pair(compression::bzip2, data_format::boost_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.boostp.bz2")
+    CHECK(get_cdf_from_filename("foo.boostp.bz2")
                 == std::make_pair(compression::bzip2, data_format::boost_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackb.bz2")
+    CHECK(get_cdf_from_filename("foo.mpackb.bz2")
                 == std::make_pair(compression::bzip2, data_format::msgpack_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackp.bz2")
+    CHECK(get_cdf_from_filename("foo.mpackp.bz2")
                 == std::make_pair(compression::bzip2, data_format::msgpack_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.boostb.gz") == std::make_pair(compression::gzip, data_format::boost_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.boostp.gz")
+    CHECK(get_cdf_from_filename("foo.boostb.gz") == std::make_pair(compression::gzip, data_format::boost_binary));
+    CHECK(get_cdf_from_filename("foo.boostp.gz")
                 == std::make_pair(compression::gzip, data_format::boost_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackb.gz")
+    CHECK(get_cdf_from_filename("foo.mpackb.gz")
                 == std::make_pair(compression::gzip, data_format::msgpack_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackp.gz")
+    CHECK(get_cdf_from_filename("foo.mpackp.gz")
                 == std::make_pair(compression::gzip, data_format::msgpack_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.boostb.zip")
+    CHECK(get_cdf_from_filename("foo.boostb.zip")
                 == std::make_pair(compression::zlib, data_format::boost_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.boostp.zip")
+    CHECK(get_cdf_from_filename("foo.boostp.zip")
                 == std::make_pair(compression::zlib, data_format::boost_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackb.zip")
+    CHECK(get_cdf_from_filename("foo.mpackb.zip")
                 == std::make_pair(compression::zlib, data_format::msgpack_binary));
-    BOOST_CHECK(get_cdf_from_filename("foo.mpackp.zip")
+    CHECK(get_cdf_from_filename("foo.mpackp.zip")
                 == std::make_pair(compression::zlib, data_format::msgpack_portable));
-    BOOST_CHECK(get_cdf_from_filename("foo.bz2.boostb")
+    CHECK(get_cdf_from_filename("foo.bz2.boostb")
                 == std::make_pair(compression::none, data_format::boost_binary));
-    BOOST_CHECK_EXCEPTION(get_cdf_from_filename("foo"), std::invalid_argument, [](const std::invalid_argument &iae) {
-        return boost::contains(iae.what(), "unable to deduce the data format from the filename 'foo'. The filename "
+    CHECK_THROWS_MATCHES(get_cdf_from_filename("foo"), std::invalid_argument,
+        test::ExceptionMatcher<std::invalid_argument>(std::string("unable to deduce the data format from the filename 'foo'. The filename "
                                            "must end with one of ['.boostb','.boostp','.mpackb','.mpackp'], "
-                                           "optionally followed by one of ['.bz2','gz','zip'].");
-    });
-    BOOST_CHECK_EXCEPTION(
-        get_cdf_from_filename("foo.bz2"), std::invalid_argument, [](const std::invalid_argument &iae) {
-            return boost::contains(iae.what(),
+                                           "optionally followed by one of ['.bz2','gz','zip']."))
+    );
+    CHECK_THROWS_MATCHES(
+        get_cdf_from_filename("foo.bz2"), std::invalid_argument,
+        test::ExceptionMatcher<std::invalid_argument>(std::string(
                                    "unable to deduce the data format from the filename 'foo.bz2'. The filename "
                                    "must end with one of ['.boostb','.boostp','.mpackb','.mpackp'], "
-                                   "optionally followed by one of ['.bz2','gz','zip'].");
-        });
-    BOOST_CHECK_EXCEPTION(
-        get_cdf_from_filename("foo.mpackb.bz2.bz2"), std::invalid_argument, [](const std::invalid_argument &iae) {
-            return boost::contains(
-                iae.what(), "unable to deduce the data format from the filename 'foo.mpackb.bz2.bz2'. The filename "
+                                   "optionally followed by one of ['.bz2','gz','zip']."))
+    );
+    CHECK_THROWS_MATCHES(
+        get_cdf_from_filename("foo.mpackb.bz2.bz2"), std::invalid_argument,
+        test::ExceptionMatcher<std::invalid_argument>(std::string("unable to deduce the data format from the filename 'foo.mpackb.bz2.bz2'. The filename "
                             "must end with one of ['.boostb','.boostp','.mpackb','.mpackp'], "
-                            "optionally followed by one of ['.bz2','gz','zip'].");
-        });
+                            "optionally followed by one of ['.bz2','gz','zip']."))
+    );
 }
 
-BOOST_AUTO_TEST_CASE(s11n_test_save_load)
+TEST_CASE("s11n_test_save_load")
 {
     tuple_for_each(integral_types{}, int_save_load_tester{});
     tuple_for_each(fp_types{}, fp_save_load_tester{});
@@ -1272,23 +1270,29 @@ BOOST_AUTO_TEST_CASE(s11n_test_save_load)
             auto msg_checker = [](const not_implemented_error &nie) -> bool {
                 return boost::contains(nie.what(), "type '" + demangle<no_boost_msgpack>() + "' does not support");
             };
-            BOOST_CHECK_EXCEPTION(save_file(n, "foo", f, c), not_implemented_error, msg_checker);
-            BOOST_CHECK_EXCEPTION(load_file(n, "foo", f, c), not_implemented_error, msg_checker);
+            CHECK_THROWS_MATCHES(save_file(n, "foo", f, c), not_implemented_error,
+                                 test::ExceptionMatcher<not_implemented_error>(std::string("type '" + demangle<no_boost_msgpack>() + "' does not support"))
+            );
+            CHECK_THROWS_MATCHES(load_file(n, "foo", f, c), not_implemented_error,
+                 test::ExceptionMatcher<not_implemented_error>(std::string("type '" + demangle<no_boost_msgpack>() + "' does not support"))
+            );
             // Wrong filename for loading.
             auto msg_checker2 = [](const std::runtime_error &re) -> bool {
                 return boost::contains(re.what(), "file 'foobar123' could not be opened for loading");
             };
             int m = 0;
-            BOOST_CHECK_EXCEPTION(load_file(m, "foobar123", f, c), std::runtime_error, msg_checker2);
+            CHECK_THROWS_MATCHES(load_file(m, "foobar123", f, c), std::runtime_error,
+                test::ExceptionMatcher<std::runtime_error>(std::string("file 'foobar123' could not be opened for loading"))
+            );
         }
     }
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, only_boost>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, only_boost>::value));
-    BOOST_CHECK_NO_THROW(save_roundtrip(only_boost{}, data_format::boost_portable, compression::none));
-    BOOST_CHECK_NO_THROW(save_roundtrip(only_boost{}, data_format::boost_binary, compression::none));
-    BOOST_CHECK_THROW(save_roundtrip(only_boost{}, data_format::msgpack_portable, compression::none),
+    CHECK((has_boost_save<boost::archive::binary_oarchive, only_boost>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, only_boost>::value));
+    CHECK_NO_THROW(save_roundtrip(only_boost{}, data_format::boost_portable, compression::none));
+    CHECK_NO_THROW(save_roundtrip(only_boost{}, data_format::boost_binary, compression::none));
+    CHECK_THROW(save_roundtrip(only_boost{}, data_format::msgpack_portable, compression::none),
                       not_implemented_error);
-    BOOST_CHECK_THROW(save_roundtrip(only_boost{}, data_format::msgpack_binary, compression::none),
+    CHECK_THROW(save_roundtrip(only_boost{}, data_format::msgpack_binary, compression::none),
                       not_implemented_error);
     // Test the convenience wrappers.
     for (auto sf : {".boostb", ".boostp", ".mpackb", ".mpackp"}) {
@@ -1298,52 +1302,52 @@ BOOST_AUTO_TEST_CASE(s11n_test_save_load)
             save_file(42, fn);
             int n;
             load_file(n, fn);
-            BOOST_CHECK_EQUAL(n, 42);
+            CHECK(n == 42);
             std::remove(fn.c_str());
         }
     }
-    BOOST_CHECK_THROW(save_file(42, "foo.txt"), std::invalid_argument);
-    BOOST_CHECK_THROW(save_file(42, "foo.bz2"), std::invalid_argument);
+    CHECK_THROW(save_file(42, "foo.txt"), std::invalid_argument);
+    CHECK_THROW(save_file(42, "foo.bz2"), std::invalid_argument);
 #endif
 }
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
-BOOST_AUTO_TEST_CASE(s11n_boost_s11n_key_wrapper_test)
+TEST_CASE("s11n_boost_s11n_key_wrapper_test")
 {
     keya ka;
     symbol_fset ss;
     using w_type = boost_s11n_key_wrapper<keya>;
     w_type w1{ka, ss};
-    BOOST_CHECK_EQUAL(&ka, &w1.key());
-    BOOST_CHECK_EQUAL(&ka, &static_cast<const w_type &>(w1).key());
-    BOOST_CHECK_EQUAL(&ss, &w1.ss());
+    CHECK(&ka == &w1.key());
+    CHECK(&ka == &static_cast<const w_type &>(w1).key());
+    CHECK(&ss == &w1.ss());
     w_type w2{static_cast<const keya &>(ka), ss};
-    BOOST_CHECK_EQUAL(&ka, &static_cast<const w_type &>(w2).key());
-    BOOST_CHECK_EQUAL(&ss, &w2.ss());
-    BOOST_CHECK_EXCEPTION(w2.key(), std::runtime_error, [](const std::runtime_error &re) {
-        return boost::contains(re.what(), "trying to access the mutable key instance of a boost_s11n_key_wrapper "
-                                          "that was constructed with a const key");
-    });
+    CHECK(&ka == &static_cast<const w_type &>(w2).key());
+    CHECK(&ss == &w2.ss());
+    CHECK_THROWS_MATCHES(w2.key(), std::runtime_error,
+        test::ExceptionMatcher<std::runtime_error>(std::string("trying to access the mutable key instance of a boost_s11n_key_wrapper "
+                                          "that was constructed with a const key"))
+    );
 }
 
 struct baz_01 {
 };
 
-BOOST_AUTO_TEST_CASE(s11n_boost_s11n_vector_test)
+TEST_CASE("s11n_boost_s11n_vector_test")
 {
-    BOOST_CHECK((has_boost_save<boost::archive::text_oarchive, std::vector<int>>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::text_iarchive, std::vector<int>>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::text_oarchive, std::vector<std::string>>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::text_iarchive, std::vector<std::string>>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::text_iarchive, std::vector<int>>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::text_oarchive, std::vector<int>>::value));
-    BOOST_CHECK((!has_boost_save<const boost::archive::text_oarchive, std::vector<int>>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::text_oarchive, std::vector<baz_01>>::value));
+    CHECK((has_boost_save<boost::archive::text_oarchive, std::vector<int>>::value));
+    CHECK((has_boost_load<boost::archive::text_iarchive, std::vector<int>>::value));
+    CHECK((has_boost_save<boost::archive::text_oarchive, std::vector<std::string>>::value));
+    CHECK((has_boost_load<boost::archive::text_iarchive, std::vector<std::string>>::value));
+    CHECK((!has_boost_save<boost::archive::text_iarchive, std::vector<int>>::value));
+    CHECK((!has_boost_load<boost::archive::text_oarchive, std::vector<int>>::value));
+    CHECK((!has_boost_save<const boost::archive::text_oarchive, std::vector<int>>::value));
+    CHECK((!has_boost_save<boost::archive::text_oarchive, std::vector<baz_01>>::value));
     std::vector<int> vint{1, 2, 3, 4, 5};
-    BOOST_CHECK(boost_roundtrip(vint) == vint);
+    CHECK(boost_roundtrip(vint) == vint);
     std::vector<std::string> vstr{"a", "b", "c"};
-    BOOST_CHECK(boost_roundtrip(vstr) == vstr);
+    CHECK(boost_roundtrip(vstr) == vstr);
 }
 
 #endif
@@ -1353,19 +1357,19 @@ BOOST_AUTO_TEST_CASE(s11n_boost_s11n_vector_test)
 struct baf_01 {
 };
 
-BOOST_AUTO_TEST_CASE(s11n_msgpack_vector_test)
+TEST_CASE("s11n_msgpack_vector_test")
 {
-    BOOST_CHECK((has_msgpack_pack<sbuffer, std::vector<int>>::value));
-    BOOST_CHECK((has_msgpack_pack<sbuffer, std::vector<std::string>>::value));
-    BOOST_CHECK((!has_msgpack_pack<sbuffer &, std::vector<int>>::value));
-    BOOST_CHECK((!has_msgpack_pack<const sbuffer, std::vector<std::string>>::value));
-    BOOST_CHECK((!has_msgpack_pack<sbuffer, std::vector<baf_01>>::value));
+    CHECK((has_msgpack_pack<sbuffer, std::vector<int>>::value));
+    CHECK((has_msgpack_pack<sbuffer, std::vector<std::string>>::value));
+    CHECK((!has_msgpack_pack<sbuffer &, std::vector<int>>::value));
+    CHECK((!has_msgpack_pack<const sbuffer, std::vector<std::string>>::value));
+    CHECK((!has_msgpack_pack<sbuffer, std::vector<baf_01>>::value));
     for (auto f : {0, 1}) {
         const std::vector<std::string> tmp{"a", "b", "c"};
         auto cmp = msgpack_roundtrip(tmp, static_cast<msgpack_format>(f));
-        BOOST_CHECK(cmp == tmp);
+        CHECK(cmp == tmp);
         cmp = msgpack_roundtrip_sstream(tmp, static_cast<msgpack_format>(f));
-        BOOST_CHECK(cmp == tmp);
+        CHECK(cmp == tmp);
     }
 }
 

@@ -257,7 +257,7 @@ inline namespace impl
 // Enabler for the overload below.
 // NOTE: is_returnable is already checked by the invocation of the other overload.
 template <typename T, typename U, typename Int>
-using math_ipow_subs_int_t = enable_if_t<mppp::is_cpp_integral_interoperable<Int>::value, math_ipow_subs_t<T, U>>;
+using math_ipow_subs_int_t = enable_if_t<mppp::is_cpp_integral<Int>::value, math_ipow_subs_t<T, U>>;
 }
 
 /// Substitution of integral power (convenience overload).
@@ -350,7 +350,7 @@ struct div3_impl<mppp::integer<SSize>> {
 
 // Specialisation of the implementation of piranha::gcd() for mp++'s integers.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename U, mppp::IntegerIntegralOpTypes<U> T>
+template <typename U, typename T> requires mppp::integer_integral_op_types<U,T>
 class gcd_impl<T, U>
 #else
 template <typename T, typename U>
@@ -506,7 +506,8 @@ inline void save(Archive &ar, const mppp::integer<SSize> &n, unsigned)
     // Maybe we should consider providing an API from mp++ to interact directly with strings
     // rather than vectors of chars.
     PIRANHA_MAYBE_TLS std::vector<char> tmp_v;
-    mppp::mpz_to_str(tmp_v, n.get_mpz_view());
+    mppp::detail::mpz_to_str(tmp_v, n.get_mpz_view());     //TODO:: this was one not in the detail namespace. How to chANGE???
+    //mppp::detail::mpz_to_str(tmp_v, n.get_mpz_view().m_ptr);   
     PIRANHA_MAYBE_TLS std::string tmp_s;
     tmp_s.assign(tmp_v.data());
     piranha::boost_save(ar, tmp_s);
@@ -598,7 +599,7 @@ using integer_msgpack_pack_enabler
 
 template <typename T>
 using integer_msgpack_convert_enabler
-    = enable_if_t<conjunction<mppp::is_integer<T>, has_msgpack_convert<std::string>>::value>;
+    = enable_if_t<conjunction<mppp::detail::is_integer<T>, has_msgpack_convert<std::string>>::value>;
 }
 
 /// Specialisation of piranha::msgpack_pack() for mp++'s integers.
@@ -645,7 +646,7 @@ struct msgpack_pack_impl<Stream, mppp::integer<SSize>, integer_msgpack_pack_enab
             // Maybe we should consider providing an API from mp++ to interact directly with strings
             // rather than vectors of chars.
             PIRANHA_MAYBE_TLS std::vector<char> tmp_v;
-            mppp::mpz_to_str(tmp_v, n.get_mpz_view());
+            mppp::detail::mpz_to_str(tmp_v, n.get_mpz_view());
             PIRANHA_MAYBE_TLS std::string tmp_s;
             tmp_s.assign(tmp_v.data());
             piranha::msgpack_pack(p, tmp_s, f);
@@ -699,11 +700,11 @@ struct msgpack_convert_impl<T, integer_msgpack_convert_enabler<T>> {
 #endif
 
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <std::size_t SSize, mppp::CppInteroperable From>
+template <std::size_t SSize, mppp::cpp_arithmetic From>
 class safe_convert_impl<mppp::integer<SSize>, From>
 #else
 template <std::size_t SSize, typename From>
-class safe_convert_impl<mppp::integer<SSize>, From, enable_if_t<mppp::is_cpp_interoperable<From>::value>>
+class safe_convert_impl<mppp::integer<SSize>, From, enable_if_t<mppp::is_cpp_arithmetic<From>::value>>
 #endif
 {
     template <typename T>
@@ -725,16 +726,16 @@ class safe_convert_impl<mppp::integer<SSize>, From, enable_if_t<mppp::is_cpp_int
 public:
     bool operator()(mppp::integer<SSize> &out, From x) const
     {
-        return impl(out, x, mppp::is_cpp_integral_interoperable<From>{});
+        return impl(out, x, mppp::is_cpp_integral<From>{});
     }
 };
 
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <mppp::CppIntegralInteroperable To, std::size_t SSize>
+template <mppp::cpp_integral To, std::size_t SSize>
 class safe_convert_impl<To, mppp::integer<SSize>>
 #else
 template <typename To, std::size_t SSize>
-class safe_convert_impl<To, mppp::integer<SSize>, enable_if_t<mppp::is_cpp_integral_interoperable<To>::value>>
+class safe_convert_impl<To, mppp::integer<SSize>, enable_if_t<mppp::is_cpp_integral<To>::value>>
 #endif
 {
 public:

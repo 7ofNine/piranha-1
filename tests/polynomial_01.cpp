@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/polynomial.hpp>
 
-#define BOOST_TEST_MODULE polynomial_01_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/lexical_cast.hpp>
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/vector.hpp>
@@ -65,6 +62,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/series_multiplier.hpp>
 #include <piranha/settings.hpp>
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -145,44 +144,44 @@ struct constructor_tester {
             typedef polynomial<Cf, monomial<Expo>> p_type;
             // Default construction.
             p_type p1;
-            BOOST_CHECK(p1 == 0);
-            BOOST_CHECK(p1.empty());
+            CHECK(p1 == 0);
+            CHECK(p1.empty());
             // Construction from symbol name.
             p_type p2{"x"};
-            BOOST_CHECK(p2.size() == 1u);
-            BOOST_CHECK(p2 == p_type{"x"});
-            BOOST_CHECK(p2 != p_type{std::string("y")});
-            BOOST_CHECK(p2 == p_type{"x"} + p_type{"y"} - p_type{"y"});
+            CHECK(p2.size() == 1u);
+            CHECK(p2 == p_type{"x"});
+            CHECK(p2 != p_type{std::string("y")});
+            CHECK(p2 == p_type{"x"} + p_type{"y"} - p_type{"y"});
             // Construction from number-like entities.
             p_type p3{3};
-            BOOST_CHECK(p3.size() == 1u);
-            BOOST_CHECK(p3 == 3);
-            BOOST_CHECK(3 == p3);
-            BOOST_CHECK(p3 != p2);
+            CHECK(p3.size() == 1u);
+            CHECK(p3 == 3);
+            CHECK(3 == p3);
+            CHECK(p3 != p2);
             p_type p3a{integer(3)};
-            BOOST_CHECK(p3a == p3);
-            BOOST_CHECK(p3 == p3a);
+            CHECK(p3a == p3);
+            CHECK(p3 == p3a);
             // Construction from polynomial of different type.
             typedef polynomial<long, monomial<int>> p_type1;
             typedef polynomial<int, monomial<short>> p_type2;
             p_type1 p4(1);
             p_type2 p5(p4);
-            BOOST_CHECK(p4 == p5);
-            BOOST_CHECK(p5 == p4);
+            CHECK(p4 == p5);
+            CHECK(p5 == p4);
             p_type1 p6("x");
             p_type2 p7(std::string("x"));
             p_type2 p8("y");
-            BOOST_CHECK(p6 == p7);
-            BOOST_CHECK(p7 == p6);
-            BOOST_CHECK(p6 != p8);
-            BOOST_CHECK(p8 != p6);
+            CHECK(p6 == p7);
+            CHECK(p7 == p6);
+            CHECK(p6 != p8);
+            CHECK(p8 != p6);
             // Type traits checks.
-            BOOST_CHECK((std::is_constructible<p_type, Cf>::value));
-            BOOST_CHECK((std::is_constructible<p_type, std::string>::value));
-            BOOST_CHECK((std::is_constructible<p_type2, p_type1>::value));
-            BOOST_CHECK((!std::is_constructible<p_type, std::vector<int>>::value));
+            CHECK((std::is_constructible<p_type, Cf>::value));
+            CHECK((std::is_constructible<p_type, std::string>::value));
+            CHECK((std::is_constructible<p_type2, p_type1>::value));
+            CHECK((!std::is_constructible<p_type, std::vector<int>>::value));
             // A check on the linarg detector.
-            BOOST_CHECK(detail::key_has_is_linear<monomial<Expo>>::value);
+            CHECK(detail::key_has_is_linear<monomial<Expo>>::value);
         }
     };
     template <typename Cf>
@@ -192,10 +191,10 @@ struct constructor_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_constructors_test)
+TEST_CASE("polynomial_constructors_test")
 {
 #if defined(MPPP_WITH_MPFR)
-    mppp::real_set_default_prec(100);
+    //mppp::real_set_default_prec(100); // did we actually ever need that anywhere ?? is cf_types a mppp::real??
 #endif
     boost::mpl::for_each<cf_types>(constructor_tester());
 }
@@ -207,10 +206,10 @@ struct is_evaluable_tester {
         void operator()(const Expo &)
         {
             typedef polynomial<Cf, monomial<Expo>> p_type;
-            BOOST_CHECK((is_evaluable<p_type, double>::value));
-            BOOST_CHECK((is_evaluable<p_type, float>::value));
-            BOOST_CHECK((is_evaluable<p_type, integer>::value));
-            BOOST_CHECK((is_evaluable<p_type, int>::value));
+            CHECK((is_evaluable<p_type, double>::value));
+            CHECK((is_evaluable<p_type, float>::value));
+            CHECK((is_evaluable<p_type, integer>::value));
+            CHECK((is_evaluable<p_type, int>::value));
         }
     };
     template <typename Cf>
@@ -220,10 +219,10 @@ struct is_evaluable_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_is_evaluable_test)
+TEST_CASE("polynomial_is_evaluable_test")
 {
     boost::mpl::for_each<cf_types>(is_evaluable_tester());
-    BOOST_CHECK((is_evaluable<polynomial<mock_cf, monomial<int>>, double>::value));
+    CHECK((is_evaluable<polynomial<mock_cf, monomial<int>>, double>::value));
 }
 
 struct assignment_tester {
@@ -235,12 +234,12 @@ struct assignment_tester {
             typedef polynomial<Cf, monomial<Expo>> p_type;
             p_type p1;
             p1 = 1;
-            BOOST_CHECK(p1 == 1);
+            CHECK(p1 == 1);
             p1 = integer(10);
-            BOOST_CHECK(p1 == integer(10));
-            BOOST_CHECK((std::is_assignable<p_type, Cf>::value));
-            BOOST_CHECK((std::is_assignable<p_type, p_type>::value));
-            BOOST_CHECK((!std::is_assignable<p_type, std::vector<int>>::value));
+            CHECK(p1 == integer(10));
+            CHECK((std::is_assignable<p_type, Cf>::value));
+            CHECK((std::is_assignable<p_type, p_type>::value));
+            CHECK((!std::is_assignable<p_type, std::vector<int>>::value));
         }
     };
     template <typename Cf>
@@ -250,12 +249,12 @@ struct assignment_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_assignment_test)
+TEST_CASE("polynomial_assignment_test")
 {
     boost::mpl::for_each<cf_types>(assignment_tester());
 }
 
-BOOST_AUTO_TEST_CASE(polynomial_recursive_test)
+TEST_CASE("polynomial_recursive_test")
 {
     typedef polynomial<double, monomial<int>> p_type1;
     typedef polynomial<p_type1, monomial<int>> p_type11;
@@ -263,63 +262,63 @@ BOOST_AUTO_TEST_CASE(polynomial_recursive_test)
     p_type1 x("x");
     p_type11 y("y");
     p_type111 z("z");
-    BOOST_CHECK((std::is_same<decltype(x + y), p_type11>::value));
-    BOOST_CHECK((std::is_same<decltype(y + x), p_type11>::value));
-    BOOST_CHECK((std::is_same<decltype(z + y), p_type111>::value));
-    BOOST_CHECK((std::is_same<decltype(y + z), p_type111>::value));
-    BOOST_CHECK((std::is_same<decltype(z + x), p_type111>::value));
-    BOOST_CHECK((std::is_same<decltype(x + z), p_type111>::value));
+    CHECK((std::is_same<decltype(x + y), p_type11>::value));
+    CHECK((std::is_same<decltype(y + x), p_type11>::value));
+    CHECK((std::is_same<decltype(z + y), p_type111>::value));
+    CHECK((std::is_same<decltype(y + z), p_type111>::value));
+    CHECK((std::is_same<decltype(z + x), p_type111>::value));
+    CHECK((std::is_same<decltype(x + z), p_type111>::value));
 }
 
-BOOST_AUTO_TEST_CASE(polynomial_degree_test)
+TEST_CASE("polynomial_degree_test")
 {
     typedef polynomial<double, monomial<int>> p_type1;
     typedef polynomial<p_type1, monomial<int>> p_type11;
     typedef polynomial<p_type11, monomial<int>> p_type111;
-    BOOST_CHECK(is_degree_type<p_type1>::value);
-    BOOST_CHECK(is_ldegree_type<p_type1>::value);
-    BOOST_CHECK(is_degree_type<p_type11>::value);
-    BOOST_CHECK(is_ldegree_type<p_type11>::value);
-    BOOST_CHECK(is_degree_type<p_type111>::value);
-    BOOST_CHECK(is_ldegree_type<p_type111>::value);
+    CHECK(is_degree_type<p_type1>::value);
+    CHECK(is_ldegree_type<p_type1>::value);
+    CHECK(is_degree_type<p_type11>::value);
+    CHECK(is_ldegree_type<p_type11>::value);
+    CHECK(is_degree_type<p_type111>::value);
+    CHECK(is_ldegree_type<p_type111>::value);
     p_type1 x("x");
-    BOOST_CHECK(piranha::degree(x) == 1);
-    BOOST_CHECK(piranha::ldegree(x) == 1);
-    BOOST_CHECK(piranha::degree(x * x) == 2);
-    BOOST_CHECK(piranha::ldegree(x * x) == 2);
-    BOOST_CHECK(piranha::degree(x * x, {"y", "z"}) == 0);
-    BOOST_CHECK(piranha::ldegree(x * x, {"y", "z"}) == 0);
+    CHECK(piranha::degree(x) == 1);
+    CHECK(piranha::ldegree(x) == 1);
+    CHECK(piranha::degree(x * x) == 2);
+    CHECK(piranha::ldegree(x * x) == 2);
+    CHECK(piranha::degree(x * x, {"y", "z"}) == 0);
+    CHECK(piranha::ldegree(x * x, {"y", "z"}) == 0);
     p_type11 y("y");
     p_type111 z("z");
-    BOOST_CHECK(piranha::degree(x * y) == 2);
-    BOOST_CHECK(piranha::degree(x * y * z) == 3);
-    BOOST_CHECK(piranha::ldegree(x * y * z) == 3);
-    BOOST_CHECK(piranha::degree(x * y * z, {"x"}) == 1);
-    BOOST_CHECK(piranha::ldegree(x * y * z, {"x"}) == 1);
-    BOOST_CHECK(piranha::degree(x * y * z, {"y"}) == 1);
-    BOOST_CHECK(piranha::ldegree(x * y * z, {"y"}) == 1);
-    BOOST_CHECK(piranha::degree(x * y * z, {"z"}) == 1);
-    BOOST_CHECK(piranha::ldegree(x * y * z, {"z"}) == 1);
-    BOOST_CHECK(piranha::degree(x * y * z, {"z", "y"}) == 2);
-    BOOST_CHECK(piranha::ldegree(x * y * z, {"z", "y"}) == 2);
-    BOOST_CHECK(piranha::degree(x * y * z, {"z", "x"}) == 2);
-    BOOST_CHECK(piranha::ldegree(x * y * z, {"z", "x"}) == 2);
-    BOOST_CHECK(piranha::degree(x * y * z, {"y", "x"}) == 2);
-    BOOST_CHECK(piranha::ldegree(x * y * z, {"y", "x"}) == 2);
-    BOOST_CHECK(piranha::degree(x * y * z, {"y", "x", "z"}) == 3);
-    BOOST_CHECK(piranha::ldegree(x * y * z, {"y", "x", "z"}) == 3);
-    BOOST_CHECK(piranha::degree(x + y + z) == 1);
-    BOOST_CHECK(piranha::ldegree(x + y + z) == 1);
-    BOOST_CHECK(piranha::degree(x + y + z, {"x"}) == 1);
-    BOOST_CHECK(piranha::ldegree(x + y + z, {"x"}) == 0);
-    BOOST_CHECK(piranha::ldegree(x + y + z, {"x", "y"}) == 0);
-    BOOST_CHECK(piranha::ldegree(x + y + 1, {"x", "y"}) == 0);
-    BOOST_CHECK(piranha::ldegree(x + y + 1, {"x", "y", "t"}) == 0);
-    BOOST_CHECK(piranha::ldegree(x + y + 1) == 0);
+    CHECK(piranha::degree(x * y) == 2);
+    CHECK(piranha::degree(x * y * z) == 3);
+    CHECK(piranha::ldegree(x * y * z) == 3);
+    CHECK(piranha::degree(x * y * z, {"x"}) == 1);
+    CHECK(piranha::ldegree(x * y * z, {"x"}) == 1);
+    CHECK(piranha::degree(x * y * z, {"y"}) == 1);
+    CHECK(piranha::ldegree(x * y * z, {"y"}) == 1);
+    CHECK(piranha::degree(x * y * z, {"z"}) == 1);
+    CHECK(piranha::ldegree(x * y * z, {"z"}) == 1);
+    CHECK(piranha::degree(x * y * z, {"z", "y"}) == 2);
+    CHECK(piranha::ldegree(x * y * z, {"z", "y"}) == 2);
+    CHECK(piranha::degree(x * y * z, {"z", "x"}) == 2);
+    CHECK(piranha::ldegree(x * y * z, {"z", "x"}) == 2);
+    CHECK(piranha::degree(x * y * z, {"y", "x"}) == 2);
+    CHECK(piranha::ldegree(x * y * z, {"y", "x"}) == 2);
+    CHECK(piranha::degree(x * y * z, {"y", "x", "z"}) == 3);
+    CHECK(piranha::ldegree(x * y * z, {"y", "x", "z"}) == 3);
+    CHECK(piranha::degree(x + y + z) == 1);
+    CHECK(piranha::ldegree(x + y + z) == 1);
+    CHECK(piranha::degree(x + y + z, {"x"}) == 1);
+    CHECK(piranha::ldegree(x + y + z, {"x"}) == 0);
+    CHECK(piranha::ldegree(x + y + z, {"x", "y"}) == 0);
+    CHECK(piranha::ldegree(x + y + 1, {"x", "y"}) == 0);
+    CHECK(piranha::ldegree(x + y + 1, {"x", "y", "t"}) == 0);
+    CHECK(piranha::ldegree(x + y + 1) == 0);
 }
 
 struct multiplication_tester {
-    template <typename Cf, typename std::enable_if<!mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<!mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
         // NOTE: this test is going to be exact in case of coefficients cancellations with double
@@ -341,17 +340,17 @@ struct multiplication_tester {
         }
         auto g = f + 1;
         auto retval = f * g;
-        BOOST_CHECK_EQUAL(retval.size(), 10626u);
+        CHECK(retval.size() == 10626u);
         auto retval_alt = p_type_alt(f) * p_type_alt(g);
-        BOOST_CHECK(retval == p_type{retval_alt});
+        CHECK(retval == p_type{retval_alt});
         // Dense case, force number of threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * g;
             auto tmp_alt = p_type_alt(f) * p_type_alt(g);
-            BOOST_CHECK_EQUAL(tmp1.size(), 10626u);
-            BOOST_CHECK(tmp1 == retval);
-            BOOST_CHECK(tmp1 == p_type{tmp_alt});
+            CHECK(tmp1.size() == 10626u);
+            CHECK(tmp1 == retval);
+            CHECK(tmp1 == p_type{tmp_alt});
         }
         settings::reset_n_threads();
         // Dense case with cancellations, default setup.
@@ -362,16 +361,16 @@ struct multiplication_tester {
         }
         retval = f * h;
         retval_alt = p_type_alt(f) * p_type_alt(h);
-        BOOST_CHECK_EQUAL(retval.size(), 5786u);
-        BOOST_CHECK(retval == p_type{retval_alt});
+        CHECK(retval.size() == 5786u);
+        CHECK(retval == p_type{retval_alt});
         // Dense case with cancellations, force number of threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * h;
             auto tmp_alt = p_type_alt(f) * p_type_alt(h);
-            BOOST_CHECK_EQUAL(tmp1.size(), 5786u);
-            BOOST_CHECK(retval == tmp1);
-            BOOST_CHECK(tmp_alt == p_type_alt{tmp1});
+            CHECK(tmp1.size() == 5786u);
+            CHECK(retval == tmp1);
+            CHECK(tmp_alt == p_type_alt{tmp1});
         }
         settings::reset_n_threads();
         // Sparse case, default.
@@ -387,41 +386,41 @@ struct multiplication_tester {
             h *= tmp_h;
         }
         retval = f * g;
-        BOOST_CHECK_EQUAL(retval.size(), 591235u);
+        CHECK(retval.size() == 591235u);
         retval_alt = p_type_alt(f) * p_type_alt(g);
-        BOOST_CHECK(retval == p_type{retval_alt});
+        CHECK(retval == p_type{retval_alt});
         // Sparse case, force n threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * g;
             auto tmp_alt = p_type_alt(f) * p_type_alt(g);
-            BOOST_CHECK_EQUAL(tmp1.size(), 591235u);
-            BOOST_CHECK(retval == tmp1);
-            BOOST_CHECK(tmp_alt == p_type_alt{tmp1});
+            CHECK(tmp1.size() == 591235u);
+            CHECK(retval == tmp1);
+            CHECK(tmp_alt == p_type_alt{tmp1});
         }
         settings::reset_n_threads();
         // Sparse case with cancellations, default.
         retval = f * h;
-        BOOST_CHECK_EQUAL(retval.size(), 591184u);
+        CHECK(retval.size() == 591184u);
         retval_alt = p_type_alt(f) * p_type_alt(h);
-        BOOST_CHECK(retval_alt == p_type_alt{retval});
+        CHECK(retval_alt == p_type_alt{retval});
         // Sparse case with cancellations, force number of threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * h;
             auto tmp_alt = p_type_alt(f) * p_type_alt(h);
-            BOOST_CHECK_EQUAL(tmp1.size(), 591184u);
-            BOOST_CHECK(tmp1 == retval);
-            BOOST_CHECK(tmp1 == p_type{tmp_alt});
+            CHECK(tmp1.size() == 591184u);
+            CHECK(tmp1 == retval);
+            CHECK(tmp1 == p_type{tmp_alt});
         }
     }
-    template <typename Cf, typename std::enable_if<mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_multiplier_test)
+TEST_CASE("polynomial_multiplier_test")
 {
     boost::mpl::for_each<cf_types>(multiplication_tester());
 }
@@ -447,17 +446,17 @@ public:
             typedef polynomial<Cf, monomial<Expo>> p_type;
             typedef std::map<std::string, integer> map_type;
             p_type p1;
-            BOOST_CHECK((p1.integral_combination() == map_type{}));
+            CHECK((p1.integral_combination() == map_type{}));
             p1 = p_type{"x"};
-            BOOST_CHECK((p1.integral_combination() == map_type{{"x", integer(1)}}));
+            CHECK((p1.integral_combination() == map_type{{"x", integer(1)}}));
             p1 += 2 * p_type{"y"};
-            BOOST_CHECK((p1.integral_combination() == map_type{{"y", integer(2)}, {"x", integer(1)}}));
+            CHECK((p1.integral_combination() == map_type{{"y", integer(2)}, {"x", integer(1)}}));
             p1 = p_type{"x"} + 1;
-            BOOST_CHECK_THROW(p1.integral_combination(), std::invalid_argument);
+            CHECK_THROWS_AS(p1.integral_combination(), std::invalid_argument);
             p1 = p_type{"x"}.pow(2);
-            BOOST_CHECK_THROW(p1.integral_combination(), std::invalid_argument);
+            CHECK_THROWS_AS(p1.integral_combination(), std::invalid_argument);
             p1 = p_type{"x"} * 2 - p_type{"z"} * 3;
-            BOOST_CHECK((p1.integral_combination() == map_type{{"x", integer(2)}, {"z", integer(-3)}}));
+            CHECK((p1.integral_combination() == map_type{{"x", integer(2)}, {"z", integer(-3)}}));
         }
     };
     template <typename Cf>
@@ -469,27 +468,27 @@ public:
         typedef std::map<std::string, integer> map_type;
         p_type p1;
         p1 = p_type{"x"} * rational(4, 2) + p_type{"y"} * 4;
-        BOOST_CHECK((p1.integral_combination() == map_type{{"x", integer(2)}, {"y", integer(4)}}));
+        CHECK((p1.integral_combination() == map_type{{"x", integer(2)}, {"y", integer(4)}}));
         p1 = p_type{"x"} * rational(4, 3) + p_type{"y"} * 4;
-        BOOST_CHECK_THROW(p1.integral_combination(), std::invalid_argument);
+        CHECK_THROWS_AS(p1.integral_combination(), std::invalid_argument);
         p1 = 3 * (p_type{"x"} * rational(5, 3) - p_type{"y"} * 4);
-        BOOST_CHECK((p1.integral_combination() == map_type{{"x", integer(5)}, {"y", integer(-12)}}));
+        CHECK((p1.integral_combination() == map_type{{"x", integer(5)}, {"y", integer(-12)}}));
         if (std::numeric_limits<double>::is_iec559 && std::numeric_limits<double>::radix == 2
             && std::numeric_limits<double>::has_infinity && std::numeric_limits<double>::has_quiet_NaN) {
             typedef polynomial<double, monomial<int>> p_type2;
             p_type2 p2;
             p2 = p_type2{"x"} * 2. + p_type2{"y"} * 4.;
-            BOOST_CHECK((p2.integral_combination() == map_type{{"x", integer(2)}, {"y", integer(4)}}));
+            CHECK((p2.integral_combination() == map_type{{"x", integer(2)}, {"y", integer(4)}}));
             p2 = p_type2{"x"} * 2.5 + p_type2{"y"} * 4.;
-            BOOST_CHECK_THROW(p2.integral_combination(), std::invalid_argument);
+            CHECK_THROWS_AS(p2.integral_combination(), std::invalid_argument);
         }
 #if defined(MPPP_WITH_MPFR)
         typedef polynomial<real, monomial<int>> p_type3;
         p_type3 p3;
         p3 = p_type3{"x"} * 2 + p_type3{"y"} * 4;
-        BOOST_CHECK((p3.integral_combination() == map_type{{"x", integer(2)}, {"y", integer(4)}}));
-        p3 = p_type3{"x"} * real{"2.5"} + p_type3{"y"} * 4.;
-        BOOST_CHECK_THROW(p3.integral_combination(), std::invalid_argument);
+        CHECK((p3.integral_combination() == map_type{{"x", integer(2)}, {"y", integer(4)}}));
+        p3 = p_type3{"x"} * real{"2.5",100} + p_type3{"y"} * 4.;
+        CHECK_THROWS_AS(p3.integral_combination(), std::invalid_argument);
 #endif
     }
 };
@@ -497,7 +496,7 @@ public:
 
 typedef debug_access<integral_combination_tag> ic_tester;
 
-BOOST_AUTO_TEST_CASE(polynomial_integral_combination_test)
+TEST_CASE("polynomial_integral_combination_test")
 {
     boost::mpl::for_each<cf_types>(ic_tester());
 }
@@ -510,16 +509,16 @@ struct pow_tester {
         {
             typedef polynomial<Cf, monomial<Expo>> p_type;
             p_type p{"x"};
-            BOOST_CHECK_EQUAL((2 * p).pow(4), p_type{piranha::pow(Cf(1) * 2, 4)} * p * p * p * p);
+            CHECK((2 * p).pow(4) == p_type{piranha::pow(Cf(1) * 2, 4)} * p * p * p * p);
             p *= p_type{"y"}.pow(2);
-            BOOST_CHECK_EQUAL((3 * p).pow(4), p_type{piranha::pow(Cf(1) * 3, 4)} * p * p * p * p);
+            CHECK((3 * p).pow(4) == p_type{piranha::pow(Cf(1) * 3, 4)} * p * p * p * p);
             if (!std::is_unsigned<Expo>::value) {
-                BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(p.pow(-1)), "x**-1*y**-2");
+                CHECK(boost::lexical_cast<std::string>(p.pow(-1)) == "x**-1*y**-2");
             }
-            BOOST_CHECK_EQUAL(p.pow(0), p_type{piranha::pow(Cf(1), 0)});
-            BOOST_CHECK_EQUAL(p_type{3}.pow(4), piranha::pow(Cf(3), 4));
-            BOOST_CHECK_THROW((p + p_type{"x"}).pow(-1), std::invalid_argument);
-            BOOST_CHECK_EQUAL((p + p_type{"x"}).pow(0), Cf(1));
+            CHECK(p.pow(0) == p_type{piranha::pow(Cf(1), 0)});
+            CHECK(p_type{3}.pow(4) == piranha::pow(Cf(3), 4));
+            CHECK_THROWS_AS((p + p_type{"x"}).pow(-1), std::invalid_argument);
+            CHECK((p + p_type{"x"}).pow(0) == Cf(1));
         }
     };
     template <typename Cf>
@@ -529,42 +528,42 @@ struct pow_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_pow_test)
+TEST_CASE("polynomial_pow_test")
 {
     boost::mpl::for_each<cf_types>(pow_tester());
     typedef polynomial<integer, monomial<int>> p_type1;
-    BOOST_CHECK((is_exponentiable<p_type1, integer>::value));
-    BOOST_CHECK((is_exponentiable<const p_type1, integer>::value));
-    BOOST_CHECK((is_exponentiable<p_type1 &, integer>::value));
-    BOOST_CHECK((is_exponentiable<p_type1 &, integer &>::value));
-    BOOST_CHECK((!is_exponentiable<p_type1, std::string>::value));
-    BOOST_CHECK((!is_exponentiable<p_type1 &, std::string &>::value));
-    BOOST_CHECK((is_exponentiable<p_type1, double>::value));
-    BOOST_CHECK((std::is_same<decltype(p_type1{"x"}.pow(2.)), polynomial<double, monomial<int>>>::value));
-    BOOST_CHECK_EQUAL((p_type1{"x"}.pow(2.)),
+    CHECK((is_exponentiable<p_type1, integer>::value));
+    CHECK((is_exponentiable<const p_type1, integer>::value));
+    CHECK((is_exponentiable<p_type1 &, integer>::value));
+    CHECK((is_exponentiable<p_type1 &, integer &>::value));
+    CHECK((!is_exponentiable<p_type1, std::string>::value));
+    CHECK((!is_exponentiable<p_type1 &, std::string &>::value));
+    CHECK((is_exponentiable<p_type1, double>::value));
+    CHECK((std::is_same<decltype(p_type1{"x"}.pow(2.)), polynomial<double, monomial<int>>>::value));
+    CHECK((p_type1{"x"}.pow(2.)) ==
                       (polynomial<double, monomial<int>>{"x"} * polynomial<double, monomial<int>>{"x"}));
 #if defined(MPPP_WITH_MPFR)
     typedef polynomial<real, monomial<int>> p_type2;
-    BOOST_CHECK((is_exponentiable<p_type2, integer>::value));
-    BOOST_CHECK((is_exponentiable<p_type2, real>::value));
-    BOOST_CHECK((!is_exponentiable<p_type2, std::string>::value));
+    CHECK((is_exponentiable<p_type2, integer>::value));
+    CHECK((is_exponentiable<p_type2, real>::value));
+    CHECK((!is_exponentiable<p_type2, std::string>::value));
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(polynomial_partial_test)
+TEST_CASE("polynomial_partial_test")
 {
     using math::partial;
     typedef polynomial<rational, monomial<short>> p_type1;
     p_type1 x{"x"}, y{"y"};
-    BOOST_CHECK_EQUAL(partial(x * y, "x"), y);
-    BOOST_CHECK_EQUAL(partial(x * y, "y"), x);
-    BOOST_CHECK_EQUAL(partial((x * y + x - 3 * piranha::pow(y, 2)).pow(10), "y"),
+    CHECK(partial(x * y, "x") == y);
+    CHECK(partial(x * y, "y") == x);
+    CHECK(partial((x * y + x - 3 * piranha::pow(y, 2)).pow(10), "y") ==
                       10 * (x * y + x - 3 * piranha::pow(y, 2)).pow(9) * (x - 6 * y));
-    BOOST_CHECK_EQUAL(partial((x * y + x - 3 * piranha::pow(y, 2)).pow(10), "z"), 0);
-    BOOST_CHECK(is_differentiable<p_type1>::value);
-    BOOST_CHECK(has_pbracket<p_type1>::value);
-    BOOST_CHECK(has_transformation_is_canonical<p_type1>::value);
-    BOOST_CHECK((!is_differentiable<polynomial<mock_cf, monomial<short>>>::value));
-    BOOST_CHECK((!has_pbracket<polynomial<mock_cf, monomial<short>>>::value));
-    BOOST_CHECK((!has_transformation_is_canonical<polynomial<mock_cf, monomial<short>>>::value));
+    CHECK(partial((x * y + x - 3 * piranha::pow(y, 2)).pow(10), "z") == 0);
+    CHECK(is_differentiable<p_type1>::value);
+    CHECK(has_pbracket<p_type1>::value);
+    CHECK(has_transformation_is_canonical<p_type1>::value);
+    CHECK((!is_differentiable<polynomial<mock_cf, monomial<short>>>::value));
+    CHECK((!has_pbracket<polynomial<mock_cf, monomial<short>>>::value));
+    CHECK((!has_transformation_is_canonical<polynomial<mock_cf, monomial<short>>>::value));
 }

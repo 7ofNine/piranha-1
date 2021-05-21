@@ -28,11 +28,10 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/math/is_zero.hpp>
 
-#define BOOST_TEST_MODULE is_zero_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <complex>
 #include <string>
+
+#include "catch.hpp"
 
 struct trivial {
 };
@@ -94,36 +93,36 @@ public:
 
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(is_zero_test_00)
+TEST_CASE("is_zero_test_00")
 {
-    BOOST_CHECK(!is_is_zero_type<void>::value);
-    BOOST_CHECK(!is_is_zero_type<std::string>::value);
-    BOOST_CHECK(is_is_zero_type<int>::value);
-    BOOST_CHECK(is_is_zero_type<const long>::value);
-    BOOST_CHECK(is_is_zero_type<const unsigned long &>::value);
-    BOOST_CHECK(is_is_zero_type<float &&>::value);
-    BOOST_CHECK(is_is_zero_type<std::complex<float>>::value);
-    BOOST_CHECK(is_is_zero_type<std::complex<double> &>::value);
-    BOOST_CHECK(is_is_zero_type<const std::complex<long double> &>::value);
-    BOOST_CHECK(piranha::is_zero(0));
-    BOOST_CHECK(!piranha::is_zero(1u));
-    BOOST_CHECK(piranha::is_zero(0.));
-    BOOST_CHECK(!piranha::is_zero(1.23l));
-    BOOST_CHECK(piranha::is_zero(std::complex<float>{0, 0}));
-    BOOST_CHECK(!piranha::is_zero(std::complex<double>{-1, 0}));
-    BOOST_CHECK(!piranha::is_zero(std::complex<double>{0, -1}));
-    BOOST_CHECK(!piranha::is_zero(std::complex<double>{1, 1}));
-    BOOST_CHECK((!is_is_zero_type<trivial>::value));
-    BOOST_CHECK((!is_is_zero_type<trivial &>::value));
-    BOOST_CHECK((!is_is_zero_type<trivial &&>::value));
-    BOOST_CHECK((!is_is_zero_type<const trivial &&>::value));
-    BOOST_CHECK(is_is_zero_type<trivial_a>::value);
-    BOOST_CHECK(is_is_zero_type<trivial_a &>::value);
-    BOOST_CHECK(!is_is_zero_type<trivial_b>::value);
-    BOOST_CHECK(!is_is_zero_type<trivial_c>::value);
-    BOOST_CHECK(!is_is_zero_type<trivial_d>::value);
-    BOOST_CHECK((is_is_zero_type<foo>::value));
-    BOOST_CHECK((is_is_zero_type<const foo>::value));
-    BOOST_CHECK((is_is_zero_type<const foo &>::value));
-    BOOST_CHECK((!is_is_zero_type<foo &>::value));
+    CHECK(!is_is_zero_type<void>::value);
+    CHECK(!is_is_zero_type<std::string>::value);
+    CHECK(is_is_zero_type<int>::value);
+    CHECK(is_is_zero_type<const long>::value);
+    CHECK(is_is_zero_type<const unsigned long &>::value);
+    CHECK(is_is_zero_type<float &&>::value);
+    CHECK(is_is_zero_type<std::complex<float>>::value);
+    CHECK(is_is_zero_type<std::complex<double> &>::value);
+    CHECK(is_is_zero_type<const std::complex<long double> &>::value);
+    CHECK(piranha::is_zero(0));
+    CHECK(!piranha::is_zero(1u));
+    CHECK(piranha::is_zero(0.));
+    CHECK(!piranha::is_zero(1.23l));
+    CHECK(piranha::is_zero(std::complex<float>{0, 0}));
+    CHECK(!piranha::is_zero(std::complex<double>{-1, 0}));
+    CHECK(!piranha::is_zero(std::complex<double>{0, -1}));
+    CHECK(!piranha::is_zero(std::complex<double>{1, 1}));
+    CHECK((!is_is_zero_type<trivial>::value));
+    CHECK((!is_is_zero_type<trivial &>::value));
+    CHECK((!is_is_zero_type<trivial &&>::value));
+    CHECK((!is_is_zero_type<const trivial &&>::value));
+    CHECK(is_is_zero_type<trivial_a>::value);
+    CHECK(is_is_zero_type<trivial_a &>::value);
+    CHECK(!is_is_zero_type<trivial_b>::value);
+    CHECK(!is_is_zero_type<trivial_c>::value);
+    CHECK(!is_is_zero_type<trivial_d>::value);
+    CHECK((is_is_zero_type<foo>::value));
+    CHECK((is_is_zero_type<const foo>::value));
+    CHECK((is_is_zero_type<const foo &>::value));
+    CHECK((!is_is_zero_type<foo &>::value));
 }

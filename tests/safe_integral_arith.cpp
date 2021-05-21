@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/detail/safe_integral_arith.hpp>
 
-#define BOOST_TEST_MODULE safe_integral_arith_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <limits>
 #include <random>
 #include <stdexcept>
@@ -41,6 +38,9 @@ see https://www.gnu.org/licenses/. */
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
+#include "exception_matcher.hpp"
 
 using namespace piranha;
 
@@ -55,45 +55,40 @@ struct add_tester {
     template <typename T>
     void operator()(const T &) const
     {
-        BOOST_CHECK_EQUAL(safe_int_add(std::numeric_limits<T>::max(), T(0)), std::numeric_limits<T>::max());
-        BOOST_CHECK_EQUAL(safe_int_add(std::numeric_limits<T>::min(), T(0)), std::numeric_limits<T>::min());
-        BOOST_CHECK_EXCEPTION(safe_int_add(std::numeric_limits<T>::max(), T(1)), std::overflow_error,
-                              [](const std::overflow_error &oe) {
-                                  return boost::contains(oe.what(), "overflow error in an integral addition: ");
-                              });
-        BOOST_CHECK_EXCEPTION(safe_int_add(std::numeric_limits<T>::max(), T(5)), std::overflow_error,
-                              [](const std::overflow_error &oe) {
-                                  return boost::contains(oe.what(), "overflow error in an integral addition: ");
-                              });
-        BOOST_CHECK_EXCEPTION(safe_int_add(std::numeric_limits<T>::max(), T(50)), std::overflow_error,
-                              [](const std::overflow_error &oe) {
-                                  return boost::contains(oe.what(), "overflow error in an integral addition: ");
-                              });
+        CHECK(safe_int_add(std::numeric_limits<T>::max(), T(0)) == std::numeric_limits<T>::max());
+        CHECK(safe_int_add(std::numeric_limits<T>::min(), T(0)) == std::numeric_limits<T>::min());
+        CHECK_THROWS_MATCHES(safe_int_add(std::numeric_limits<T>::max(), T(1)), std::overflow_error,
+                              test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral addition: "))
+        );
+        CHECK_THROWS_MATCHES(safe_int_add(std::numeric_limits<T>::max(), T(5)), std::overflow_error,
+                              test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral addition: "))
+        );
+        CHECK_THROWS_MATCHES(safe_int_add(std::numeric_limits<T>::max(), T(50)), std::overflow_error,
+                              test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral addition: "))
+        );
         if (std::is_signed<T>::value) {
-            BOOST_CHECK_EXCEPTION(safe_int_add(std::numeric_limits<T>::min(), T(-1)), std::overflow_error,
-                                  [](const std::overflow_error &oe) {
-                                      return boost::contains(oe.what(), "overflow error in an integral addition: ");
-                                  });
-            BOOST_CHECK_EXCEPTION(safe_int_add(std::numeric_limits<T>::min(), T(-5)), std::overflow_error,
-                                  [](const std::overflow_error &oe) {
-                                      return boost::contains(oe.what(), "overflow error in an integral addition: ");
-                                  });
-            BOOST_CHECK_EXCEPTION(safe_int_add(std::numeric_limits<T>::min(), T(-50)), std::overflow_error,
-                                  [](const std::overflow_error &oe) {
-                                      return boost::contains(oe.what(), "overflow error in an integral addition: ");
-                                  });
+            CHECK_THROWS_MATCHES(safe_int_add(std::numeric_limits<T>::min(), T(-1)), std::overflow_error,
+                                  test::ExceptionMatcher<std::overflow_error>(std::string(
+                                      "overflow error in an integral addition: "))
+                                  );
+            CHECK_THROWS_MATCHES(safe_int_add(std::numeric_limits<T>::min(), T(-5)), std::overflow_error,
+                                  test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral addition: "))
+                                  );
+            CHECK_THROWS_MATCHES(safe_int_add(std::numeric_limits<T>::min(), T(-50)), std::overflow_error,
+                                  test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral addition: "))
+            );
         }
         using r_type = decltype(T(0) + T(0));
         std::uniform_int_distribution<r_type> dist(std::numeric_limits<T>::min() / T(5),
                                                    std::numeric_limits<T>::max() / T(5));
         for (auto i = 0; i < ntries; ++i) {
             const auto a = dist(rng), b = dist(rng);
-            BOOST_CHECK_EQUAL(safe_int_add(static_cast<T>(a), static_cast<T>(b)), a + b);
+            CHECK(safe_int_add(static_cast<T>(a), static_cast<T>(b)) == a + b);
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(sia_add_test)
+TEST_CASE("sia_add_test")
 {
     tuple_for_each(integral_types{}, add_tester{});
 }
@@ -102,33 +97,27 @@ struct sub_tester {
     template <typename T>
     void operator()(const T &) const
     {
-        BOOST_CHECK_EQUAL(safe_int_sub(std::numeric_limits<T>::max(), T(0)), std::numeric_limits<T>::max());
-        BOOST_CHECK_EQUAL(safe_int_sub(std::numeric_limits<T>::min(), T(0)), std::numeric_limits<T>::min());
-        BOOST_CHECK_EXCEPTION(safe_int_sub(std::numeric_limits<T>::min(), T(1)), std::overflow_error,
-                              [](const std::overflow_error &oe) {
-                                  return boost::contains(oe.what(), "overflow error in an integral subtraction: ");
-                              });
-        BOOST_CHECK_EXCEPTION(safe_int_sub(std::numeric_limits<T>::min(), T(5)), std::overflow_error,
-                              [](const std::overflow_error &oe) {
-                                  return boost::contains(oe.what(), "overflow error in an integral subtraction: ");
-                              });
-        BOOST_CHECK_EXCEPTION(safe_int_sub(std::numeric_limits<T>::min(), T(50)), std::overflow_error,
-                              [](const std::overflow_error &oe) {
-                                  return boost::contains(oe.what(), "overflow error in an integral subtraction: ");
-                              });
+        CHECK(safe_int_sub(std::numeric_limits<T>::max(), T(0)) == std::numeric_limits<T>::max());
+        CHECK(safe_int_sub(std::numeric_limits<T>::min(), T(0)) == std::numeric_limits<T>::min());
+        CHECK_THROWS_MATCHES(safe_int_sub(std::numeric_limits<T>::min(), T(1)), std::overflow_error,
+                              test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral subtraction: "))
+        );
+        CHECK_THROWS_MATCHES(safe_int_sub(std::numeric_limits<T>::min(), T(5)), std::overflow_error,
+                              test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral subtraction: "))
+        );
+        CHECK_THROWS_MATCHES(safe_int_sub(std::numeric_limits<T>::min(), T(50)), std::overflow_error,
+                              test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral subtraction: "))
+        );
         if (std::is_signed<T>::value) {
-            BOOST_CHECK_EXCEPTION(safe_int_sub(std::numeric_limits<T>::max(), T(-1)), std::overflow_error,
-                                  [](const std::overflow_error &oe) {
-                                      return boost::contains(oe.what(), "overflow error in an integral subtraction: ");
-                                  });
-            BOOST_CHECK_EXCEPTION(safe_int_sub(std::numeric_limits<T>::max(), T(-5)), std::overflow_error,
-                                  [](const std::overflow_error &oe) {
-                                      return boost::contains(oe.what(), "overflow error in an integral subtraction: ");
-                                  });
-            BOOST_CHECK_EXCEPTION(safe_int_sub(std::numeric_limits<T>::max(), T(-50)), std::overflow_error,
-                                  [](const std::overflow_error &oe) {
-                                      return boost::contains(oe.what(), "overflow error in an integral subtraction: ");
-                                  });
+            CHECK_THROWS_MATCHES(safe_int_sub(std::numeric_limits<T>::max(), T(-1)), std::overflow_error,
+                                  test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral subtraction: "))
+            );
+            CHECK_THROWS_MATCHES(safe_int_sub(std::numeric_limits<T>::max(), T(-5)), std::overflow_error,
+                                  test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral subtraction: "))
+            );
+            CHECK_THROWS_MATCHES(safe_int_sub(std::numeric_limits<T>::max(), T(-50)), std::overflow_error,
+                                  test::ExceptionMatcher<std::overflow_error>(std::string("overflow error in an integral subtraction: "))
+            );
         }
         using r_type = decltype(T(0) - T(0));
         std::uniform_int_distribution<r_type> dist(std::numeric_limits<T>::min() / T(5),
@@ -138,12 +127,12 @@ struct sub_tester {
             if (a < b && std::is_unsigned<T>::value) {
                 std::swap(a, b);
             }
-            BOOST_CHECK_EQUAL(safe_int_sub(static_cast<T>(a), static_cast<T>(b)), a - b);
+            CHECK(safe_int_sub(static_cast<T>(a), static_cast<T>(b)) == a - b);
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(sia_sub_test)
+TEST_CASE("sia_sub_test")
 {
     tuple_for_each(integral_types{}, sub_tester{});
 }

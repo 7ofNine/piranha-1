@@ -81,6 +81,8 @@ see https://www.gnu.org/licenses/. */
 #include "type_system.hpp"
 #include "utils.hpp"
 
+#include "piranha/math/gcd.hpp"
+
 namespace bp = boost::python;
 
 static std::mutex global_mutex;
@@ -288,7 +290,7 @@ BOOST_PYTHON_MODULE(_core)
 #endif
 #undef PYRANHA_EXPOSE_INVERT
     // GCD.
-    bp::def("_gcd", &piranha::math::gcd<piranha::integer, piranha::integer>);
+    //bp::def("_gcd", &piranha::gcd<piranha::integer, piranha::integer>);   //TODO::fails in boost::python ???????
     // Tests for exception translation.
     bp::def("_test_safe_cast_failure", &test_exception<piranha::safe_cast_failure>);
     bp::def("_test_zero_division_error", &test_exception<mppp::zero_division_error>);

@@ -28,30 +28,29 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/thread_barrier.hpp>
 
-#define BOOST_TEST_MODULE thread_barrier_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <functional>
 #include <type_traits>
 
 #include <piranha/thread_pool.hpp>
 
-BOOST_AUTO_TEST_CASE(thread_barrier_test_01)
+#include "catch.hpp"
+
+TEST_CASE("thread_barrier_test_01")
 {
     const unsigned n_threads = 100;
     piranha::thread_barrier tb(n_threads);
     piranha::thread_pool::resize(n_threads);
     piranha::future_list<void> f_list;
     for (unsigned i = 0; i < n_threads; ++i) {
-        BOOST_CHECK_NO_THROW(f_list.push_back(piranha::thread_pool::enqueue(i, std::bind(
+        CHECK_NOTHROW(f_list.push_back(piranha::thread_pool::enqueue(i, std::bind(
                                                                                    [&tb](unsigned x, unsigned y) {
                                                                                        tb.wait();
                                                                                        (void)(x + y);
                                                                                    },
                                                                                    i, i + 1))));
     }
-    BOOST_CHECK_NO_THROW(f_list.wait_all());
-    BOOST_CHECK_NO_THROW(f_list.wait_all());
-    BOOST_CHECK(!std::is_copy_assignable<piranha::thread_barrier>::value);
-    BOOST_CHECK(!std::is_move_assignable<piranha::thread_barrier>::value);
+    CHECK_NOTHROW(f_list.wait_all());
+    CHECK_NOTHROW(f_list.wait_all());
+    CHECK(!std::is_copy_assignable<piranha::thread_barrier>::value);
+    CHECK(!std::is_move_assignable<piranha::thread_barrier>::value);
 }

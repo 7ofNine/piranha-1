@@ -29,8 +29,6 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/detail/atomic_flag_array.hpp>
 #include <piranha/detail/atomic_lock_guard.hpp>
 
-#define BOOST_TEST_MODULE atomic_utils_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -40,12 +38,14 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/thread_barrier.hpp>
 
+#include "catch.hpp"
+
 using namespace piranha;
 
 using a_array = detail::atomic_flag_array;
 using alg = detail::atomic_lock_guard;
 
-BOOST_AUTO_TEST_CASE(atomic_utils_atomic_flag_array_test)
+TEST_CASE("atomic_utils_atomic_flag_array_test")
 {
     // Test with just an empty array.
     a_array a0(0u);
@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(atomic_utils_atomic_flag_array_test)
     a_array a1(size);
     // Verify everything is set to false.
     for (std::size_t i = 0u; i < size; ++i) {
-        BOOST_CHECK(!a1[i].test_and_set());
-        BOOST_CHECK(a1[i].test_and_set());
+        CHECK(!a1[i].test_and_set());
+        CHECK(a1[i].test_and_set());
     }
     // Concurrent.
     size = 1000000u;
@@ -72,26 +72,26 @@ BOOST_AUTO_TEST_CASE(atomic_utils_atomic_flag_array_test)
     t0.join();
     t1.join();
     for (std::size_t i = 0u; i < size; ++i) {
-        BOOST_CHECK(a2[i].test_and_set());
+        CHECK(a2[i].test_and_set());
         // Check also the const getter of the array.
-        BOOST_CHECK(std::addressof(a2[i]) == std::addressof(static_cast<const a_array &>(a2)[i]));
+        CHECK(std::addressof(a2[i]) == std::addressof(static_cast<const a_array &>(a2)[i]));
     }
     // Some type traits checks.
-    BOOST_CHECK(!std::is_constructible<a_array>::value);
-    BOOST_CHECK(!std::is_copy_constructible<a_array>::value);
-    BOOST_CHECK(!std::is_move_constructible<a_array>::value);
-    BOOST_CHECK(!std::is_copy_assignable<a_array>::value);
-    BOOST_CHECK(!std::is_move_assignable<a_array>::value);
+    CHECK(!std::is_constructible<a_array>::value);
+    CHECK(!std::is_copy_constructible<a_array>::value);
+    CHECK(!std::is_move_constructible<a_array>::value);
+    CHECK(!std::is_copy_assignable<a_array>::value);
+    CHECK(!std::is_move_assignable<a_array>::value);
 }
 
-BOOST_AUTO_TEST_CASE(atomic_utils_atomic_lock_guard_test)
+TEST_CASE("atomic_utils_atomic_lock_guard_test")
 {
     // Some type traits checks.
-    BOOST_CHECK(!std::is_constructible<alg>::value);
-    BOOST_CHECK(!std::is_copy_constructible<alg>::value);
-    BOOST_CHECK(!std::is_move_constructible<alg>::value);
-    BOOST_CHECK(!std::is_copy_assignable<alg>::value);
-    BOOST_CHECK(!std::is_move_assignable<alg>::value);
+    CHECK(!std::is_constructible<alg>::value);
+    CHECK(!std::is_copy_constructible<alg>::value);
+    CHECK(!std::is_move_constructible<alg>::value);
+    CHECK(!std::is_copy_assignable<alg>::value);
+    CHECK(!std::is_move_assignable<alg>::value);
     // Concurrent writes protected by a spinlock.
     std::size_t size = 10000u;
     using size_type = std::vector<double>::size_type;
@@ -109,5 +109,5 @@ BOOST_AUTO_TEST_CASE(atomic_utils_atomic_lock_guard_test)
     std::thread t1(func);
     t0.join();
     t1.join();
-    BOOST_CHECK(std::all_of(v.begin(), v.end(), [](double x) { return x == 1.; }));
+    CHECK(std::all_of(v.begin(), v.end(), [](double x) { return x == 1.; }));
 }

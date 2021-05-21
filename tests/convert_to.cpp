@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/convert_to.hpp>
 
-#define BOOST_TEST_MODULE convert_to_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <string>
 #include <type_traits>
@@ -43,6 +41,8 @@ see https://www.gnu.org/licenses/. */
 #if defined(MPPP_WITH_MPFR)
 #include <piranha/real.hpp>
 #endif
+
+#include "catch.hpp"
 
 static void test_func() {}
 static auto l1 = []() {};
@@ -110,58 +110,58 @@ struct convert_to_impl<conv_nr_00, conv5, void> {
 
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(convert_to_main_test)
+TEST_CASE("convert_to_main_test")
 {
-    BOOST_CHECK_EQUAL(convert_to<int>(3.5), 3);
-    BOOST_CHECK((std::is_same<int, decltype(convert_to<int>(3.5))>::value));
-    BOOST_CHECK_EQUAL(convert_to<std::string>("asdasd"), "asdasd");
-    BOOST_CHECK_NO_THROW(convert_to<std::function<void()>>(test_func));
-    BOOST_CHECK_NO_THROW(convert_to<std::function<void()>>(l1));
-    BOOST_CHECK_NO_THROW(convert_to<void (*)()>(l1));
-    BOOST_CHECK((!has_convert_to<int, std::string>::value));
-    BOOST_CHECK((has_convert_to<std::string, const char *>::value));
-    BOOST_CHECK((has_convert_to<std::string, char *>::value));
-    BOOST_CHECK((has_convert_to<double, long double>::value));
-    BOOST_CHECK((has_convert_to<void, long double>::value));
-    BOOST_CHECK((!has_convert_to<long double, void>::value));
-    BOOST_CHECK((!has_convert_to<void, void>::value));
-    BOOST_CHECK((has_convert_to<long double, double>::value));
-    BOOST_CHECK((has_convert_to<long double, int>::value));
-    BOOST_CHECK((has_convert_to<std::function<void()>, void (*)()>::value));
-    BOOST_CHECK((has_convert_to<std::function<void()>, decltype(l1)>::value));
-    BOOST_CHECK((has_convert_to<void (*)(), decltype(l1)>::value));
+    CHECK(convert_to<int>(3.5) == 3);
+    CHECK((std::is_same<int, decltype(convert_to<int>(3.5))>::value));
+    CHECK(convert_to<std::string>("asdasd") == "asdasd");
+    CHECK_NOTHROW(convert_to<std::function<void()>>(test_func));
+    CHECK_NOTHROW(convert_to<std::function<void()>>(l1));
+    CHECK_NOTHROW(convert_to<void (*)()>(l1));
+    CHECK((!has_convert_to<int, std::string>::value));
+    CHECK((has_convert_to<std::string, const char *>::value));
+    CHECK((has_convert_to<std::string, char *>::value));
+    CHECK((has_convert_to<double, long double>::value));
+    CHECK((has_convert_to<void, long double>::value));
+    CHECK((!has_convert_to<long double, void>::value));
+    CHECK((!has_convert_to<void, void>::value));
+    CHECK((has_convert_to<long double, double>::value));
+    CHECK((has_convert_to<long double, int>::value));
+    CHECK((has_convert_to<std::function<void()>, void (*)()>::value));
+    CHECK((has_convert_to<std::function<void()>, decltype(l1)>::value));
+    CHECK((has_convert_to<void (*)(), decltype(l1)>::value));
 #if defined(MPPP_WITH_MPFR)
-    BOOST_CHECK((has_convert_to<real, rational>::value));
-    BOOST_CHECK((has_convert_to<rational, real>::value));
-    BOOST_CHECK((has_convert_to<integer, real>::value));
-    BOOST_CHECK((has_convert_to<real, real>::value));
+    CHECK((has_convert_to<real, rational>::value));
+    CHECK((has_convert_to<rational, real>::value));
+    CHECK((has_convert_to<integer, real>::value));
+    CHECK((has_convert_to<real, real>::value));
 #endif
     // NOTE: this used to be problematic with libc++ in an earlier implementation
     // of convert_to().
-    BOOST_CHECK((has_convert_to<int, integer>::value));
-    BOOST_CHECK_EQUAL(convert_to<int>(45_z), 45);
+    CHECK((has_convert_to<int, integer>::value));
+    CHECK(convert_to<int>(45_z) == 45);
     // Some pointer conversions.
-    BOOST_CHECK((has_convert_to<derived *, base *>::value));
-    BOOST_CHECK((has_convert_to<base *, derived *>::value));
-    BOOST_CHECK((!has_convert_to<derived *, const base *>::value));
-    BOOST_CHECK((has_convert_to<derived const *, const base *>::value));
+    CHECK((has_convert_to<derived *, base *>::value));
+    CHECK((has_convert_to<base *, derived *>::value));
+    CHECK((!has_convert_to<derived *, const base *>::value));
+    CHECK((has_convert_to<derived const *, const base *>::value));
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
     // This looks like an Intel compiler bug. ICC returns this as false:
     // std::is_same<decltype(static_cast<derived const *>((base *)nullptr)),derived const *>::value
     // It erases the const from "derived const *" when casting.
-    BOOST_CHECK((has_convert_to<derived const *, base *>::value));
+    CHECK((has_convert_to<derived const *, base *>::value));
 #endif
-    BOOST_CHECK((!has_convert_to<base *, base2 *>::value));
-    BOOST_CHECK((!has_convert_to<base2 *, base *>::value));
+    CHECK((!has_convert_to<base *, base2 *>::value));
+    CHECK((!has_convert_to<base2 *, base *>::value));
     // User-defined conversion operator and specialisations.
-    BOOST_CHECK((has_convert_to<conv2, conv1>::value));
-    BOOST_CHECK((!has_convert_to<conv1, conv2>::value));
-    BOOST_CHECK((has_convert_to<conv1, conv3>::value));
-    BOOST_CHECK((!has_convert_to<conv1, conv4>::value));
-    BOOST_CHECK((!has_convert_to<conv1, conv5>::value));
-    BOOST_CHECK((!has_convert_to<conv_nr_00, conv5>::value));
+    CHECK((has_convert_to<conv2, conv1>::value));
+    CHECK((!has_convert_to<conv1, conv2>::value));
+    CHECK((has_convert_to<conv1, conv3>::value));
+    CHECK((!has_convert_to<conv1, conv4>::value));
+    CHECK((!has_convert_to<conv1, conv5>::value));
+    CHECK((!has_convert_to<conv_nr_00, conv5>::value));
     // Check with cv qualifiers.
-    BOOST_CHECK((has_convert_to<double &, const long double &>::value));
-    BOOST_CHECK((has_convert_to<const long double, double &&>::value));
-    BOOST_CHECK((has_convert_to<const long double, int &>::value));
+    CHECK((has_convert_to<double &, const long double &>::value));
+    CHECK((has_convert_to<const long double, double &&>::value));
+    CHECK((has_convert_to<const long double, int &>::value));
 }

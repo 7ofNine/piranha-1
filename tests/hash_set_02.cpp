@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/hash_set.hpp>
 
-#define BOOST_TEST_MODULE hash_set_02_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstddef>
@@ -45,6 +43,9 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/rational.hpp>
 #include <piranha/s11n.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
+#include "exception_matcher.hpp"
 
 #if defined(PIRANHA_WITH_BOOST_S11N) || defined(PIRANHA_WITH_MSGPACK)
 static const int ntries = 1000;
@@ -84,7 +85,7 @@ static inline bool check_eq(const H &h1, const H &h2)
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(hash_set_empty_test) {}
+TEST_CASE("hash_set_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -101,7 +102,7 @@ static inline void boost_roundtrip(const T &x)
         IArchive ia(ss);
         boost_load(ia, retval);
     }
-    BOOST_CHECK(check_eq(x, retval));
+    CHECK(check_eq(x, retval));
 }
 
 struct boost_s11n_tester {
@@ -109,18 +110,18 @@ struct boost_s11n_tester {
     void operator()(const T &) const
     {
         using h_type = hash_set<T>;
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, h_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, h_type &>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const h_type &>::value));
-        BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const h_type &>::value));
-        BOOST_CHECK((!has_boost_save<void, const h_type &>::value));
-        BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, h_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, h_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, h_type &>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const h_type &>::value));
-        BOOST_CHECK((!has_boost_load<const boost::archive::binary_iarchive &, const h_type &>::value));
-        BOOST_CHECK((!has_boost_load<void, const h_type &>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, h_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive, h_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, h_type &>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, const h_type &>::value));
+        CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const h_type &>::value));
+        CHECK((!has_boost_save<void, const h_type &>::value));
+        CHECK((!has_boost_save<boost::archive::binary_iarchive, h_type>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive, h_type>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive &, h_type &>::value));
+        CHECK((!has_boost_load<boost::archive::binary_iarchive &, const h_type &>::value));
+        CHECK((!has_boost_load<const boost::archive::binary_iarchive &, const h_type &>::value));
+        CHECK((!has_boost_load<void, const h_type &>::value));
+        CHECK((!has_boost_load<boost::archive::binary_oarchive, h_type>::value));
         using size_type = typename h_type::size_type;
         std::uniform_int_distribution<size_type> sdist(0, 10);
         std::uniform_int_distribution<int> vdist(-10, 10);
@@ -136,11 +137,11 @@ struct boost_s11n_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_boost_s11n_test)
+TEST_CASE("hash_set_boost_s11n_test")
 {
     tuple_for_each(types{}, boost_s11n_tester{});
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_oarchive, hash_set<no_s11n>>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive, hash_set<no_s11n>>::value));
+    CHECK((!has_boost_save<boost::archive::binary_oarchive, hash_set<no_s11n>>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive, hash_set<no_s11n>>::value));
 }
 
 #endif
@@ -156,7 +157,7 @@ static inline void msgpack_roundtrip(const T &x, msgpack_format f)
     auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
     T retval;
     msgpack_convert(retval, oh.get(), f);
-    BOOST_CHECK(check_eq(retval, x));
+    CHECK(check_eq(retval, x));
 }
 
 struct msgpack_s11n_tester {
@@ -164,14 +165,14 @@ struct msgpack_s11n_tester {
     void operator()(const T &) const
     {
         using h_type = hash_set<T>;
-        BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, h_type>::value));
-        BOOST_CHECK((has_msgpack_pack<std::stringstream, h_type &>::value));
-        BOOST_CHECK((has_msgpack_pack<std::stringstream, const h_type &>::value));
-        BOOST_CHECK((!has_msgpack_pack<std::stringstream &, const h_type &>::value));
-        BOOST_CHECK((!has_msgpack_pack<void, const h_type &>::value));
-        BOOST_CHECK((has_msgpack_convert<h_type>::value));
-        BOOST_CHECK((has_msgpack_convert<h_type &>::value));
-        BOOST_CHECK((!has_msgpack_convert<const h_type &>::value));
+        CHECK((has_msgpack_pack<msgpack::sbuffer, h_type>::value));
+        CHECK((has_msgpack_pack<std::stringstream, h_type &>::value));
+        CHECK((has_msgpack_pack<std::stringstream, const h_type &>::value));
+        CHECK((!has_msgpack_pack<std::stringstream &, const h_type &>::value));
+        CHECK((!has_msgpack_pack<void, const h_type &>::value));
+        CHECK((has_msgpack_convert<h_type>::value));
+        CHECK((has_msgpack_convert<h_type &>::value));
+        CHECK((!has_msgpack_convert<const h_type &>::value));
         using size_type = typename h_type::size_type;
         std::uniform_int_distribution<size_type> sdist(0, 10);
         std::uniform_int_distribution<int> vdist(-10, 10);
@@ -195,22 +196,20 @@ struct msgpack_s11n_tester {
             msgpack_pack(p, T(42), msgpack_format::binary);
             h_type h;
             auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
-            BOOST_CHECK_EXCEPTION(
+            CHECK_THROWS_MATCHES(
                 msgpack_convert(h, oh.get(), msgpack_format::binary), std::invalid_argument,
-                [](const std::invalid_argument &iae) {
-                    return boost::contains(
-                        iae.what(),
-                        "while deserializing a hash_set from a msgpack object a duplicate value was encountered");
-                });
+                test::ExceptionMatcher<std::invalid_argument>(std::string(
+                        "while deserializing a hash_set from a msgpack object a duplicate value was encountered"))
+            );
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_msgpack_s11n_test)
+TEST_CASE("hash_set_msgpack_s11n_test")
 {
     tuple_for_each(types{}, msgpack_s11n_tester{});
-    BOOST_CHECK((!has_msgpack_pack<msgpack::sbuffer, hash_set<no_s11n>>::value));
-    BOOST_CHECK((!has_msgpack_convert<hash_set<no_s11n>>::value));
+    CHECK((!has_msgpack_pack<msgpack::sbuffer, hash_set<no_s11n>>::value));
+    CHECK((!has_msgpack_convert<hash_set<no_s11n>>::value));
 }
 
 #endif

@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/safe_convert.hpp>
 
-#define BOOST_TEST_MODULE safe_convert_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <cstdint>
 #include <limits>
 #include <random>
@@ -42,6 +39,8 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/integer.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -89,11 +88,11 @@ struct int_checker {
         template <typename U>
         void operator()(const U &) const
         {
-            BOOST_CHECK((!is_safely_convertible<U, T>::value));
-            BOOST_CHECK((is_safely_convertible<U, T &>::value));
-            BOOST_CHECK((is_safely_convertible<const U, T &>::value));
-            BOOST_CHECK((is_safely_convertible<U &, T &>::value));
-            BOOST_CHECK((!is_safely_convertible<U, void>::value));
+            CHECK((!is_safely_convertible<U, T>::value));
+            CHECK((is_safely_convertible<U, T &>::value));
+            CHECK((is_safely_convertible<const U, T &>::value));
+            CHECK((is_safely_convertible<U &, T &>::value));
+            CHECK((!is_safely_convertible<U, void>::value));
             T out;
             auto dist = get_dist<U>(std::is_signed<U>{});
             for (auto i = 0; i < ntrials; ++i) {
@@ -101,11 +100,11 @@ struct int_checker {
                 const bool flag = safe_convert(out, tmp);
                 // We check that the conversion status is consistent
                 // with the conversion routine from mp++.
-                BOOST_CHECK(flag == mppp::get(out, integer{tmp}));
+                CHECK(flag == mppp::get(out, integer{tmp}));
                 if (flag) {
                     // If the conversion was successful, let's make
                     // sure the value was actually written out.
-                    BOOST_CHECK_EQUAL(out, static_cast<T>(tmp));
+                    CHECK(out == static_cast<T>(tmp));
                 }
             }
         }
@@ -113,73 +112,73 @@ struct int_checker {
     template <typename T>
     void operator()(const T &) const
     {
-        BOOST_CHECK((!is_safely_convertible<void, T &>::value));
-        BOOST_CHECK((!is_safely_convertible<std::string, T &>::value));
-        BOOST_CHECK((!is_safely_convertible<T, std::string &>::value));
+        CHECK((!is_safely_convertible<void, T &>::value));
+        CHECK((!is_safely_convertible<std::string, T &>::value));
+        CHECK((!is_safely_convertible<T, std::string &>::value));
         tuple_for_each(int_types{}, runner<T>{});
     }
 };
 
-BOOST_AUTO_TEST_CASE(safe_convert_test_00)
+TEST_CASE("safe_convert_test_00")
 {
-    BOOST_CHECK((!is_safely_convertible<void, void>::value));
-    BOOST_CHECK((!is_safely_convertible<int, void>::value));
-    BOOST_CHECK((!is_safely_convertible<void, int>::value));
-    BOOST_CHECK((is_safely_convertible<const int, int &>::value));
-    BOOST_CHECK((is_safely_convertible<const int &, int &>::value));
-    BOOST_CHECK((is_safely_convertible<int &, int &>::value));
-    BOOST_CHECK((is_safely_convertible<int &&, int &>::value));
-    BOOST_CHECK((!is_safely_convertible<int &&, int>::value));
-    BOOST_CHECK((!is_safely_convertible<int &&, const int>::value));
-    BOOST_CHECK((!is_safely_convertible<int &&, const int &>::value));
-    BOOST_CHECK((is_safely_convertible<const float, int &>::value));
-    BOOST_CHECK((is_safely_convertible<const double &, unsigned &>::value));
-    BOOST_CHECK((is_safely_convertible<long double &, long long &>::value));
-    BOOST_CHECK((is_safely_convertible<float &&, char &>::value));
-    BOOST_CHECK((!is_safely_convertible<float &&, int>::value));
-    BOOST_CHECK((!is_safely_convertible<const double &&, int>::value));
-    BOOST_CHECK((!is_safely_convertible<long double &&, const int &>::value));
-    BOOST_CHECK((!is_safely_convertible<double, float &>::value));
-    BOOST_CHECK((!is_safely_convertible<double &, const long double &>::value));
-    BOOST_CHECK((is_safely_convertible<foo, foo &>::value));
-    BOOST_CHECK((!is_safely_convertible<foo &, foo &>::value));
+    CHECK((!is_safely_convertible<void, void>::value));
+    CHECK((!is_safely_convertible<int, void>::value));
+    CHECK((!is_safely_convertible<void, int>::value));
+    CHECK((is_safely_convertible<const int, int &>::value));
+    CHECK((is_safely_convertible<const int &, int &>::value));
+    CHECK((is_safely_convertible<int &, int &>::value));
+    CHECK((is_safely_convertible<int &&, int &>::value));
+    CHECK((!is_safely_convertible<int &&, int>::value));
+    CHECK((!is_safely_convertible<int &&, const int>::value));
+    CHECK((!is_safely_convertible<int &&, const int &>::value));
+    CHECK((is_safely_convertible<const float, int &>::value));
+    CHECK((is_safely_convertible<const double &, unsigned &>::value));
+    CHECK((is_safely_convertible<long double &, long long &>::value));
+    CHECK((is_safely_convertible<float &&, char &>::value));
+    CHECK((!is_safely_convertible<float &&, int>::value));
+    CHECK((!is_safely_convertible<const double &&, int>::value));
+    CHECK((!is_safely_convertible<long double &&, const int &>::value));
+    CHECK((!is_safely_convertible<double, float &>::value));
+    CHECK((!is_safely_convertible<double &, const long double &>::value));
+    CHECK((is_safely_convertible<foo, foo &>::value));
+    CHECK((!is_safely_convertible<foo &, foo &>::value));
 
     // Integral conversions.
     tuple_for_each(int_types{}, int_checker{});
 
     // Fp to int conversions.
     unsigned un;
-    BOOST_CHECK(!safe_convert(un, -1.));
-    BOOST_CHECK(safe_convert(un, 5.));
-    BOOST_CHECK_EQUAL(un, 5u);
+    CHECK(!safe_convert(un, -1.));
+    CHECK(safe_convert(un, 5.));
+    CHECK(un == 5u);
     int n;
-    BOOST_CHECK(!safe_convert(n, 1.5f));
-    BOOST_CHECK(safe_convert(n, 3.l));
-    BOOST_CHECK_EQUAL(n, 3);
+    CHECK(!safe_convert(n, 1.5f));
+    CHECK(safe_convert(n, 3.l));
+    CHECK(n == 3);
     // A couple of tests for the common case in which we have ieee FP and a 32-bit
     // integer type available.
     if (std::numeric_limits<double>::is_iec559) {
-        BOOST_CHECK(!safe_convert(n, std::numeric_limits<double>::quiet_NaN()));
-        BOOST_CHECK(!safe_convert(n, std::numeric_limits<double>::infinity()));
-        BOOST_CHECK(!safe_convert(n, -std::numeric_limits<double>::infinity()));
+        CHECK(!safe_convert(n, std::numeric_limits<double>::quiet_NaN()));
+        CHECK(!safe_convert(n, std::numeric_limits<double>::infinity()));
+        CHECK(!safe_convert(n, -std::numeric_limits<double>::infinity()));
         if (std::numeric_limits<std::uint_least32_t>::digits == 32 && std::numeric_limits<double>::digits > 32
             && std::numeric_limits<double>::radix == 2) {
             // 4294967296 == 2**32.
             std::uint_least32_t un32;
-            BOOST_CHECK(!safe_convert(un32, 4294967296.));
-            BOOST_CHECK(safe_convert(un32, 4294967295.));
-            BOOST_CHECK_EQUAL(un32, 4294967295ull);
+            CHECK(!safe_convert(un32, 4294967296.));
+            CHECK(safe_convert(un32, 4294967295.));
+            CHECK(un32 == 4294967295ull);
         }
     }
 
     // Check the default implementation.
-    BOOST_CHECK((is_safely_convertible<bar, bar &>::value));
-    BOOST_CHECK((is_safely_convertible<bar, bar &&>::value));
-    BOOST_CHECK((is_safely_convertible<const bar, bar &>::value));
-    BOOST_CHECK((is_safely_convertible<const bar &, bar &>::value));
-    BOOST_CHECK((!is_safely_convertible<const bar &, const bar &>::value));
+    CHECK((is_safely_convertible<bar, bar &>::value));
+    CHECK((is_safely_convertible<bar, bar &&>::value));
+    CHECK((is_safely_convertible<const bar, bar &>::value));
+    CHECK((is_safely_convertible<const bar &, bar &>::value));
+    CHECK((!is_safely_convertible<const bar &, const bar &>::value));
     bar b;
     b.n = 12;
     safe_convert(b, bar{});
-    BOOST_CHECK_EQUAL(b.n, 0);
+    CHECK(b.n == 0);
 }

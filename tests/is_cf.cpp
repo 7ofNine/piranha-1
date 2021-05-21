@@ -28,14 +28,14 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/is_cf.hpp>
 
-#define BOOST_TEST_MODULE is_cf_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <complex>
 #include <iostream>
 #include <type_traits>
 
 #include <piranha/config.hpp>
+
+#include "catch.hpp"
 
 struct cf01 {
 };
@@ -148,12 +148,12 @@ struct enable_noexcept_checks<cf07> : std::false_type {
 
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(is_cf_test_00)
+TEST_CASE("is_cf_test_00")
 {
-    BOOST_CHECK(is_cf<int>::value);
-    BOOST_CHECK(is_cf<double>::value);
-    BOOST_CHECK(is_cf<long double>::value);
-    BOOST_CHECK(is_cf<std::complex<double>>::value);
+    CHECK(is_cf<int>::value);
+    CHECK(is_cf<double>::value);
+    CHECK(is_cf<long double>::value);
+    CHECK(is_cf<std::complex<double>>::value);
     // NOTE: the checks on the pointers here produce warnings in clang. The reason is that
     // ptr1 -= ptr2
     // expands to
@@ -163,21 +163,21 @@ BOOST_AUTO_TEST_CASE(is_cf_test_00)
     // entirely clear if this should be a hard error (GCC) or just a warning (clang) so for now it is better to simply
     // disable
     // the check. Note that the same problem would be in is_subtractable_in_place if we checked for pointers there.
-    // BOOST_CHECK(!is_cf<double *>::value);
-    // BOOST_CHECK(!is_cf<double const *>::value);
-    BOOST_CHECK(!is_cf<int &>::value);
-    BOOST_CHECK(!is_cf<int const &>::value);
-    BOOST_CHECK(!is_cf<int const &>::value);
-    BOOST_CHECK(!is_cf<cf01>::value);
-    BOOST_CHECK(is_cf<cf02>::value);
-    // BOOST_CHECK(!is_cf<cf02 *>::value);
-    BOOST_CHECK(!is_cf<cf02 &&>::value);
-    BOOST_CHECK(!is_cf<cf03>::value);
-    BOOST_CHECK(!is_cf<cf04>::value);
-    BOOST_CHECK(!is_cf<cf05>::value);
+    // CHECK(!is_cf<double *>::value);
+    // CHECK(!is_cf<double const *>::value);
+    CHECK(!is_cf<int &>::value);
+    CHECK(!is_cf<int const &>::value);
+    CHECK(!is_cf<int const &>::value);
+    CHECK(!is_cf<cf01>::value);
+    CHECK(is_cf<cf02>::value);
+    // CHECK(!is_cf<cf02 *>::value);
+    CHECK(!is_cf<cf02 &&>::value);
+    CHECK(!is_cf<cf03>::value);
+    CHECK(!is_cf<cf04>::value);
+    CHECK(!is_cf<cf05>::value);
 // Missing noexcept.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK(!is_cf<cf06>::value);
+    CHECK(!is_cf<cf06>::value);
 #endif
-    BOOST_CHECK(is_cf<cf07>::value);
+    CHECK(is_cf<cf07>::value);
 }

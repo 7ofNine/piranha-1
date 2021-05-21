@@ -66,7 +66,7 @@ struct is_exponentiable : is_returnable<detected_t<pow_t_, T, U>> {
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U = T>
-concept bool Exponentiable = is_exponentiable<T, U>::value;
+concept Exponentiable = is_exponentiable<T, U>::value;
 
 #endif
 
@@ -78,13 +78,13 @@ using pow_t = enable_if_t<is_exponentiable<T, U>::value, pow_t_<T, U>>;
 }
 
 // The exponentiation function.
-#if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename T>
-inline auto pow(Exponentiable<T> &&x, T &&y)
-#else
+//#if defined(PIRANHA_HAVE_CONCEPTS)
+//template <typename T, typename U> requires Exponentiable <T, U>   //TODO:: does not work correctly
+//inline auto pow(T &&x, T &&y)
+//#else
 template <typename T, typename U>
 inline pow_t<T, U> pow(T &&x, U &&y)
-#endif
+//#endif
 {
     return pow_impl<uncvref_t<decltype(x)>, uncvref_t<decltype(y)>>{}(std::forward<decltype(x)>(x),
                                                                       std::forward<decltype(y)>(y));
@@ -125,7 +125,7 @@ public:
 // mppp::integer inside, so the declaration of mppp::integer must be avaiable. On the other hand, we cannot put this in
 // integer.hpp as the integral-integral overload is supposed to work without including mppp::integer.hpp.
 #if defined(PIRANHA_HAVE_CONCEPTS)
-template <typename U, mppp::IntegerOpTypes<U> T>
+template <typename U, mppp::integer_op_types<U> T>
 class pow_impl<T, U>
 #else
 template <typename T, typename U>

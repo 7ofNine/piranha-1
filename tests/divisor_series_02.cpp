@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/divisor_series.hpp>
 
-#define BOOST_TEST_MODULE divisor_series_02_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <piranha/config.hpp>
 #include <piranha/divisor.hpp>
 #include <piranha/invert.hpp>
@@ -39,29 +36,31 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/rational.hpp>
 #include <piranha/s11n.hpp>
 
+#include "catch.hpp"
+
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(divisor_series_empty_test) {}
+TEST_CASE("divisor_series_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
-BOOST_AUTO_TEST_CASE(divisor_series_boost_s11n_test)
+TEST_CASE("divisor_series_boost_s11n_test")
 {
     using p_type = divisor_series<polynomial<rational, monomial<char>>, divisor<short>>;
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, p_type>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, p_type>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, p_type &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const p_type &>::value));
-    BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const p_type &>::value));
-    BOOST_CHECK((!has_boost_save<void, const p_type &>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, p_type>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, p_type>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, p_type>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, p_type &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const p_type &>::value));
-    BOOST_CHECK((!has_boost_load<const boost::archive::binary_oarchive &, const p_type &>::value));
-    BOOST_CHECK((!has_boost_load<void, const p_type &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, p_type>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, p_type>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, p_type>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, p_type &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, const p_type &>::value));
+    CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const p_type &>::value));
+    CHECK((!has_boost_save<void, const p_type &>::value));
+    CHECK((!has_boost_save<boost::archive::binary_iarchive, p_type>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, p_type>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, p_type>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, p_type &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive &, const p_type &>::value));
+    CHECK((!has_boost_load<const boost::archive::binary_oarchive &, const p_type &>::value));
+    CHECK((!has_boost_load<void, const p_type &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_oarchive, p_type>::value));
     p_type x{"x"}, y{"y"};
     const auto tmp = (x + y) * 3 * math::invert(y) + (x - y) + 1;
     std::stringstream ss;
@@ -73,7 +72,7 @@ BOOST_AUTO_TEST_CASE(divisor_series_boost_s11n_test)
         p_type retval;
         boost::archive::binary_iarchive ia(ss);
         boost_load(ia, retval);
-        BOOST_CHECK_EQUAL(tmp, retval);
+        CHECK(tmp == retval);
     }
 }
 
@@ -81,18 +80,18 @@ BOOST_AUTO_TEST_CASE(divisor_series_boost_s11n_test)
 
 #if defined(PIRANHA_WITH_MSGPACK)
 
-BOOST_AUTO_TEST_CASE(divisor_series_msgpack_s11n_test)
+TEST_CASE("divisor_series_msgpack_s11n_test")
 {
     using p_type = divisor_series<polynomial<rational, monomial<char>>, divisor<short>>;
-    BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, p_type>::value));
-    BOOST_CHECK((!has_msgpack_pack<msgpack::sbuffer &, p_type>::value));
-    BOOST_CHECK((!has_msgpack_pack<msgpack::sbuffer &, p_type &>::value));
-    BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, const p_type &>::value));
-    BOOST_CHECK((!has_msgpack_pack<const msgpack::sbuffer &, const p_type &>::value));
-    BOOST_CHECK((!has_msgpack_pack<void, const p_type &>::value));
-    BOOST_CHECK((has_msgpack_convert<p_type>::value));
-    BOOST_CHECK((has_msgpack_convert<p_type &>::value));
-    BOOST_CHECK((!has_msgpack_convert<const p_type &>::value));
+    CHECK((has_msgpack_pack<msgpack::sbuffer, p_type>::value));
+    CHECK((!has_msgpack_pack<msgpack::sbuffer &, p_type>::value));
+    CHECK((!has_msgpack_pack<msgpack::sbuffer &, p_type &>::value));
+    CHECK((has_msgpack_pack<msgpack::sbuffer, const p_type &>::value));
+    CHECK((!has_msgpack_pack<const msgpack::sbuffer &, const p_type &>::value));
+    CHECK((!has_msgpack_pack<void, const p_type &>::value));
+    CHECK((has_msgpack_convert<p_type>::value));
+    CHECK((has_msgpack_convert<p_type &>::value));
+    CHECK((!has_msgpack_convert<const p_type &>::value));
     p_type x{"x"}, y{"y"};
     const auto tmp = (x + y) * 3 * math::invert(y) + (x - y) + 1;
     msgpack::sbuffer sbuf;
@@ -101,7 +100,7 @@ BOOST_AUTO_TEST_CASE(divisor_series_msgpack_s11n_test)
     auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
     p_type retval;
     msgpack_convert(retval, oh.get(), msgpack_format::portable);
-    BOOST_CHECK(retval == tmp);
+    CHECK(retval == tmp);
 }
 
 #endif

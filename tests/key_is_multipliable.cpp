@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/key_is_multipliable.hpp>
 
-#define BOOST_TEST_MODULE key_is_multipliable_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <array>
 #include <cstddef>
@@ -40,6 +38,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/is_key.hpp>
 #include <piranha/key/key_is_one.hpp>
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -148,13 +148,13 @@ public:
 };
 }
 
-BOOST_AUTO_TEST_CASE(key_is_multipliable_test_00)
+TEST_CASE("key_is_multipliable_test_00")
 {
-    BOOST_CHECK(is_key<mock_key>::value);
-    BOOST_CHECK(!(key_is_multipliable<double, mock_key>::value));
-    BOOST_CHECK(is_key<mock_key_00>::value);
-    BOOST_CHECK(!(key_is_multipliable<double, mock_key_00>::value));
-    BOOST_CHECK(is_key<mock_key_01>::value);
-    BOOST_CHECK((key_is_multipliable<double, mock_key_01>::value));
-    BOOST_CHECK(!(key_is_multipliable<float, mock_key_01>::value));
+    CHECK(is_key<mock_key>::value);
+    CHECK(!(key_is_multipliable<double, mock_key>::value));
+    CHECK(is_key<mock_key_00>::value);
+    CHECK(!(key_is_multipliable<double, mock_key_00>::value));
+    CHECK(is_key<mock_key_01>::value);
+    CHECK((key_is_multipliable<double, mock_key_01>::value));
+    CHECK(!(key_is_multipliable<float, mock_key_01>::value));
 }

@@ -156,7 +156,7 @@ struct base_series_multiplier_impl {
 
 template <typename Series, typename Derived>
 struct base_series_multiplier_impl<
-    Series, Derived, typename std::enable_if<mppp::is_rational<typename Series::term_type::cf_type>::value>::type> {
+    Series, Derived, typename std::enable_if<mppp::detail::is_rational<typename Series::term_type::cf_type>::value>::type> {
     // Useful shortcuts.
     using term_type = typename Series::term_type;
     using rat_type = typename term_type::cf_type;
@@ -273,7 +273,7 @@ private:
     }
     // Implementation of finalise().
     template <typename T,
-              typename std::enable_if<mppp::is_rational<typename T::term_type::cf_type>::value, int>::type = 0>
+              typename std::enable_if<mppp::detail::is_rational<typename T::term_type::cf_type>::value, int>::type = 0>
     void finalise_impl(T &s) const
     {
         // Nothing to do if the lcm is unitary.
@@ -325,7 +325,7 @@ private:
         }
     }
     template <typename T,
-              typename std::enable_if<!mppp::is_rational<typename T::term_type::cf_type>::value, int>::type = 0>
+              typename std::enable_if<!mppp::detail::is_rational<typename T::term_type::cf_type>::value, int>::type = 0>
     void finalise_impl(T &) const
     {
     }

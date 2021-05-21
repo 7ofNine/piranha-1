@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/poisson_series.hpp>
 
-#define BOOST_TEST_MODULE poisson_series_03_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <sstream>
 
 #include <piranha/config.hpp>
@@ -44,29 +41,31 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/rational.hpp>
 #include <piranha/s11n.hpp>
 
+#include "catch.hpp"
+
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(poisson_series_empty_test) {}
+TEST_CASE("poisson_series_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
-BOOST_AUTO_TEST_CASE(poisson_series_boost_s11n_test)
+TEST_CASE("poisson_series_boost_s11n_test")
 {
     using pst1 = poisson_series<polynomial<rational, monomial<short>>>;
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, pst1>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, pst1>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, pst1 &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const pst1 &>::value));
-    BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const pst1 &>::value));
-    BOOST_CHECK((!has_boost_save<void, const pst1 &>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, pst1>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, pst1>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, pst1>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, pst1 &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const pst1 &>::value));
-    BOOST_CHECK((!has_boost_load<const boost::archive::binary_oarchive &, const pst1 &>::value));
-    BOOST_CHECK((!has_boost_load<void, const pst1 &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, pst1>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, pst1>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, pst1>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, pst1 &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, const pst1 &>::value));
+    CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const pst1 &>::value));
+    CHECK((!has_boost_save<void, const pst1 &>::value));
+    CHECK((!has_boost_save<boost::archive::binary_iarchive, pst1>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, pst1>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, pst1>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, pst1 &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive &, const pst1 &>::value));
+    CHECK((!has_boost_load<const boost::archive::binary_oarchive &, const pst1 &>::value));
+    CHECK((!has_boost_load<void, const pst1 &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_oarchive, pst1>::value));
     {
         pst1 x{"x"}, y{"y"}, z{"z"};
         const auto tmp = (x + y) * 3 + z * piranha::cos(x - y) + 1;
@@ -79,24 +78,24 @@ BOOST_AUTO_TEST_CASE(poisson_series_boost_s11n_test)
             pst1 retval;
             boost::archive::binary_iarchive ia(ss);
             boost_load(ia, retval);
-            BOOST_CHECK_EQUAL(tmp, retval);
+            CHECK(tmp == retval);
         }
     }
     using pst2 = poisson_series<divisor_series<polynomial<rational, monomial<short>>, divisor<int>>>;
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, pst2>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, pst2>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, pst2 &>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const pst2 &>::value));
-    BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const pst2 &>::value));
-    BOOST_CHECK((!has_boost_save<void, const pst2 &>::value));
-    BOOST_CHECK((!has_boost_save<boost::archive::binary_iarchive, pst2>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, pst2>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, pst2>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, pst2 &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const pst2 &>::value));
-    BOOST_CHECK((!has_boost_load<const boost::archive::binary_oarchive &, const pst2 &>::value));
-    BOOST_CHECK((!has_boost_load<void, const pst2 &>::value));
-    BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive, pst2>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, pst2>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, pst2>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, pst2 &>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive &, const pst2 &>::value));
+    CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const pst2 &>::value));
+    CHECK((!has_boost_save<void, const pst2 &>::value));
+    CHECK((!has_boost_save<boost::archive::binary_iarchive, pst2>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, pst2>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, pst2>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive &, pst2 &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_iarchive &, const pst2 &>::value));
+    CHECK((!has_boost_load<const boost::archive::binary_oarchive &, const pst2 &>::value));
+    CHECK((!has_boost_load<void, const pst2 &>::value));
+    CHECK((!has_boost_load<boost::archive::binary_oarchive, pst2>::value));
     {
         pst2 x{"x"}, y{"y"}, z{"z"};
         const auto tmp = (x + y) * 3 * math::invert(z) + z * piranha::cos(x - y) + 1;
@@ -109,7 +108,7 @@ BOOST_AUTO_TEST_CASE(poisson_series_boost_s11n_test)
             pst2 retval;
             boost::archive::binary_iarchive ia(ss);
             boost_load(ia, retval);
-            BOOST_CHECK_EQUAL(tmp, retval);
+            CHECK(tmp == retval);
         }
     }
 }
@@ -118,18 +117,18 @@ BOOST_AUTO_TEST_CASE(poisson_series_boost_s11n_test)
 
 #if defined(PIRANHA_WITH_MSGPACK)
 
-BOOST_AUTO_TEST_CASE(poisson_series_msgpack_s11n_test)
+TEST_CASE("poisson_series_msgpack_s11n_test")
 {
     using pst1 = poisson_series<polynomial<rational, monomial<short>>>;
-    BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, pst1>::value));
-    BOOST_CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst1>::value));
-    BOOST_CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst1 &>::value));
-    BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, const pst1 &>::value));
-    BOOST_CHECK((!has_msgpack_pack<const msgpack::sbuffer &, const pst1 &>::value));
-    BOOST_CHECK((!has_msgpack_pack<void, const pst1 &>::value));
-    BOOST_CHECK((has_msgpack_convert<pst1>::value));
-    BOOST_CHECK((has_msgpack_convert<pst1 &>::value));
-    BOOST_CHECK((!has_msgpack_convert<const pst1 &>::value));
+    CHECK((has_msgpack_pack<msgpack::sbuffer, pst1>::value));
+    CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst1>::value));
+    CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst1 &>::value));
+    CHECK((has_msgpack_pack<msgpack::sbuffer, const pst1 &>::value));
+    CHECK((!has_msgpack_pack<const msgpack::sbuffer &, const pst1 &>::value));
+    CHECK((!has_msgpack_pack<void, const pst1 &>::value));
+    CHECK((has_msgpack_convert<pst1>::value));
+    CHECK((has_msgpack_convert<pst1 &>::value));
+    CHECK((!has_msgpack_convert<const pst1 &>::value));
     {
         pst1 x{"x"}, y{"y"}, z{"z"};
         const auto tmp = (x + y) * 3 + z * piranha::cos(x - y) + 1;
@@ -139,19 +138,19 @@ BOOST_AUTO_TEST_CASE(poisson_series_msgpack_s11n_test)
         auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
         pst1 retval;
         msgpack_convert(retval, oh.get(), msgpack_format::binary);
-        BOOST_CHECK_EQUAL(tmp, retval);
+        CHECK(tmp == retval);
         std::stringstream ss;
     }
     using pst2 = poisson_series<divisor_series<polynomial<rational, monomial<short>>, divisor<int>>>;
-    BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, pst2>::value));
-    BOOST_CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst2>::value));
-    BOOST_CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst2 &>::value));
-    BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, const pst2 &>::value));
-    BOOST_CHECK((!has_msgpack_pack<const msgpack::sbuffer &, const pst2 &>::value));
-    BOOST_CHECK((!has_msgpack_pack<void, const pst2 &>::value));
-    BOOST_CHECK((has_msgpack_convert<pst2>::value));
-    BOOST_CHECK((has_msgpack_convert<pst2 &>::value));
-    BOOST_CHECK((!has_msgpack_convert<const pst2 &>::value));
+    CHECK((has_msgpack_pack<msgpack::sbuffer, pst2>::value));
+    CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst2>::value));
+    CHECK((!has_msgpack_pack<msgpack::sbuffer &, pst2 &>::value));
+    CHECK((has_msgpack_pack<msgpack::sbuffer, const pst2 &>::value));
+    CHECK((!has_msgpack_pack<const msgpack::sbuffer &, const pst2 &>::value));
+    CHECK((!has_msgpack_pack<void, const pst2 &>::value));
+    CHECK((has_msgpack_convert<pst2>::value));
+    CHECK((has_msgpack_convert<pst2 &>::value));
+    CHECK((!has_msgpack_convert<const pst2 &>::value));
     {
         pst2 x{"x"}, y{"y"}, z{"z"};
         const auto tmp = (x + y) * 3 * math::invert(z) + z * piranha::cos(x - y) + 1;
@@ -161,7 +160,7 @@ BOOST_AUTO_TEST_CASE(poisson_series_msgpack_s11n_test)
         auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
         pst2 retval;
         msgpack_convert(retval, oh.get(), msgpack_format::binary);
-        BOOST_CHECK_EQUAL(tmp, retval);
+        CHECK(tmp == retval);
         std::stringstream ss;
     }
 }

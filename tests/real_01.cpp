@@ -32,9 +32,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/real.hpp>
 
-#define BOOST_TEST_MODULE real_01_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/algorithm/string/predicate.hpp>
 #include <limits>
 #include <sstream>
@@ -55,6 +52,9 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/safe_convert.hpp>
 #include <piranha/symbol_utils.hpp>
 
+#include "catch.hpp"
+#include "exception_matcher.hpp"
+
 using namespace piranha;
 
 static inline real operator"" _r(const char *s)
@@ -62,265 +62,266 @@ static inline real operator"" _r(const char *s)
     return real(s, 100);
 }
 
-BOOST_AUTO_TEST_CASE(real_tt_test)
+TEST_CASE("real_tt_test")
 {
-    BOOST_CHECK(is_cf<real>::value);
+    CHECK(is_cf<real>::value);
 }
 
-BOOST_AUTO_TEST_CASE(real_negate_test)
+TEST_CASE("real_negate_test")
 {
-    BOOST_CHECK(has_negate<real>::value);
+    CHECK(has_negate<real>::value);
     real r1;
-    BOOST_CHECK(!r1.signbit());
+    CHECK(!r1.signbit());
     math::negate(r1);
-    BOOST_CHECK_EQUAL(r1, 0);
-    BOOST_CHECK(r1.signbit());
+    CHECK(r1 == 0);
+    CHECK(r1.signbit());
     r1 = 123;
     math::negate(r1);
-    BOOST_CHECK_EQUAL(r1, -123);
+    CHECK(r1 == -123);
     math::negate(r1);
-    BOOST_CHECK_EQUAL(r1, 123);
+    CHECK(r1 == 123);
     r1 = real{"inf", 100};
     math::negate(r1);
-    BOOST_CHECK_EQUAL(r1, -(real{"inf", 100}));
+    CHECK(r1 == -(real{"inf", 100}));
 }
 
-BOOST_AUTO_TEST_CASE(real_is_zero_test)
+TEST_CASE("real_is_zero_test")
 {
-    BOOST_CHECK(is_is_zero_type<real>::value);
-    BOOST_CHECK(is_is_zero_type<real &>::value);
-    BOOST_CHECK(is_is_zero_type<const real &>::value);
-    BOOST_CHECK(is_is_zero_type<const real>::value);
+    CHECK(is_is_zero_type<real>::value);
+    CHECK(is_is_zero_type<real &>::value);
+    CHECK(is_is_zero_type<const real &>::value);
+    CHECK(is_is_zero_type<const real>::value);
     real r1;
-    BOOST_CHECK(piranha::is_zero(r1));
+    CHECK(piranha::is_zero(r1));
     r1.neg();
-    BOOST_CHECK(piranha::is_zero(r1));
+    CHECK(piranha::is_zero(r1));
     r1 = 123;
-    BOOST_CHECK(!piranha::is_zero(r1));
+    CHECK(!piranha::is_zero(r1));
     r1 = real{"inf", 100};
-    BOOST_CHECK(!piranha::is_zero(r1));
+    CHECK(!piranha::is_zero(r1));
     r1 = -1;
-    BOOST_CHECK(!piranha::is_zero(r1));
+    CHECK(!piranha::is_zero(r1));
     r1 = real{"nan", 100};
-    BOOST_CHECK(!piranha::is_zero(r1));
+    CHECK(!piranha::is_zero(r1));
 }
 
-BOOST_AUTO_TEST_CASE(real_pow_test)
+TEST_CASE("real_pow_test")
 {
-    BOOST_CHECK((is_exponentiable<real, real>::value));
-    BOOST_CHECK((is_exponentiable<real, int>::value));
-    BOOST_CHECK((is_exponentiable<int, real>::value));
-    BOOST_CHECK((is_exponentiable<real, double>::value));
-    BOOST_CHECK((is_exponentiable<double, real>::value));
-    BOOST_CHECK((is_exponentiable<real, long double>::value));
-    BOOST_CHECK((is_exponentiable<long double, real>::value));
-    BOOST_CHECK((!is_exponentiable<void, real>::value));
-    BOOST_CHECK((!is_exponentiable<real, void>::value));
-    BOOST_CHECK((!is_exponentiable<std::string, real>::value));
-    BOOST_CHECK((!is_exponentiable<real, std::string>::value));
+    CHECK((is_exponentiable<real, real>::value));
+    CHECK((is_exponentiable<real, int>::value));
+    CHECK((is_exponentiable<int, real>::value));
+    CHECK((is_exponentiable<real, double>::value));
+    CHECK((is_exponentiable<double, real>::value));
+    CHECK((is_exponentiable<real, long double>::value));
+    CHECK((is_exponentiable<long double, real>::value));
+    CHECK((!is_exponentiable<void, real>::value));
+    CHECK((!is_exponentiable<real, void>::value));
+    CHECK((!is_exponentiable<std::string, real>::value));
+    CHECK((!is_exponentiable<real, std::string>::value));
 #if defined(MPPP_HAVE_GCC_INT128)
-    BOOST_CHECK((is_exponentiable<real, __int128_t>::value));
-    BOOST_CHECK((is_exponentiable<__int128_t, real>::value));
-    BOOST_CHECK((is_exponentiable<real, __uint128_t>::value));
-    BOOST_CHECK((is_exponentiable<__uint128_t, real>::value));
+    CHECK((is_exponentiable<real, __int128_t>::value));
+    CHECK((is_exponentiable<__int128_t, real>::value));
+    CHECK((is_exponentiable<real, __uint128_t>::value));
+    CHECK((is_exponentiable<__uint128_t, real>::value));
 #endif
     {
         real r1{2}, r2{5};
-        BOOST_CHECK_EQUAL(piranha::pow(r1, r2), 32);
-        BOOST_CHECK_EQUAL(piranha::pow(r1, 5), 32);
-        BOOST_CHECK_EQUAL(piranha::pow(2, r2), 32);
-        BOOST_CHECK_EQUAL(piranha::pow(r1, 5.), 32);
-        BOOST_CHECK_EQUAL(piranha::pow(2.l, r2), 32);
+        CHECK(piranha::pow(r1, r2) == 32);
+        CHECK(piranha::pow(r1, 5) == 32);
+        CHECK(piranha::pow(2, r2) == 32);
+        CHECK(piranha::pow(r1, 5.) == 32);
+        CHECK(piranha::pow(2.l, r2) == 32);
 #if defined(MPPP_HAVE_GCC_INT128)
-        BOOST_CHECK_EQUAL(piranha::pow(r1, __int128_t(5)), 32);
-        BOOST_CHECK_EQUAL(piranha::pow(__uint128_t(2), r2), 32);
+        CHECK(piranha::pow(r1, __int128_t(5)) == 32);
+        CHECK(piranha::pow(__uint128_t(2), r2) == 32);
 #endif
     }
     {
         // Verify perfect forwarding.
         real r0{5, 100}, r1{2, 100};
         auto res = piranha::pow(std::move(r0), r1);
-        BOOST_CHECK(res == 25);
-        BOOST_CHECK(r0.get_mpfr_t()->_mpfr_d == nullptr);
+        CHECK(res == 25);
+        CHECK(r0.get_mpfr_t()->_mpfr_d == nullptr);
         r0 = real{5, 100};
         auto res2 = piranha::pow(r0, std::move(r1));
-        BOOST_CHECK(res2 == 25);
-        BOOST_CHECK(r1.get_mpfr_t()->_mpfr_d == nullptr);
+        CHECK(res2 == 25);
+        CHECK(r1.get_mpfr_t()->_mpfr_d == nullptr);
     }
 }
 
-BOOST_AUTO_TEST_CASE(real_fma_test)
+TEST_CASE("real_fma_test")
 {
     real r0{1}, r1{4}, r2{-5};
     math::multiply_accumulate(r0, r1, r2);
-    BOOST_CHECK_EQUAL(r0, -19);
+    CHECK(r0 == -19);
     r0 = -5;
     r1 = -3;
     r2 = 6;
     math::multiply_accumulate(r0, r1, r2);
-    BOOST_CHECK_EQUAL(r0, -23);
+    CHECK(r0 == -23);
 }
 
-BOOST_AUTO_TEST_CASE(real_sin_cos_test)
+TEST_CASE("real_sin_cos_test")
 {
-    BOOST_CHECK_EQUAL(piranha::cos(real{0, 4}), 1);
-    BOOST_CHECK_EQUAL(piranha::sin(real{0, 4}), 0);
+    CHECK(piranha::cos(real{0, 4}) == 1);
+    CHECK(piranha::sin(real{0, 4}) == 0);
     // Check stealing semantics.
     real x{1.23, 100};
     auto tmp = piranha::sin(std::move(x));
-    BOOST_CHECK(x.get_mpfr_t()->_mpfr_d == nullptr);
+    CHECK(x.get_mpfr_t()->_mpfr_d == nullptr);
     x = real{1.23, 100};
     tmp = piranha::cos(std::move(x));
-    BOOST_CHECK(x.get_mpfr_t()->_mpfr_d == nullptr);
+    CHECK(x.get_mpfr_t()->_mpfr_d == nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(real_partial_test)
+TEST_CASE("real_partial_test")
 {
-    BOOST_CHECK_EQUAL(math::partial(real(), ""), 0);
-    BOOST_CHECK_EQUAL(math::partial(real(1), std::string("")), 0);
-    BOOST_CHECK_EQUAL(math::partial(real(-10), std::string("")), 0);
+    CHECK(math::partial(real(), "") == 0);
+    CHECK(math::partial(real(1), std::string("")) == 0);
+    CHECK(math::partial(real(-10), std::string("")) == 0);
 }
 
-BOOST_AUTO_TEST_CASE(real_evaluate_test)
+TEST_CASE("real_evaluate_test")
 {
-    BOOST_CHECK_EQUAL(math::evaluate(real(), symbol_fmap<integer>{}), real());
-    BOOST_CHECK_EQUAL(math::evaluate(real(2), symbol_fmap<int>{}), real(2));
-    BOOST_CHECK_EQUAL(math::evaluate(real(-3.5), symbol_fmap<double>{}), real(-3.5));
-    BOOST_CHECK((std::is_same<decltype(math::evaluate(real(), symbol_fmap<real>{})), real>::value));
+    CHECK(math::evaluate(real(), symbol_fmap<integer>{}) == real());
+    CHECK(math::evaluate(real(2), symbol_fmap<int>{}) == real(2));
+    CHECK(math::evaluate(real(-3.5), symbol_fmap<double>{}) == real(-3.5));
+    CHECK((std::is_same<decltype(math::evaluate(real(), symbol_fmap<real>{})), real>::value));
 #if defined(MPPP_HAVE_GCC_INT128)
-    BOOST_CHECK_EQUAL(math::evaluate(real(2), symbol_fmap<__int128_t>{}), real(2));
-    BOOST_CHECK_EQUAL(math::evaluate(real(2), symbol_fmap<__uint128_t>{}), real(2));
+    CHECK(math::evaluate(real(2), symbol_fmap<__int128_t>{}) == real(2));
+    CHECK(math::evaluate(real(2), symbol_fmap<__uint128_t>{}) == real(2));
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(real_abs_test)
+TEST_CASE("real_abs_test")
 {
-    BOOST_CHECK_EQUAL(math::abs(real(42)), real(42));
-    BOOST_CHECK_EQUAL(math::abs(real(-42)), real(42));
-    BOOST_CHECK_EQUAL(math::abs(real("inf", 100)), real("inf", 100));
-    BOOST_CHECK_EQUAL(math::abs(real("-inf", 100)), real("inf", 100));
-    BOOST_CHECK(math::abs(real("-nan", 100)).nan_p());
+    CHECK(math::abs(real(42)) == real(42));
+    CHECK(math::abs(real(-42)) == real(42));
+    CHECK(math::abs(real("inf", 100)) == real("inf", 100));
+    CHECK(math::abs(real("-inf", 100)) == real("inf", 100));
+    CHECK(math::abs(real("-nan", 100)).nan_p());
 }
 
-BOOST_AUTO_TEST_CASE(real_safe_cast_test)
+TEST_CASE("real_safe_cast_test")
 {
-    BOOST_CHECK((is_safely_castable<real, int>::value));
-    BOOST_CHECK((!is_safely_castable<real, int &>::value));
-    BOOST_CHECK((is_safely_castable<real &&, int>::value));
-    BOOST_CHECK((is_safely_castable<const real &, int>::value));
-    BOOST_CHECK((is_safely_castable<const real, int>::value));
-    BOOST_CHECK((!is_safely_castable<real, void>::value));
-    BOOST_CHECK((is_safely_castable<real, unsigned>::value));
-    BOOST_CHECK((is_safely_castable<real, integer>::value));
-    BOOST_CHECK((is_safely_castable<real, rational>::value));
-    BOOST_CHECK((is_safely_castable<real, rational>::value));
-    BOOST_CHECK((is_safely_castable<const real, rational>::value));
-    BOOST_CHECK((is_safely_castable<const real &, rational>::value));
-    BOOST_CHECK((!is_safely_castable<real, double>::value));
-    BOOST_CHECK((!is_safely_castable<real, float>::value));
-    BOOST_CHECK((is_safely_convertible<real, int &>::value));
-    BOOST_CHECK((is_safely_convertible<real &, integer &>::value));
-    BOOST_CHECK((is_safely_convertible<const real &, rational &>::value));
-    BOOST_CHECK((!is_safely_convertible<real, const int &>::value));
-    BOOST_CHECK((!is_safely_convertible<real, float &>::value));
-    BOOST_CHECK((!is_safely_convertible<real, void>::value));
-    BOOST_CHECK((!is_safely_castable<int, real>::value));
-    BOOST_CHECK((!is_safely_castable<float, real>::value));
-    BOOST_CHECK((!is_safely_castable<integer, real>::value));
-    BOOST_CHECK((!is_safely_castable<rational, real>::value));
-    BOOST_CHECK((!is_safely_castable<void, real>::value));
-    BOOST_CHECK((!is_safely_convertible<int, real &>::value));
-    BOOST_CHECK((!is_safely_convertible<void, real &>::value));
-    BOOST_CHECK_EQUAL(safe_cast<int>(3_r), 3);
-    BOOST_CHECK_EQUAL(safe_cast<int>(-3_r), -3);
+    CHECK((is_safely_castable<real, int>::value));
+    CHECK((!is_safely_castable<real, int &>::value));
+    CHECK((is_safely_castable<real &&, int>::value));
+    CHECK((is_safely_castable<const real &, int>::value));
+    CHECK((is_safely_castable<const real, int>::value));
+    CHECK((!is_safely_castable<real, void>::value));
+    CHECK((is_safely_castable<real, unsigned>::value));
+    CHECK((is_safely_castable<real, integer>::value));
+    CHECK((is_safely_castable<real, rational>::value));
+    CHECK((is_safely_castable<real, rational>::value));
+    CHECK((is_safely_castable<const real, rational>::value));
+    CHECK((is_safely_castable<const real &, rational>::value));
+    CHECK((!is_safely_castable<real, double>::value));
+    CHECK((!is_safely_castable<real, float>::value));
+    CHECK((is_safely_convertible<real, int &>::value));
+    CHECK((is_safely_convertible<real &, integer &>::value));
+    CHECK((is_safely_convertible<const real &, rational &>::value));
+    CHECK((!is_safely_convertible<real, const int &>::value));
+    CHECK((!is_safely_convertible<real, float &>::value));
+    CHECK((!is_safely_convertible<real, void>::value));
+    CHECK((!is_safely_castable<int, real>::value));
+    CHECK((!is_safely_castable<float, real>::value));
+    CHECK((!is_safely_castable<integer, real>::value));
+    CHECK((!is_safely_castable<rational, real>::value));
+    CHECK((!is_safely_castable<void, real>::value));
+    CHECK((!is_safely_convertible<int, real &>::value));
+    CHECK((!is_safely_convertible<void, real &>::value));
+    CHECK(safe_cast<int>(3_r) == 3);
+    CHECK(safe_cast<int>(-3_r) == -3);
     int tmp_n;
-    BOOST_CHECK((safe_convert(tmp_n, 3_r)));
-    BOOST_CHECK_EQUAL(tmp_n, 3);
-    BOOST_CHECK((!safe_convert(tmp_n, 3.12_r)));
-    BOOST_CHECK_EQUAL(tmp_n, 3);
+    CHECK((safe_convert(tmp_n, 3_r)));
+    CHECK(tmp_n == 3);
+    CHECK((!safe_convert(tmp_n, 3.12_r)));
+    CHECK(tmp_n == 3);
     integer tmp_z;
-    BOOST_CHECK((safe_convert(tmp_z, 3_r)));
-    BOOST_CHECK_EQUAL(tmp_z, 3);
-    BOOST_CHECK((!safe_convert(tmp_z, 3.12_r)));
-    BOOST_CHECK_EQUAL(tmp_z, 3);
+    CHECK((safe_convert(tmp_z, 3_r)));
+    CHECK(tmp_z == 3);
+    CHECK((!safe_convert(tmp_z, 3.12_r)));
+    CHECK(tmp_z == 3);
     rational tmp_q;
-    BOOST_CHECK((safe_convert(tmp_q, 3.5_r)));
-    BOOST_CHECK_EQUAL(tmp_q, (rational{7, 2}));
-    BOOST_CHECK((!safe_convert(tmp_q, real{"inf", 100})));
-    BOOST_CHECK_EQUAL(tmp_q, (rational{7, 2}));
+    CHECK((safe_convert(tmp_q, 3.5_r)));
+    CHECK(tmp_q == (rational{7, 2}));
+    CHECK((!safe_convert(tmp_q, real{"inf", 100})));
+    CHECK(tmp_q == (rational{7, 2}));
 #if defined(MPPP_HAVE_GCC_INT128)
-    BOOST_CHECK(safe_cast<__int128_t>(3_r) == 3);
-    BOOST_CHECK(safe_cast<__uint128_t>(3_r) == 3u);
-    BOOST_CHECK_THROW(safe_cast<__uint128_t>(-3_r), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<__uint128_t>(real{__uint128_t(-1)} * 2), safe_cast_failure);
+    CHECK(safe_cast<__int128_t>(3_r) == 3);
+    CHECK(safe_cast<__uint128_t>(3_r) == 3u);
+    CHECK_THROWS_AS(safe_cast<__uint128_t>(-3_r), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<__uint128_t>(real{__uint128_t(-1)} * 2), safe_cast_failure);
 #endif
-    BOOST_CHECK_EQUAL(safe_cast<unsigned>(4_r), 4u);
-    BOOST_CHECK_EQUAL(safe_cast<integer>(4_r), 4_z);
-    BOOST_CHECK_EQUAL(safe_cast<integer>(-4_r), -4_z);
-    BOOST_CHECK_EQUAL(safe_cast<rational>(4_r), 4_q);
-    BOOST_CHECK_EQUAL(safe_cast<rational>(-4_r), -4_q);
-    BOOST_CHECK_EQUAL(safe_cast<rational>(5_r / 2), 5_q / 2);
-    BOOST_CHECK_EQUAL(safe_cast<rational>(-5_r / 2), -5_q / 2);
+    CHECK(safe_cast<unsigned>(4_r) == 4u);
+    CHECK(safe_cast<integer>(4_r) == 4_z);
+    CHECK(safe_cast<integer>(-4_r) == -4_z);
+    CHECK(safe_cast<rational>(4_r) == 4_q);
+    CHECK(safe_cast<rational>(-4_r) == -4_q);
+    CHECK(safe_cast<rational>(5_r / 2) == 5_q / 2);
+    CHECK(safe_cast<rational>(-5_r / 2) == -5_q / 2);
     // Various types of failures.
-    BOOST_CHECK_EXCEPTION(safe_cast<int>(3.1_r), safe_cast_failure, [](const safe_cast_failure &e) {
-        return boost::contains(e.what(), "the safe conversion of a value of type");
-    });
-    BOOST_CHECK_THROW(safe_cast<int>(-3.1_r), safe_cast_failure);
-    BOOST_CHECK_EXCEPTION(safe_cast<int>(real{"inf", 100}), safe_cast_failure, [](const safe_cast_failure &e) {
-        return boost::contains(e.what(), "the safe conversion of a value of type");
-    });
-    BOOST_CHECK_THROW(safe_cast<int>(real{"nan", 100}), safe_cast_failure);
-    BOOST_CHECK_EXCEPTION(
+    CHECK_THROWS_MATCHES(safe_cast<int>(3.1_r), safe_cast_failure, 
+        test::ExceptionMatcher<safe_cast_failure>(std::string("the safe conversion of a value of type"))
+    );
+    CHECK_THROWS_AS(safe_cast<int>(-3.1_r), safe_cast_failure);
+    CHECK_THROWS_MATCHES(safe_cast<int>(real{"inf", 100}), safe_cast_failure,
+        test::ExceptionMatcher<safe_cast_failure>(std::string("the safe conversion of a value of type"))
+    );
+    CHECK_THROWS_AS(safe_cast<int>(real{"nan", 100}), safe_cast_failure);
+    CHECK_THROWS_MATCHES(
         safe_cast<int>(real{std::numeric_limits<int>::max()} * 2), safe_cast_failure,
-        [](const safe_cast_failure &e) { return boost::contains(e.what(), "the safe conversion of a value of type"); });
-    BOOST_CHECK_THROW(safe_cast<int>(real{std::numeric_limits<int>::min()} * 2), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<unsigned>(3.1_r), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<unsigned>(-3_r), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<unsigned>(real{"inf", 100}), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<unsigned>(real{"nan", 100}), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<unsigned>(real{std::numeric_limits<unsigned>::max()} * 2), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<integer>(3.1_r), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<integer>(-3.1_r), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<integer>(real{"inf", 100}), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<integer>(real{"nan", 100}), safe_cast_failure);
-    BOOST_CHECK_THROW(safe_cast<rational>(real{"inf", 100}), safe_cast_failure);
-    BOOST_CHECK_EXCEPTION(safe_cast<rational>(real{"nan", 100}), safe_cast_failure, [](const safe_cast_failure &e) {
-        return boost::contains(e.what(), "the safe conversion of a value of type");
-    });
+        test::ExceptionMatcher<safe_cast_failure>(std::string("the safe conversion of a value of type")) 
+    );
+    CHECK_THROWS_AS(safe_cast<int>(real{std::numeric_limits<int>::min()} * 2), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<unsigned>(3.1_r), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<unsigned>(-3_r), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<unsigned>(real{"inf", 100}), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<unsigned>(real{"nan", 100}), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<unsigned>(real{std::numeric_limits<unsigned>::max()} * 2), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<integer>(3.1_r), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<integer>(-3.1_r), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<integer>(real{"inf", 100}), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<integer>(real{"nan", 100}), safe_cast_failure);
+    CHECK_THROWS_AS(safe_cast<rational>(real{"inf", 100}), safe_cast_failure);
+    CHECK_THROWS_MATCHES(safe_cast<rational>(real{"nan", 100}), safe_cast_failure,
+        test::ExceptionMatcher<safe_cast_failure>(std::string("the safe conversion of a value of type"))
+    );
     // Check that real-real safe_convert() actually steals with move semantics.
     real foo1{123}, foo2{2};
     safe_convert(foo1, std::move(foo2));
-    BOOST_CHECK_EQUAL(foo1, 2);
+    CHECK(foo1 == 2);
     // NOTE: safe_convert() will do a move assignment, which is implemented
     // as a swap() in real.
-    BOOST_CHECK(foo2 == real{123});
+    CHECK(foo2 == real{123});
 }
 
-BOOST_AUTO_TEST_CASE(real_ternary_arith_test)
+TEST_CASE("real_ternary_arith_test")
 {
     real out;
     math::add3(out, real{4}, real{-1});
-    BOOST_CHECK(out == 3);
+    CHECK(out == 3);
     math::sub3(out, real{4}, real{-1});
-    BOOST_CHECK(out == 5);
+    CHECK(out == 5);
     math::mul3(out, real{4}, real{-1});
-    BOOST_CHECK(out == -4);
+    CHECK(out == -4);
     math::div3(out, real{4}, real{-1});
-    BOOST_CHECK(out == -4);
+    CHECK(out == -4);
 }
 
-BOOST_AUTO_TEST_CASE(real_is_one_test)
+TEST_CASE("real_is_one_test")
 {
     real out;
-    BOOST_CHECK(!piranha::is_one(out));
+    CHECK(!piranha::is_one(out));
     out = 1.234;
-    BOOST_CHECK(!piranha::is_one(out));
+    CHECK(!piranha::is_one(out));
     out = 1;
-    BOOST_CHECK(piranha::is_one(out));
+    CHECK(piranha::is_one(out));
     out = real{"inf", 5};
-    BOOST_CHECK(!piranha::is_one(out));
+    CHECK(!piranha::is_one(out));
     out = real{"-nan", 5};
-    BOOST_CHECK(!piranha::is_one(out));
+    CHECK(!piranha::is_one(out));
 }
 
 #else

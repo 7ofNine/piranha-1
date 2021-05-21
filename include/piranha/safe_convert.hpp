@@ -80,7 +80,7 @@ using is_safely_convertible = std::is_convertible<detected_t<safe_convert_t_, To
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename From, typename To>
-concept bool SafelyConvertible = is_safely_convertible<From, To>::value;
+concept SafelyConvertible = is_safely_convertible<From, To>::value;
 
 #endif
 

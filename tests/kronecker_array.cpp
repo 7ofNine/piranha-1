@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/kronecker_array.hpp>
 
-#define BOOST_TEST_MODULE kronecker_array_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/integer_traits.hpp>
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/vector.hpp>
@@ -41,6 +38,8 @@ see https://www.gnu.org/licenses/. */
 #include <tuple>
 #include <type_traits>
 #include <vector>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -58,17 +57,17 @@ struct limits_tester {
         typedef decltype(l) l_type;
         typedef typename l_type::value_type v_type;
         typedef typename l_type::size_type size_type;
-        BOOST_CHECK(l.size() > 1u);
-        BOOST_CHECK(l[0u] == v_type());
-        BOOST_CHECK(std::get<0u>(l[1u])[0u] == -std::get<1u>(l[1u]));
-        BOOST_CHECK(std::get<0u>(l[1u])[0u] == std::get<2u>(l[1u]));
+        CHECK(l.size() > 1u);
+        CHECK(l[0u] == v_type());
+        CHECK(std::get<0u>(l[1u])[0u] == -std::get<1u>(l[1u]));
+        CHECK(std::get<0u>(l[1u])[0u] == std::get<2u>(l[1u]));
         for (size_type i = 1u; i < l.size(); ++i) {
             for (size_type j = 0u; j < std::get<0u>(l[i]).size(); ++j) {
-                BOOST_CHECK(std::get<0u>(l[i])[j] > 0);
+                CHECK(std::get<0u>(l[i])[j] > 0);
             }
-            BOOST_CHECK(std::get<1u>(l[i]) < 0);
-            BOOST_CHECK(std::get<2u>(l[i]) > 0);
-            BOOST_CHECK(std::get<3u>(l[i]) > 0);
+            CHECK(std::get<1u>(l[i]) < 0);
+            CHECK(std::get<2u>(l[i]) > 0);
+            CHECK(std::get<3u>(l[i]) > 0);
             if (std::is_same<T, std::make_signed<std::size_t>::type>::value) {
                 std::cout << '[';
                 for (size_type j = 0u; j < std::get<0u>(l[i]).size(); ++j) {
@@ -81,7 +80,7 @@ struct limits_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(kronecker_array_limits_test)
+TEST_CASE("kronecker_array_limits_test")
 {
     boost::mpl::for_each<int_types>(limits_tester());
 }
@@ -93,16 +92,16 @@ struct coding_tester {
     {
         typedef kronecker_array<T> ka_type;
         auto &l = ka_type::get_limits();
-        BOOST_CHECK(ka_type::encode(std::vector<std::int16_t>{}) == 0);
-        BOOST_CHECK(ka_type::encode(std::vector<std::int16_t>{0}) == 0);
-        BOOST_CHECK(ka_type::encode(std::vector<std::int16_t>{1}) == 1);
-        BOOST_CHECK(ka_type::encode(std::vector<std::int16_t>{-1}) == -1);
-        BOOST_CHECK(ka_type::encode(std::vector<std::int16_t>{-10}) == -10);
-        BOOST_CHECK(ka_type::encode(std::vector<std::int16_t>{10}) == 10);
+        CHECK(ka_type::encode(std::vector<std::int16_t>{}) == 0);
+        CHECK(ka_type::encode(std::vector<std::int16_t>{0}) == 0);
+        CHECK(ka_type::encode(std::vector<std::int16_t>{1}) == 1);
+        CHECK(ka_type::encode(std::vector<std::int16_t>{-1}) == -1);
+        CHECK(ka_type::encode(std::vector<std::int16_t>{-10}) == -10);
+        CHECK(ka_type::encode(std::vector<std::int16_t>{10}) == 10);
         // NOTE: static_cast for use when T is a char.
         const T emax1 = std::get<0u>(l[1u])[0u], emin1 = static_cast<T>(-emax1);
-        BOOST_CHECK(ka_type::encode(std::vector<T>{emin1}) == emin1);
-        BOOST_CHECK(ka_type::encode(std::vector<T>{emax1}) == emax1);
+        CHECK(ka_type::encode(std::vector<T>{emin1}) == emin1);
+        CHECK(ka_type::encode(std::vector<T>{emax1}) == emax1);
         std::mt19937 rng;
         // Test with max/min vectors in various sizes.
         for (std::uint_least8_t i = 1u; i < l.size(); ++i) {
@@ -114,21 +113,21 @@ struct coding_tester {
             auto tmp(m);
             auto c = ka_type::encode(m);
             ka_type::decode(tmp, c);
-            BOOST_CHECK(m == tmp);
+            CHECK(m == tmp);
             tmp = M;
             c = ka_type::encode(M);
             ka_type::decode(tmp, c);
-            BOOST_CHECK(M == tmp);
+            CHECK(M == tmp);
             auto v1 = std::vector<T>(i, 0);
             auto v2 = v1;
             c = ka_type::encode(v1);
             ka_type::decode(v1, c);
-            BOOST_CHECK(v2 == v1);
+            CHECK(v2 == v1);
             v1 = std::vector<T>(i, -1);
             v2 = v1;
             c = ka_type::encode(v1);
             ka_type::decode(v1, c);
-            BOOST_CHECK(v2 == v1);
+            CHECK(v2 == v1);
             // Test with random values within the bounds.
             for (auto j = 0; j < 10000; ++j) {
                 for (decltype(v1.size()) k = 0u; k < v1.size(); ++k) {
@@ -138,23 +137,23 @@ struct coding_tester {
                 v2 = v1;
                 c = ka_type::encode(v1);
                 ka_type::decode(v1, c);
-                BOOST_CHECK(v2 == v1);
+                CHECK(v2 == v1);
             }
         }
         // Exceptions tests.
-        BOOST_CHECK_THROW(ka_type::encode(std::vector<T>(l.size())), std::invalid_argument);
-        BOOST_CHECK_THROW(ka_type::encode(std::vector<T>{T(0), boost::integer_traits<T>::const_min}),
+        CHECK_THROWS_AS(ka_type::encode(std::vector<T>(l.size())), std::invalid_argument);
+        CHECK_THROWS_AS(ka_type::encode(std::vector<T>{T(0), boost::integer_traits<T>::const_min}),
                           std::invalid_argument);
-        BOOST_CHECK_THROW(ka_type::encode(std::vector<T>{T(0), boost::integer_traits<T>::const_max}),
+        CHECK_THROWS_AS(ka_type::encode(std::vector<T>{T(0), boost::integer_traits<T>::const_max}),
                           std::invalid_argument);
         std::vector<T> v1(l.size());
-        BOOST_CHECK_THROW(ka_type::decode(v1, 0), std::invalid_argument);
+        CHECK_THROWS_AS(ka_type::decode(v1, 0), std::invalid_argument);
         v1.resize(0);
-        BOOST_CHECK_THROW(ka_type::decode(v1, 1), std::invalid_argument);
+        CHECK_THROWS_AS(ka_type::decode(v1, 1), std::invalid_argument);
     }
 };
 
-BOOST_AUTO_TEST_CASE(kronecker_array_coding_test)
+TEST_CASE("kronecker_array_coding_test")
 {
     boost::mpl::for_each<int_types>(coding_tester());
 }

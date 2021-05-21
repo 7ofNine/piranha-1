@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/polynomial.hpp>
 
-#define BOOST_TEST_MODULE polynomial_04_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/vector.hpp>
 #include <limits>
@@ -61,6 +58,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/series_multiplier.hpp>
 #include <piranha/settings.hpp>
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -112,7 +111,7 @@ public:
 }
 
 struct multiplication_tester {
-    template <typename Cf, typename std::enable_if<mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
         typedef polynomial<Cf, monomial<int>> p_type;
@@ -126,17 +125,17 @@ struct multiplication_tester {
         }
         auto g = f + 1;
         auto retval = f * g;
-        BOOST_CHECK_EQUAL(retval.size(), 10626u);
+        CHECK(retval.size() == 10626u);
         auto retval_alt = p_type_alt(f) * p_type_alt(g);
-        BOOST_CHECK(retval == p_type{retval_alt});
+        CHECK(retval == p_type{retval_alt});
         // Dense case, force number of threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * g;
             auto tmp_alt = p_type_alt(f) * p_type_alt(g);
-            BOOST_CHECK_EQUAL(tmp1.size(), 10626u);
-            BOOST_CHECK(tmp1 == retval);
-            BOOST_CHECK(tmp1 == p_type{tmp_alt});
+            CHECK(tmp1.size() == 10626u);
+            CHECK(tmp1 == retval);
+            CHECK(tmp1 == p_type{tmp_alt});
         }
         settings::reset_n_threads();
         // Dense case with cancellations, default setup.
@@ -147,16 +146,16 @@ struct multiplication_tester {
         }
         retval = f * h;
         retval_alt = p_type_alt(f) * p_type_alt(h);
-        BOOST_CHECK_EQUAL(retval.size(), 5786u);
-        BOOST_CHECK(retval == p_type{retval_alt});
+        CHECK(retval.size() == 5786u);
+        CHECK(retval == p_type{retval_alt});
         // Dense case with cancellations, force number of threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * h;
             auto tmp_alt = p_type_alt(f) * p_type_alt(h);
-            BOOST_CHECK_EQUAL(tmp1.size(), 5786u);
-            BOOST_CHECK(retval == tmp1);
-            BOOST_CHECK(tmp_alt == p_type_alt{tmp1});
+            CHECK(tmp1.size() == 5786u);
+            CHECK(retval == tmp1);
+            CHECK(tmp_alt == p_type_alt{tmp1});
         }
         settings::reset_n_threads();
         // Sparse case, default.
@@ -172,113 +171,113 @@ struct multiplication_tester {
             h *= tmp_h;
         }
         retval = f * g;
-        BOOST_CHECK_EQUAL(retval.size(), 591235u);
+        CHECK(retval.size() == 591235u);
         retval_alt = p_type_alt(f) * p_type_alt(g);
-        BOOST_CHECK(retval == p_type{retval_alt});
+        CHECK(retval == p_type{retval_alt});
         // Sparse case, force n threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * g;
             auto tmp_alt = p_type_alt(f) * p_type_alt(g);
-            BOOST_CHECK_EQUAL(tmp1.size(), 591235u);
-            BOOST_CHECK(retval == tmp1);
-            BOOST_CHECK(tmp_alt == p_type_alt{tmp1});
+            CHECK(tmp1.size() == 591235u);
+            CHECK(retval == tmp1);
+            CHECK(tmp_alt == p_type_alt{tmp1});
         }
         settings::reset_n_threads();
         // Sparse case with cancellations, default.
         retval = f * h;
-        BOOST_CHECK_EQUAL(retval.size(), 591184u);
+        CHECK(retval.size() == 591184u);
         retval_alt = p_type_alt(f) * p_type_alt(h);
-        BOOST_CHECK(retval_alt == p_type_alt{retval});
+        CHECK(retval_alt == p_type_alt{retval});
         // Sparse case with cancellations, force number of threads.
         for (auto i = 1u; i <= 4u; ++i) {
             settings::set_n_threads(i);
             auto tmp1 = f * h;
             auto tmp_alt = p_type_alt(f) * p_type_alt(h);
-            BOOST_CHECK_EQUAL(tmp1.size(), 591184u);
-            BOOST_CHECK(tmp1 == retval);
-            BOOST_CHECK(tmp1 == p_type{tmp_alt});
+            CHECK(tmp1.size() == 591184u);
+            CHECK(tmp1 == retval);
+            CHECK(tmp1 == p_type{tmp_alt});
         }
     }
-    template <typename Cf, typename std::enable_if<!mppp::is_rational<Cf>::value, int>::type = 0>
+    template <typename Cf, typename std::enable_if<!mppp::detail::is_rational<Cf>::value, int>::type = 0>
     void operator()(const Cf &)
     {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_multiplier_test)
+TEST_CASE("polynomial_multiplier_test")
 {
     boost::mpl::for_each<cf_types>(multiplication_tester());
 }
 
-BOOST_AUTO_TEST_CASE(polynomial_subs_test)
+TEST_CASE("polynomial_subs_test")
 {
     {
         typedef polynomial<rational, monomial<short>> p_type1;
-        BOOST_CHECK((has_subs<p_type1, rational>::value));
-        BOOST_CHECK((has_subs<p_type1, double>::value));
-        BOOST_CHECK((has_subs<p_type1, integer>::value));
-        BOOST_CHECK((!has_subs<p_type1, std::string>::value));
-        BOOST_CHECK_EQUAL(p_type1{"x"}.template subs<integer>({{"x", integer(1)}}), 1);
-        BOOST_CHECK_EQUAL(p_type1{"x"}.template subs<p_type1>({{"x", p_type1{"x"}}}), p_type1{"x"});
+        CHECK((has_subs<p_type1, rational>::value));
+        CHECK((has_subs<p_type1, double>::value));
+        CHECK((has_subs<p_type1, integer>::value));
+        CHECK((!has_subs<p_type1, std::string>::value));
+        CHECK(p_type1{"x"}.template subs<integer>({{"x", integer(1)}}) == 1);
+        CHECK(p_type1{"x"}.template subs<p_type1>({{"x", p_type1{"x"}}}) == p_type1{"x"});
         p_type1 x{"x"}, y{"y"}, z{"z"};
-        BOOST_CHECK_EQUAL((piranha::pow(x, 2) + x * y + z).template subs<integer>({{"x", integer(3)}}), 9 + 3 * y + z);
-        BOOST_CHECK_EQUAL((piranha::pow(x, 2) + x * y + z).template subs<rational>({{"y", rational(3, 2)}}),
+        CHECK((piranha::pow(x, 2) + x * y + z).template subs<integer>({{"x", integer(3)}}) == 9 + 3 * y + z);
+        CHECK((piranha::pow(x, 2) + x * y + z).template subs<rational>({{"y", rational(3, 2)}}) ==
                           x * x + x * rational(3, 2) + z);
-        BOOST_CHECK_EQUAL((piranha::pow(x, 2) + x * y + z).template subs<rational>({{"k", rational(3, 2)}}),
+        CHECK((piranha::pow(x, 2) + x * y + z).template subs<rational>({{"k", rational(3, 2)}}) ==
                           x * x + x * y + z);
-        BOOST_CHECK_EQUAL(piranha::pow(x, -1).template subs<p_type1>({{"x", piranha::pow(x, -1)}}), x);
-        BOOST_CHECK_EQUAL(
+        CHECK(piranha::pow(x, -1).template subs<p_type1>({{"x", piranha::pow(x, -1)}}) == x);
+        CHECK(
             (piranha::pow(x, 2) + x * y + z)
-                .template subs<rational>({{"x", rational(3, 2)}, {"y", rational(4, 5)}, {"z", -rational(6, 7)}}),
+                .template subs<rational>({{"x", rational(3, 2)}, {"y", rational(4, 5)}, {"z", -rational(6, 7)}}) ==
             math::evaluate<rational>(piranha::pow(x, 2) + x * y + z,
                                      {{"x", rational(3, 2)}, {"y", rational(4, 5)}, {"z", -rational(6, 7)}}));
-        BOOST_CHECK_EQUAL(
+        CHECK(
             math::subs<rational>(piranha::pow(x, 2) + x * y + z,
-                                 {{"x", rational(3, 2)}, {"y", rational(4, 5)}, {"z", -rational(6, 7)}}),
+                                 {{"x", rational(3, 2)}, {"y", rational(4, 5)}, {"z", -rational(6, 7)}}) ==
             math::evaluate<rational>(piranha::pow(x, 2) + x * y + z,
                                      {{"x", rational(3, 2)}, {"y", rational(4, 5)}, {"z", -rational(6, 7)}}));
-        BOOST_CHECK((std::is_same<decltype(p_type1{"x"}.template subs<integer>({{"x", integer(1)}})), p_type1>::value));
-        BOOST_CHECK(
+        CHECK((std::is_same<decltype(p_type1{"x"}.template subs<integer>({{"x", integer(1)}})), p_type1>::value));
+        CHECK(
             (std::is_same<decltype(p_type1{"x"}.template subs<rational>({{"x", rational(1)}})), p_type1>::value));
-        BOOST_CHECK_EQUAL((piranha::pow(x, 2) + x * y + z).template subs<rational>({{"k", rational(3, 2)}}),
+        CHECK((piranha::pow(x, 2) + x * y + z).template subs<rational>({{"k", rational(3, 2)}}) ==
                           x * x + x * y + z);
-        BOOST_CHECK_EQUAL(
-            (piranha::pow(y + 4 * z, 5) * piranha::pow(x, -1)).template subs<rational>({{"x", rational(3)}}),
+        CHECK(
+            (piranha::pow(y + 4 * z, 5) * piranha::pow(x, -1)).template subs<rational>({{"x", rational(3)}}) ==
             (piranha::pow(y + 4 * z, 5)) / 3);
     }
 #if defined(MPPP_WITH_MPFR)
     {
         typedef polynomial<real, monomial<int>> p_type2;
-        BOOST_CHECK((has_subs<p_type2, rational>::value));
-        BOOST_CHECK((has_subs<p_type2, double>::value));
-        BOOST_CHECK((has_subs<p_type2, integer>::value));
-        BOOST_CHECK((!has_subs<p_type2, std::string>::value));
+        CHECK((has_subs<p_type2, rational>::value));
+        CHECK((has_subs<p_type2, double>::value));
+        CHECK((has_subs<p_type2, integer>::value));
+        CHECK((!has_subs<p_type2, std::string>::value));
         p_type2 x{"x"}, y{"y"};
-        BOOST_CHECK_EQUAL((x * x * x + y * y).template subs<real>({{"x", real(1.234)}}),
+        CHECK((x * x * x + y * y).template subs<real>({{"x", real(1.234)}}) ==
                           y * y + piranha::pow(real(1.234), 3));
-        BOOST_CHECK_EQUAL((x * x * x + y * y).template subs<real>({{"x", real(1.234)}, {"y", real(-5.678)}}),
+        CHECK((x * x * x + y * y).template subs<real>({{"x", real(1.234)}, {"y", real(-5.678)}}) ==
                           piranha::pow(real(-5.678), 2) + piranha::pow(real(1.234), 3));
-        BOOST_CHECK_EQUAL(math::subs<real>(x * x * x + y * y, {{"x", real(1.234)}, {"y", real(-5.678)}}),
+        CHECK(math::subs<real>(x * x * x + y * y, {{"x", real(1.234)}, {"y", real(-5.678)}}) ==
                           piranha::pow(real(-5.678), 2) + piranha::pow(real(1.234), 3));
     }
 #endif
     typedef polynomial<integer, monomial<long>> p_type3;
-    BOOST_CHECK((has_subs<p_type3, rational>::value));
-    BOOST_CHECK((has_subs<p_type3, double>::value));
-    BOOST_CHECK((has_subs<p_type3, integer>::value));
-    BOOST_CHECK((!has_subs<p_type3, std::string>::value));
+    CHECK((has_subs<p_type3, rational>::value));
+    CHECK((has_subs<p_type3, double>::value));
+    CHECK((has_subs<p_type3, integer>::value));
+    CHECK((!has_subs<p_type3, std::string>::value));
     p_type3 x{"x"}, y{"y"}, z{"z"};
-    BOOST_CHECK_EQUAL(
+    CHECK(
         (x * x * x + y * y + z * y * x)
-            .template subs<integer>({{"x", integer(2)}, {"y", integer(-3)}, {"z", integer(4)}, {"k", integer()}}),
+            .template subs<integer>({{"x", integer(2)}, {"y", integer(-3)}, {"z", integer(4)}, {"k", integer()}}) ==
         piranha::pow(integer(2), 3) + piranha::pow(integer(-3), 2) + integer(2) * integer(-3) * integer(4));
-    BOOST_CHECK_EQUAL(math::subs<integer>(x * x * x + y * y + z * y * x,
-                                          {{"x", integer(2)}, {"y", integer(-3)}, {"z", integer(4)}, {"k", integer()}}),
+    CHECK(math::subs<integer>(x * x * x + y * y + z * y * x,
+                                          {{"x", integer(2)}, {"y", integer(-3)}, {"z", integer(4)}, {"k", integer()}}) ==
                       piranha::pow(integer(2), 3) + piranha::pow(integer(-3), 2)
                           + integer(2) * integer(-3) * integer(4));
-    BOOST_CHECK_EQUAL(
+    CHECK(
         (x * x * x + y * y + z * y * x)
-            .template subs<integer>({{"x", integer(0)}, {"y", integer(0)}, {"z", integer(0)}, {"k", integer()}}),
+            .template subs<integer>({{"x", integer(0)}, {"y", integer(0)}, {"z", integer(0)}, {"k", integer()}}) ==
         0);
 }

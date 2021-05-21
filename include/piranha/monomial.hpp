@@ -537,7 +537,7 @@ public:
 private:
     // Let's hard code the custom behaviour for rational exponents for the moment.
     // We can offer a customization point in the future.
-    template <typename U, enable_if_t<mppp::is_rational<U>::value, int> = 0>
+    template <typename U, enable_if_t<mppp::detail::is_rational<U>::value, int> = 0>
     static void print_exponent(std::ostream &os, const U &e)
     {
         if (piranha::is_one(e.get_den())) {
@@ -546,7 +546,7 @@ private:
             os << '(' << e << ')';
         }
     }
-    template <typename U, enable_if_t<!mppp::is_rational<U>::value, int> = 0>
+    template <typename U, enable_if_t<!mppp::detail::is_rational<U>::value, int> = 0>
     static void print_exponent(std::ostream &os, const U &e)
     {
         os << detail::prepare_for_print(e);
@@ -993,8 +993,8 @@ private:
 #if defined(PIRANHA_WITH_BOOST_S11N)
     // Make friend with the s11n functions.
     template <typename Archive, typename T1, typename S1>
-    friend void
-    boost::serialization::save(Archive &, const piranha::boost_s11n_key_wrapper<piranha::monomial<T1, S1>> &, unsigned);
+    friend void 
+        boost::serialization::save(Archive &, const piranha::boost_s11n_key_wrapper<piranha::monomial<T1, S1>> &, unsigned);
     template <typename Archive, typename T1, typename S1>
     friend void boost::serialization::load(Archive &, piranha::boost_s11n_key_wrapper<piranha::monomial<T1, S1>> &,
                                            unsigned);

@@ -40,12 +40,12 @@ see https://www.gnu.org/licenses/. */
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <string>
+#include "mp++/concepts.hpp"
+#include "mp++/detail/type_traits.hpp"
 
-#include <mp++/concepts.hpp>
-#include <mp++/detail/type_traits.hpp>
-
-#include <piranha/config.hpp>
-#include <piranha/detail/init.hpp>
+#include "piranha/config.hpp"
+#include "piranha/detail/init.hpp"
 
 namespace piranha
 {
@@ -57,20 +57,20 @@ struct is_string_type : mppp::is_string_type<T> {
 
 #if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename T>
-concept bool StringType = is_string_type<T>::value;
+concept StringType = is_string_type<T>::value;
 #endif
 
 inline namespace impl
 {
 
 // Import a bunch of implementation-detail type traits / utils from mp++.
-using mppp::conjunction;
-using mppp::detected_t;
-using mppp::disjunction;
-using mppp::enable_if_t;
-using mppp::is_detected;
-using mppp::negation;
-using mppp::nonesuch;
+using std::conjunction;
+using mppp::detail::detected_t;
+using std::disjunction;
+using mppp::detail::enable_if_t;
+using mppp::detail::is_detected;
+using std::negation;
+using mppp::detail::nonesuch;
 
 // This is like disjunction, but instead of providing true/false it provides
 // the index of the first boolean class which evaluates to true. If no class
@@ -191,28 +191,28 @@ using are_same = conjunction<std::is_same<T, Args>...>;
 
 // Provide concept versions of a few C++ type traits.
 template <typename T>
-concept bool CppArithmetic = std::is_arithmetic<T>::value;
+concept CppArithmetic = std::is_arithmetic<T>::value;
 
 template <typename T>
-concept bool CppIntegral = std::is_integral<T>::value;
+concept CppIntegral = std::is_integral<T>::value;
 
 template <typename T>
-concept bool CppFloatingPoint = std::is_floating_point<T>::value;
+concept CppFloatingPoint = std::is_floating_point<T>::value;
 
 template <typename T, typename... Args>
-concept bool Constructible = std::is_constructible<T, Args...>::value;
+concept Constructible = std::is_constructible<T, Args...>::value;
 
 template <typename T>
-concept bool DefaultConstructible = std::is_default_constructible<T>::value;
+concept DefaultConstructible = std::is_default_constructible<T>::value;
 
 template <typename From, typename To>
-concept bool Convertible = std::is_convertible<From, To>::value;
+concept Convertible = std::is_convertible<From, To>::value;
 
 template <typename T>
-concept bool NonConst = !std::is_const<T>::value;
+concept NonConst = !std::is_const<T>::value;
 
 template <typename T, typename... Args>
-concept bool Same = are_same<T, Args...>::value;
+concept Same = are_same<T, Args...>::value;
 
 #endif
 
@@ -224,7 +224,7 @@ using is_cpp_complex
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool CppComplex = is_cpp_complex<T>::value;
+concept CppComplex = is_cpp_complex<T>::value;
 
 #endif
 
@@ -318,7 +318,7 @@ struct is_swappable : std::conditional<std_swap_viable<T, U>::value, using_std_a
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U = T>
-concept bool Swappable = is_swappable<T, U>::value;
+concept Swappable = is_swappable<T, U>::value;
 
 #endif
 
@@ -338,7 +338,7 @@ struct is_addable : is_detected<add_t, T, U> {
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U = T>
-concept bool Addable = is_addable<T, U>::value;
+concept Addable = is_addable<T, U>::value;
 
 #endif
 
@@ -393,7 +393,7 @@ using is_preincrementable = is_detected<preinc_t, T>;
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool Preincrementable = is_preincrementable<T>::value;
+concept Preincrementable = is_preincrementable<T>::value;
 
 #endif
 
@@ -425,7 +425,7 @@ using is_postincrementable = is_detected<postinc_t, T>;
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool Postincrementable = is_postincrementable<T>::value;
+concept Postincrementable = is_postincrementable<T>::value;
 
 #endif
 
@@ -687,7 +687,7 @@ struct is_equality_comparable : conjunction<std::is_convertible<detected_t<eq_t,
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U = T>
-concept bool EqualityComparable = is_equality_comparable<T, U>::value;
+concept EqualityComparable = is_equality_comparable<T, U>::value;
 
 #endif
 
@@ -1045,7 +1045,7 @@ using is_iterator = conjunction<
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool Iterator = is_iterator<T>::value;
+concept Iterator = is_iterator<T>::value;
 
 #endif
 
@@ -1160,7 +1160,7 @@ using is_input_iterator = conjunction<
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool InputIterator = is_input_iterator<T>::value;
+concept InputIterator = is_input_iterator<T>::value;
 
 #endif
 
@@ -1199,7 +1199,7 @@ using is_output_iterator = conjunction<
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T, typename U>
-concept bool OutputIterator = is_output_iterator<T, U>::value;
+concept OutputIterator = is_output_iterator<T, U>::value;
 
 #endif
 
@@ -1229,7 +1229,7 @@ using is_forward_iterator = conjunction<
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool ForwardIterator = is_forward_iterator<T>::value;
+concept ForwardIterator = is_forward_iterator<T>::value;
 
 #endif
 
@@ -1241,7 +1241,7 @@ using is_mutable_forward_iterator
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool MutableForwardIterator = is_mutable_forward_iterator<T>::value;
+concept MutableForwardIterator = is_mutable_forward_iterator<T>::value;
 
 #endif
 
@@ -1304,7 +1304,7 @@ using is_input_range = conjunction<is_input_iterator<detected_t<begin_adl::type,
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool InputRange = is_input_range<T>::value;
+concept InputRange = is_input_range<T>::value;
 
 #endif
 
@@ -1316,7 +1316,7 @@ using is_forward_range = conjunction<is_forward_iterator<detected_t<begin_adl::t
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool ForwardRange = is_forward_range<T>::value;
+concept ForwardRange = is_forward_range<T>::value;
 
 #endif
 
@@ -1329,7 +1329,7 @@ using is_mutable_forward_range
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool MutableForwardRange = is_mutable_forward_range<T>::value;
+concept MutableForwardRange = is_mutable_forward_range<T>::value;
 
 #endif
 
@@ -1344,7 +1344,7 @@ using is_returnable = disjunction<std::is_same<T, void>, std::is_copy_constructi
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool Returnable = is_returnable<T>::value;
+concept Returnable = is_returnable<T>::value;
 
 #endif
 

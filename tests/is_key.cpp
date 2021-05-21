@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/is_key.hpp>
 
-#define BOOST_TEST_MODULE is_key_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <cstddef>
 #include <functional>
@@ -39,6 +37,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/key/key_is_one.hpp>
 #include <piranha/key/key_is_zero.hpp>
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -293,28 +293,28 @@ class key_is_zero_impl<key02a>
 };
 }
 
-BOOST_AUTO_TEST_CASE(is_key_test_00)
+TEST_CASE("is_key_test_00")
 {
-    BOOST_CHECK(!is_key<void>::value);
-    BOOST_CHECK(!is_key<int>::value);
-    BOOST_CHECK(!is_key<double>::value);
-    BOOST_CHECK(!is_key<long *>::value);
-    BOOST_CHECK(!is_key<long &>::value);
-    BOOST_CHECK(!is_key<long const &>::value);
-    BOOST_CHECK(!is_key<key01>::value);
-    BOOST_CHECK(!is_key<const key01 &>::value);
-    BOOST_CHECK(is_key<key02>::value);
-    BOOST_CHECK(!is_key<key02a>::value);
-    BOOST_CHECK(!is_key<key02b>::value);
-    BOOST_CHECK(!is_key<key02 &>::value);
-    BOOST_CHECK(!is_key<key02 &&>::value);
-    BOOST_CHECK(!is_key<const key02>::value);
-    BOOST_CHECK(!is_key<const key02 &>::value);
-    BOOST_CHECK(!is_key<const key02 &&>::value);
-    BOOST_CHECK(!is_key<key03>::value);
-    BOOST_CHECK(!is_key<key04>::value);
-    BOOST_CHECK(!is_key<key05>::value);
-    BOOST_CHECK(is_key<key06>::value);
-    BOOST_CHECK(!is_key<key07>::value);
-    BOOST_CHECK(!is_key<key08>::value);
+    CHECK(!is_key<void>::value);
+    CHECK(!is_key<int>::value);
+    CHECK(!is_key<double>::value);
+    CHECK(!is_key<long *>::value);
+    CHECK(!is_key<long &>::value);
+    CHECK(!is_key<long const &>::value);
+    CHECK(!is_key<key01>::value);
+    CHECK(!is_key<const key01 &>::value);
+    CHECK(is_key<key02>::value);
+    CHECK(!is_key<key02a>::value);
+    CHECK(!is_key<key02b>::value);
+    CHECK(!is_key<key02 &>::value);
+    CHECK(!is_key<key02 &&>::value);
+    CHECK(!is_key<const key02>::value);
+    CHECK(!is_key<const key02 &>::value);
+    CHECK(!is_key<const key02 &&>::value);
+    CHECK(!is_key<key03>::value);
+    CHECK(!is_key<key04>::value);
+    CHECK(!is_key<key05>::value);
+    CHECK(is_key<key06>::value);
+    CHECK(!is_key<key07>::value);
+    CHECK(!is_key<key08>::value);
 }

@@ -68,7 +68,7 @@ using is_is_zero_type = std::is_convertible<detected_t<is_zero_t_, T>, bool>;
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool IsZeroType = is_is_zero_type<T>::value;
+concept IsZeroType = is_is_zero_type<T>::value;
 
 #endif
 

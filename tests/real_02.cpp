@@ -32,9 +32,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/real.hpp>
 
-#define BOOST_TEST_MODULE real_02_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstdint>
 #include <initializer_list>
@@ -55,6 +52,10 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/s11n.hpp>
 #include <piranha/type_traits.hpp>
 
+#include "exception_matcher.hpp"
+
+#include "catch.hpp"
+
 #if defined(PIRANHA_WITH_BOOST_S11N) || defined(PIRANHA_WITH_MSGPACK)
 static const int ntries = 1000;
 static std::mutex mut;
@@ -64,7 +65,7 @@ using namespace piranha;
 
 static const std::vector<::mpfr_prec_t> vprec{32, 64, 113, 128, 197, 256, 273, 512};
 
-BOOST_AUTO_TEST_CASE(real_empty_test) {}
+TEST_CASE("real_empty_test") {}
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -83,22 +84,22 @@ static inline void boost_roundtrip(const T &x, bool mt = false)
     }
     if (mt) {
         std::lock_guard<std::mutex> lock(mut);
-        BOOST_CHECK_EQUAL(x, retval);
-        BOOST_CHECK_EQUAL(x.get_prec(), retval.get_prec());
+        CHECK(x == retval);
+        CHECK(x.get_prec() == retval.get_prec());
     } else {
-        BOOST_CHECK_EQUAL(x, retval);
-        BOOST_CHECK_EQUAL(x.get_prec(), retval.get_prec());
+        CHECK(x == retval);
+        CHECK(x.get_prec() == retval.get_prec());
     }
 }
 
-BOOST_AUTO_TEST_CASE(real_boost_s11n_test)
+TEST_CASE("real_boost_s11n_test")
 {
-    BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, real>::value));
-    BOOST_CHECK((has_boost_save<boost::archive::text_oarchive, real>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, real>::value));
-    BOOST_CHECK((!has_boost_save<void, real>::value));
-    BOOST_CHECK((has_boost_load<boost::archive::text_iarchive, real>::value));
-    BOOST_CHECK((!has_boost_load<void, real>::value));
+    CHECK((has_boost_save<boost::archive::binary_oarchive, real>::value));
+    CHECK((has_boost_save<boost::archive::text_oarchive, real>::value));
+    CHECK((has_boost_load<boost::archive::binary_iarchive, real>::value));
+    CHECK((!has_boost_save<void, real>::value));
+    CHECK((has_boost_load<boost::archive::text_iarchive, real>::value));
+    CHECK((!has_boost_load<void, real>::value));
     for (auto prec : vprec) {
         auto t_func = [prec](unsigned n) {
             std::mt19937 rng(n);
@@ -149,8 +150,8 @@ BOOST_AUTO_TEST_CASE(real_boost_s11n_test)
                     boost::archive::binary_iarchive ia(ss);
                     boost_load(ia, retval);
                 }
-                BOOST_CHECK(retval.nan_p());
-                BOOST_CHECK_EQUAL(retval.get_prec(), prec);
+                CHECK(retval.nan_p());
+                CHECK(retval.get_prec() == prec);
             }
             {
                 std::stringstream ss;
@@ -163,8 +164,8 @@ BOOST_AUTO_TEST_CASE(real_boost_s11n_test)
                     boost::archive::binary_iarchive ia(ss);
                     boost_load(ia, retval);
                 }
-                BOOST_CHECK(retval.nan_p());
-                BOOST_CHECK_EQUAL(retval.get_prec(), prec);
+                CHECK(retval.nan_p());
+                CHECK(retval.get_prec() == prec);
             }
             {
                 std::stringstream ss;
@@ -177,8 +178,8 @@ BOOST_AUTO_TEST_CASE(real_boost_s11n_test)
                     boost::archive::text_iarchive ia(ss);
                     boost_load(ia, retval);
                 }
-                BOOST_CHECK(retval.nan_p());
-                BOOST_CHECK_EQUAL(retval.get_prec(), prec);
+                CHECK(retval.nan_p());
+                CHECK(retval.get_prec() == prec);
             }
             {
                 std::stringstream ss;
@@ -191,8 +192,8 @@ BOOST_AUTO_TEST_CASE(real_boost_s11n_test)
                     boost::archive::text_iarchive ia(ss);
                     boost_load(ia, retval);
                 }
-                BOOST_CHECK(retval.nan_p());
-                BOOST_CHECK_EQUAL(retval.get_prec(), prec);
+                CHECK(retval.nan_p());
+                CHECK(retval.get_prec() == prec);
             }
         }
     }
@@ -213,25 +214,25 @@ static inline void msgpack_roundtrip(const T &x, msgpack_format f, bool mt = fal
     msgpack_convert(retval, oh.get(), f);
     if (mt) {
         std::lock_guard<std::mutex> lock(mut);
-        BOOST_CHECK_EQUAL(x, retval);
-        BOOST_CHECK_EQUAL(x.get_prec(), retval.get_prec());
+        CHECK(x  == retval);
+        CHECK(x.get_prec() == retval.get_prec());
     } else {
-        BOOST_CHECK_EQUAL(x, retval);
-        BOOST_CHECK_EQUAL(x.get_prec(), retval.get_prec());
+        CHECK(x == retval);
+        CHECK(x.get_prec() == retval.get_prec());
     }
 }
 
-BOOST_AUTO_TEST_CASE(real_msgpack_s11n_test)
+TEST_CASE("real_msgpack_s11n_test")
 {
-    BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, real>::value));
-    BOOST_CHECK((has_msgpack_pack<std::stringstream, real>::value));
-    BOOST_CHECK((has_msgpack_pack<std::stringstream, real &>::value));
-    BOOST_CHECK((has_msgpack_pack<std::stringstream, const real &>::value));
-    BOOST_CHECK((!has_msgpack_pack<std::stringstream &, real>::value));
-    BOOST_CHECK((!has_msgpack_pack<void, real>::value));
-    BOOST_CHECK((has_msgpack_convert<real>::value));
-    BOOST_CHECK((has_msgpack_convert<real &>::value));
-    BOOST_CHECK((!has_msgpack_convert<const real>::value));
+    CHECK((has_msgpack_pack<msgpack::sbuffer, real>::value));
+    CHECK((has_msgpack_pack<std::stringstream, real>::value));
+    CHECK((has_msgpack_pack<std::stringstream, real &>::value));
+    CHECK((has_msgpack_pack<std::stringstream, const real &>::value));
+    CHECK((!has_msgpack_pack<std::stringstream &, real>::value));
+    CHECK((!has_msgpack_pack<void, real>::value));
+    CHECK((has_msgpack_convert<real>::value));
+    CHECK((has_msgpack_convert<real &>::value));
+    CHECK((!has_msgpack_convert<const real>::value));
     for (auto prec : vprec) {
         for (auto f : {msgpack_format::portable, msgpack_format::binary}) {
             auto t_func = [f, prec](unsigned n) {
@@ -269,8 +270,8 @@ BOOST_AUTO_TEST_CASE(real_msgpack_s11n_test)
                     auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
                     real retval;
                     msgpack_convert(retval, oh.get(), f);
-                    BOOST_CHECK(retval.nan_p());
-                    BOOST_CHECK_EQUAL(retval.get_prec(), prec);
+                    CHECK(retval.nan_p());
+                    CHECK(retval.get_prec() == prec);
                 }
                 {
                     msgpack::sbuffer sbuf;
@@ -279,8 +280,8 @@ BOOST_AUTO_TEST_CASE(real_msgpack_s11n_test)
                     auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
                     real retval;
                     msgpack_convert(retval, oh.get(), f);
-                    BOOST_CHECK(retval.nan_p());
-                    BOOST_CHECK_EQUAL(retval.get_prec(), prec);
+                    CHECK(retval.nan_p());
+                    CHECK(retval.get_prec() == prec);
                 }
             }
         }
@@ -305,17 +306,14 @@ BOOST_AUTO_TEST_CASE(real_msgpack_s11n_test)
         }
         auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
         real retval{42};
-        BOOST_CHECK_EXCEPTION(msgpack_convert(retval, oh.get(), msgpack_format::binary), std::invalid_argument,
-                              [s_from_prec](const std::invalid_argument &ia) {
-                                  return boost::contains(
-                                      ia.what(),
-                                      std::string("error in the msgpack deserialization of a real: the number "
+        CHECK_THROWS_MATCHES(msgpack_convert(retval, oh.get(), msgpack_format::binary), std::invalid_argument,
+                              test::ExceptionMatcher<std::invalid_argument>(std::string(("error in the msgpack deserialization of a real: the number "
                                                   "of serialized limbs (")
                                           + std::to_string(std::uint32_t(s_from_prec + 1))
                                           + ") is not consistent with the number of limbs inferred from the precision ("
-                                          + std::to_string(s_from_prec) + ")");
-                              });
-        BOOST_CHECK_EQUAL(retval, 0);
+                                          + std::to_string(s_from_prec) + ")"))
+        );
+        CHECK(retval == 0);
     }
     {
         ::mpfr_prec_t prec = 371;
@@ -334,20 +332,20 @@ BOOST_AUTO_TEST_CASE(real_msgpack_s11n_test)
         msgpack_pack(p, 123., msgpack_format::binary);
         auto oh = msgpack::unpack(sbuf.data(), sbuf.size());
         real retval{42};
-        BOOST_CHECK_THROW(msgpack_convert(retval, oh.get(), msgpack_format::binary), std::bad_cast);
-        BOOST_CHECK_EQUAL(retval, 0);
+        CHECK_THROWS_AS(msgpack_convert(retval, oh.get(), msgpack_format::binary), std::bad_cast);
+        CHECK(retval == 0);
     }
 }
 
 #endif
 
-BOOST_AUTO_TEST_CASE(real_zero_is_absorbing_test)
+TEST_CASE("real_zero_is_absorbing_test")
 {
-    BOOST_CHECK((!zero_is_absorbing<real>::value));
-    BOOST_CHECK((!zero_is_absorbing<real &>::value));
-    BOOST_CHECK((!zero_is_absorbing<real &&>::value));
-    BOOST_CHECK((!zero_is_absorbing<const real &>::value));
-    BOOST_CHECK((!zero_is_absorbing<const real>::value));
+    CHECK((!zero_is_absorbing<real>::value));
+    CHECK((!zero_is_absorbing<real &>::value));
+    CHECK((!zero_is_absorbing<real &&>::value));
+    CHECK((!zero_is_absorbing<const real &>::value));
+    CHECK((!zero_is_absorbing<const real>::value));
 }
 
 #else

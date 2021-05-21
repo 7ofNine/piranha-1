@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/polynomial.hpp>
 
-#define BOOST_TEST_MODULE polynomial_multiplier_01_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/vector.hpp>
 #include <cstdint>
@@ -47,6 +44,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/rational.hpp>
 #include <piranha/settings.hpp>
 #include <piranha/symbol_utils.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -78,41 +77,41 @@ struct bounds_tester {
                 using int_type = typename Key::value_type;
                 settings::set_n_threads(nt);
                 auto x = pt{"x"}, y = pt{"y"};
-                BOOST_CHECK_THROW(piranha::pow(x, std::numeric_limits<int_type>::max()) * x, std::overflow_error);
-                BOOST_CHECK_THROW((piranha::pow(x, std::numeric_limits<int_type>::max()) + 1) * (x + 1),
+                CHECK_THROWS_AS(piranha::pow(x, std::numeric_limits<int_type>::max()) * x, std::overflow_error);
+                CHECK_THROWS_AS((piranha::pow(x, std::numeric_limits<int_type>::max()) + 1) * (x + 1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW(piranha::pow(x, std::numeric_limits<int_type>::min()) * x.pow(-1),
+                CHECK_THROWS_AS(piranha::pow(x, std::numeric_limits<int_type>::min()) * x.pow(-1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW((piranha::pow(x, std::numeric_limits<int_type>::min()) + 1) * (x.pow(-1) + 1),
+                CHECK_THROWS_AS((piranha::pow(x, std::numeric_limits<int_type>::min()) + 1) * (x.pow(-1) + 1),
                                   std::overflow_error);
-                BOOST_CHECK_EQUAL(piranha::pow(x, std::numeric_limits<int_type>::max() - 1) * x,
+                CHECK(piranha::pow(x, std::numeric_limits<int_type>::max() - 1) * x ==
                                   piranha::pow(x, std::numeric_limits<int_type>::max()));
-                BOOST_CHECK_EQUAL(piranha::pow(x, std::numeric_limits<int_type>::min() + 1) * x.pow(-1),
+                CHECK(piranha::pow(x, std::numeric_limits<int_type>::min() + 1) * x.pow(-1) ==
                                   piranha::pow(x, std::numeric_limits<int_type>::min()));
                 // Try also with more than one variable.
-                BOOST_CHECK_THROW(x * piranha::pow(y, std::numeric_limits<int_type>::max()) * y, std::overflow_error);
-                BOOST_CHECK_THROW((x + 1) * (piranha::pow(y, std::numeric_limits<int_type>::max()) * y + 1),
+                CHECK_THROWS_AS(x * piranha::pow(y, std::numeric_limits<int_type>::max()) * y, std::overflow_error);
+                CHECK_THROWS_AS((x + 1) * (piranha::pow(y, std::numeric_limits<int_type>::max()) * y + 1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW(piranha::pow(x, std::numeric_limits<int_type>::max())
+                CHECK_THROWS_AS(piranha::pow(x, std::numeric_limits<int_type>::max())
                                       * piranha::pow(y, std::numeric_limits<int_type>::min()) * y.pow(-1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW((piranha::pow(x, std::numeric_limits<int_type>::max()) + 1)
+                CHECK_THROWS_AS((piranha::pow(x, std::numeric_limits<int_type>::max()) + 1)
                                       * (piranha::pow(y, std::numeric_limits<int_type>::min()) * y.pow(-1) + 1),
                                   std::overflow_error);
-                BOOST_CHECK_EQUAL(piranha::pow(y, std::numeric_limits<int_type>::max())
-                                      * piranha::pow(x, std::numeric_limits<int_type>::max() - 1) * x,
+                CHECK(piranha::pow(y, std::numeric_limits<int_type>::max())
+                                      * piranha::pow(x, std::numeric_limits<int_type>::max() - 1) * x ==
                                   piranha::pow(y, std::numeric_limits<int_type>::max())
                                       * piranha::pow(x, std::numeric_limits<int_type>::max()));
-                BOOST_CHECK_EQUAL(piranha::pow(y, std::numeric_limits<int_type>::min())
-                                      * piranha::pow(x, std::numeric_limits<int_type>::min() + 1) * x.pow(-1),
+                CHECK(piranha::pow(y, std::numeric_limits<int_type>::min())
+                                      * piranha::pow(x, std::numeric_limits<int_type>::min() + 1) * x.pow(-1) ==
                                   piranha::pow(y, std::numeric_limits<int_type>::min())
                                       * piranha::pow(x, std::numeric_limits<int_type>::min()));
                 // Check with empty series.
-                BOOST_CHECK_EQUAL(piranha::pow(y, std::numeric_limits<int_type>::max()) * 0, 0);
-                BOOST_CHECK_EQUAL(piranha::pow(y, std::numeric_limits<int_type>::min()) * 0, 0);
-                BOOST_CHECK_EQUAL(pt(0) * pt(0), 0);
+                CHECK(piranha::pow(y, std::numeric_limits<int_type>::max()) * 0 == 0);
+                CHECK(piranha::pow(y, std::numeric_limits<int_type>::min()) * 0 == 0);
+                CHECK(pt(0) * pt(0) == 0);
                 // Check with constant polys.
-                BOOST_CHECK_EQUAL(pt{2} * pt{3}, 6);
+                CHECK(pt{2} * pt{3} == 6);
             }
             settings::reset_min_work_per_thread();
             settings::reset_n_threads();
@@ -129,44 +128,44 @@ struct bounds_tester {
                 // Use polynomials with 3 variables for testing.
                 const auto &limits = std::get<0u>(ka::get_limits()[3u]);
                 auto x = pt{"x"}, y = pt{"y"}, z = pt{"z"};
-                BOOST_CHECK_THROW(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * x, std::overflow_error);
-                BOOST_CHECK_THROW((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1) * (x + 1),
+                CHECK_THROWS_AS(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * x, std::overflow_error);
+                CHECK_THROWS_AS((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1) * (x + 1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * y, std::overflow_error);
-                BOOST_CHECK_THROW((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1) * (y + 1),
+                CHECK_THROWS_AS(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * y, std::overflow_error);
+                CHECK_THROWS_AS((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1) * (y + 1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * z, std::overflow_error);
-                BOOST_CHECK_THROW((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1) * (z + 1),
+                CHECK_THROWS_AS(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * z, std::overflow_error);
+                CHECK_THROWS_AS((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1) * (z + 1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW(x.pow(-limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * x.pow(-1),
+                CHECK_THROWS_AS(x.pow(-limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]) * x.pow(-1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW((x.pow(-limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1)
+                CHECK_THROWS_AS((x.pow(-limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(limits[2u]) + 1)
                                       * (x.pow(-1) + 1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW(x.pow(limits[0u]) * y.pow(-limits[1u]) * z.pow(limits[2u]) * y.pow(-1),
+                CHECK_THROWS_AS(x.pow(limits[0u]) * y.pow(-limits[1u]) * z.pow(limits[2u]) * y.pow(-1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW((x.pow(limits[0u]) + 1) * (y.pow(-limits[1u]) + 1) * (z.pow(limits[2u]) + 1)
+                CHECK_THROWS_AS((x.pow(limits[0u]) + 1) * (y.pow(-limits[1u]) + 1) * (z.pow(limits[2u]) + 1)
                                       * (y.pow(-1) + 1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(-limits[2u]) * z.pow(-1),
+                CHECK_THROWS_AS(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(-limits[2u]) * z.pow(-1),
                                   std::overflow_error);
-                BOOST_CHECK_THROW((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(-limits[2u]) + 1)
+                CHECK_THROWS_AS((x.pow(limits[0u]) + 1) * (y.pow(limits[1u]) + 1) * (z.pow(-limits[2u]) + 1)
                                       * (z.pow(-1) + 1),
                                   std::overflow_error);
-                BOOST_CHECK_EQUAL(x.pow(limits[0u] - 1) * y.pow(limits[1u]) * z.pow(limits[2u]) * x,
+                CHECK(x.pow(limits[0u] - 1) * y.pow(limits[1u]) * z.pow(limits[2u]) * x ==
                                   x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]));
-                BOOST_CHECK_EQUAL(x.pow(limits[0u]) * y.pow(limits[1u] - 1) * z.pow(limits[2u]) * y,
+                CHECK(x.pow(limits[0u]) * y.pow(limits[1u] - 1) * z.pow(limits[2u]) * y ==
                                   x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]));
-                BOOST_CHECK_EQUAL(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u] - 1) * z,
+                CHECK(x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u] - 1) * z ==
                                   x.pow(limits[0u]) * y.pow(limits[1u]) * z.pow(limits[2u]));
-                BOOST_CHECK_EQUAL(x.pow(-limits[0u] + 1) * y.pow(-limits[1u]) * z.pow(-limits[2u]) * x.pow(-1),
+                CHECK(x.pow(-limits[0u] + 1) * y.pow(-limits[1u]) * z.pow(-limits[2u]) * x.pow(-1) ==
                                   x.pow(-limits[0u]) * y.pow(-limits[1u]) * z.pow(-limits[2u]));
-                BOOST_CHECK_EQUAL(x.pow(-limits[0u]) * y.pow(-limits[1u] + 1) * z.pow(-limits[2u]) * y.pow(-1),
+                CHECK(x.pow(-limits[0u]) * y.pow(-limits[1u] + 1) * z.pow(-limits[2u]) * y.pow(-1) ==
                                   x.pow(-limits[0u]) * y.pow(-limits[1u]) * z.pow(-limits[2u]));
-                BOOST_CHECK_EQUAL(x.pow(-limits[0u]) * y.pow(-limits[1u]) * z.pow(-limits[2u] + 1) * z.pow(-1),
+                CHECK(x.pow(-limits[0u]) * y.pow(-limits[1u]) * z.pow(-limits[2u] + 1) * z.pow(-1) ==
                                   x.pow(-limits[0u]) * y.pow(-limits[1u]) * z.pow(-limits[2u]));
                 // Check with constant polys.
-                BOOST_CHECK_EQUAL(pt{2} * pt{3}, 6);
+                CHECK(pt{2} * pt{3} == 6);
             }
             settings::reset_min_work_per_thread();
             settings::reset_n_threads();
@@ -179,7 +178,7 @@ struct bounds_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_multiplier_bounds_test)
+TEST_CASE("polynomial_multiplier_bounds_test")
 {
     boost::mpl::for_each<cf_types>(bounds_tester());
 }
@@ -193,13 +192,13 @@ struct multiplication_tester {
             using pt = polynomial<Cf, Key>;
             // First a test with empty series.
             pt e1, e2;
-            BOOST_CHECK_EQUAL(e1 * e2, 0);
-            BOOST_CHECK_EQUAL((e1 * e2).get_symbol_set().size(), 0u);
+            CHECK(e1 * e2 == 0);
+            CHECK((e1 * e2).get_symbol_set().size() == 0u);
             pt x{"x"};
-            BOOST_CHECK_EQUAL(e1 * x, 0);
-            BOOST_CHECK_EQUAL(x * e1, 0);
-            BOOST_CHECK((x * e1).get_symbol_set() == symbol_fset{"x"});
-            BOOST_CHECK((e1 * x).get_symbol_set() == symbol_fset{"x"});
+            CHECK(e1 * x == 0);
+            CHECK(x * e1 == 0);
+            CHECK((x * e1).get_symbol_set() == symbol_fset{"x"});
+            CHECK((e1 * x).get_symbol_set() == symbol_fset{"x"});
             // A reduced fateman benchmark.
             pt y{"y"}, z{"z"}, t{"t"};
             auto f = 1 + x + y + z + t;
@@ -209,7 +208,7 @@ struct multiplication_tester {
             }
             auto g = f + 1;
             auto retval = f * g;
-            BOOST_CHECK_EQUAL(retval.size(), 10626u);
+            CHECK(retval.size() == 10626u);
             // NOTE: this test is going to be exact in case of coefficients cancellations with double
             // precision coefficients only if the platform has ieee 754 format (integer exactly representable
             // as doubles up to 2 ** 53).
@@ -228,7 +227,7 @@ struct multiplication_tester {
                 f *= tmp3;
             }
             retval = f * h;
-            BOOST_CHECK_EQUAL(retval.size(), 5786u);
+            CHECK(retval.size() == 5786u);
         }
     };
     template <typename Cf>
@@ -238,7 +237,7 @@ struct multiplication_tester {
     }
 };
 
-BOOST_AUTO_TEST_CASE(polynomial_multiplier_multiplication_test)
+TEST_CASE("polynomial_multiplier_multiplication_test")
 {
     boost::mpl::for_each<cf_types>(multiplication_tester());
     for (unsigned i = 1u; i <= 4u; ++i) {

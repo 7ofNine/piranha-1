@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/trigonometric_series.hpp>
 
-#define BOOST_TEST_MODULE trigonometric_series_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <cstddef>
 #include <iostream>
 #include <sstream>
@@ -52,147 +49,149 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/series.hpp>
 #include <piranha/symbol_utils.hpp>
 
+#include "catch.hpp"
+
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(trigonometric_series_degree_order_test)
+TEST_CASE("trigonometric_series_degree_order_test")
 {
     typedef poisson_series<polynomial<rational, monomial<short>>> p_type1;
     p_type1 x{"x"}, y{"y"};
-    BOOST_CHECK_EQUAL(x.t_degree(), 0);
-    BOOST_CHECK_EQUAL(cos(3 * x).t_degree(), 3);
-    BOOST_CHECK_EQUAL(cos(3 * x - 4 * y).t_degree(), -1);
-    BOOST_CHECK_EQUAL((cos(3 * x - 4 * y) + sin(x + y)).t_degree(), 2);
-    BOOST_CHECK_EQUAL((cos(-3 * x - 4 * y) + sin(-x - y)).t_degree(), 7);
-    BOOST_CHECK_EQUAL(math::t_degree(cos(-3 * x - 4 * y) + sin(-x - y)), 7);
-    BOOST_CHECK_EQUAL((cos(-3 * x - 2 * y) + sin(-x + y)).t_degree(), 5);
-    BOOST_CHECK_EQUAL(math::t_degree(cos(2 * x), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_degree(cos(2 * x), {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(cos(2 * x) + cos(3 * x + y), {"x"}), 3);
-    BOOST_CHECK_EQUAL(math::t_degree(cos(2 * x) + cos(x + y), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_degree(x * cos(2 * x) - y * cos(x + y), {"y"}), 1);
-    BOOST_CHECK_EQUAL(math::t_degree(y * cos(x - y), {"y"}), -1);
-    BOOST_CHECK_EQUAL(math::t_degree(y * cos(x - y) + x, {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(y * cos(x - y) + x, {"y", "x", "y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(y * cos(x - y) + cos(x + y), {"y", "x", "y", "z"}), 2);
-    BOOST_CHECK_EQUAL(math::t_degree(y * cos(x - y) + cos(x + y), {"x"}), 1);
-    BOOST_CHECK_EQUAL(math::t_degree(y * sin(x - y) + cos(x + y), symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type1{}, symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type1{}, {"x"}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type1{}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type1{2}), 0);
+    CHECK(x.t_degree() == 0);
+    CHECK(cos(3 * x).t_degree() == 3);
+    CHECK(cos(3 * x - 4 * y).t_degree() == -1);
+    CHECK((cos(3 * x - 4 * y) + sin(x + y)).t_degree() == 2);
+    CHECK((cos(-3 * x - 4 * y) + sin(-x - y)).t_degree() == 7);
+    CHECK(math::t_degree(cos(-3 * x - 4 * y) + sin(-x - y)) == 7);
+    CHECK((cos(-3 * x - 2 * y) + sin(-x + y)).t_degree() == 5);
+    CHECK(math::t_degree(cos(2 * x), {"x"}) == 2);
+    CHECK(math::t_degree(cos(2 * x), {"y"}) == 0);
+    CHECK(math::t_degree(cos(2 * x) + cos(3 * x + y), {"x"}) == 3);
+    CHECK(math::t_degree(cos(2 * x) + cos(x + y), {"x"})== 2);
+    CHECK(math::t_degree(x * cos(2 * x) - y * cos(x + y), {"y"}) == 1);
+    CHECK(math::t_degree(y * cos(x - y), {"y"}) == -1);
+    CHECK(math::t_degree(y * cos(x - y) + x, {"y"}) == 0);
+    CHECK(math::t_degree(y * cos(x - y) + x, {"y", "x", "y"}) == 0);
+    CHECK(math::t_degree(y * cos(x - y) + cos(x + y), {"y", "x", "y", "z"}) == 2);
+    CHECK(math::t_degree(y * cos(x - y) + cos(x + y), {"x"}) == 1);
+    CHECK(math::t_degree(y * sin(x - y) + cos(x + y), symbol_fset{}) == 0);
+    CHECK(math::t_degree(p_type1{}, symbol_fset{}) == 0);
+    CHECK(math::t_degree(p_type1{}, {"x"}) == 0);
+    CHECK(math::t_degree(p_type1{}) == 0);
+    CHECK(math::t_degree(p_type1{2}) == 0);
     // Low trigonometric degree.
-    BOOST_CHECK_EQUAL(math::t_ldegree(x), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree(cos(3 * x)), 3);
-    BOOST_CHECK_EQUAL(math::t_ldegree(cos(3 * x - 4 * y)), -1);
-    BOOST_CHECK_EQUAL(math::t_ldegree((cos(3 * x - 4 * y) + sin(x + y))), -1);
-    BOOST_CHECK_EQUAL(math::t_ldegree((cos(-3 * x - 4 * y) + sin(-x - y))), 2);
-    BOOST_CHECK_EQUAL(math::t_ldegree((cos(-3 * x - 2 * y) + sin(-x + y))), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree(cos(2 * x), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_ldegree(cos(2 * x), {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree((cos(2 * x) + cos(3 * x + y)), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_ldegree((cos(2 * x) + cos(x + y)), {"x"}), 1);
-    BOOST_CHECK_EQUAL(math::t_ldegree((x * cos(2 * x) - y * cos(x + y)), {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree((y * cos(x - y)), {"y"}), -1);
-    BOOST_CHECK_EQUAL(math::t_ldegree((y * cos(x - y) + x), {"y"}), -1);
-    BOOST_CHECK_EQUAL(math::t_ldegree((y * cos(x - y) + x), {"y", "x", "y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree((y * cos(x - y) + cos(x + y)), {"y", "x", "y", "z"}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree((y * cos(x - y) + cos(x + y)), {"x"}), 1);
-    BOOST_CHECK_EQUAL(math::t_ldegree((y * sin(x - y) + cos(x + y)), symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree(p_type1{}, symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree(p_type1{}, {"x"}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree(p_type1{}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree(p_type1{2}), 0);
+    CHECK(math::t_ldegree(x) == 0);
+    CHECK(math::t_ldegree(cos(3 * x)) == 3);
+    CHECK(math::t_ldegree(cos(3 * x - 4 * y)) == -1);
+    CHECK(math::t_ldegree((cos(3 * x - 4 * y) + sin(x + y))) == -1);
+    CHECK(math::t_ldegree((cos(-3 * x - 4 * y) + sin(-x - y))) == 2);
+    CHECK(math::t_ldegree((cos(-3 * x - 2 * y) + sin(-x + y))) == 0);
+    CHECK(math::t_ldegree(cos(2 * x), {"x"}) == 2);
+    CHECK(math::t_ldegree(cos(2 * x), {"y"}) == 0);
+    CHECK(math::t_ldegree((cos(2 * x) + cos(3 * x + y)), {"x"}) == 2);
+    CHECK(math::t_ldegree((cos(2 * x) + cos(x + y)), {"x"}) == 1);
+    CHECK(math::t_ldegree((x * cos(2 * x) - y * cos(x + y)), {"y"}) == 0);
+    CHECK(math::t_ldegree((y * cos(x - y)), {"y"}) == -1);
+    CHECK(math::t_ldegree((y * cos(x - y) + x), {"y"}) == -1);
+    CHECK(math::t_ldegree((y * cos(x - y) + x), {"y", "x", "y"}) == 0);
+    CHECK(math::t_ldegree((y * cos(x - y) + cos(x + y)), {"y", "x", "y", "z"}) == 0);
+    CHECK(math::t_ldegree((y * cos(x - y) + cos(x + y)), {"x"}) == 1);
+    CHECK(math::t_ldegree((y * sin(x - y) + cos(x + y)), symbol_fset{}) == 0);
+    CHECK(math::t_ldegree(p_type1{}, symbol_fset{}) == 0);
+    CHECK(math::t_ldegree(p_type1{}, {"x"}) == 0);
+    CHECK(math::t_ldegree(p_type1{}) == 0);
+    CHECK(math::t_ldegree(p_type1{2}) == 0);
     // Order tests.
-    BOOST_CHECK_EQUAL(math::t_order(x), 0);
-    BOOST_CHECK_EQUAL(math::t_order(cos(3 * x)), 3);
-    BOOST_CHECK_EQUAL(math::t_order(cos(3 * x - 4 * y)), 7);
-    BOOST_CHECK_EQUAL(math::t_order((cos(3 * x - 4 * y) + sin(x + y))), 7);
-    BOOST_CHECK_EQUAL(math::t_order((cos(-3 * x - 4 * y) + sin(-x - y))), 7);
-    BOOST_CHECK_EQUAL(math::t_order((cos(-3 * x - 2 * y) + sin(-x + y))), 5);
-    BOOST_CHECK_EQUAL(math::t_order(cos(2 * x), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_order(cos(2 * x), {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_order((cos(2 * x) + cos(3 * x + y)), {"x"}), 3);
-    BOOST_CHECK_EQUAL(math::t_order((cos(2 * x) + cos(x + y)), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_order((x * cos(2 * x) - y * cos(x + y)), {"y"}), 1);
-    BOOST_CHECK_EQUAL(math::t_order((y * cos(x - y)), {"y"}), 1);
-    BOOST_CHECK_EQUAL(math::t_order((y * cos(x - y) + x), {"y"}), 1);
-    BOOST_CHECK_EQUAL(math::t_order((y * cos(x - y) + x), {"y", "x", "y"}), 2);
-    BOOST_CHECK_EQUAL(math::t_order((y * cos(x - y) + cos(x + y)), {"y", "x", "y", "z"}), 2);
-    BOOST_CHECK_EQUAL(math::t_order((y * cos(x - y) + cos(x + y)), {"x"}), 1);
-    BOOST_CHECK_EQUAL(math::t_order((y * sin(x - y) + cos(x + y)), symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_order(p_type1{}, symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_order(p_type1{}, {"x"}), 0);
-    BOOST_CHECK_EQUAL(math::t_order(p_type1{}), 0);
-    BOOST_CHECK_EQUAL(math::t_order(p_type1{2}), 0);
+    CHECK(math::t_order(x) == 0);
+    CHECK(math::t_order(cos(3 * x)) == 3);
+    CHECK(math::t_order(cos(3 * x - 4 * y)) == 7);
+    CHECK(math::t_order((cos(3 * x - 4 * y) + sin(x + y))) == 7);
+    CHECK(math::t_order((cos(-3 * x - 4 * y) + sin(-x - y))) == 7);
+    CHECK(math::t_order((cos(-3 * x - 2 * y) + sin(-x + y))) == 5);
+    CHECK(math::t_order(cos(2 * x), {"x"}) == 2);
+    CHECK(math::t_order(cos(2 * x), {"y"}) == 0);
+    CHECK(math::t_order((cos(2 * x) + cos(3 * x + y)), {"x"}) == 3);
+    CHECK(math::t_order((cos(2 * x) + cos(x + y)), {"x"}) == 2);
+    CHECK(math::t_order((x * cos(2 * x) - y * cos(x + y)), {"y"}) == 1);
+    CHECK(math::t_order((y * cos(x - y)), {"y"}) == 1);
+    CHECK(math::t_order((y * cos(x - y) + x), {"y"}) == 1);
+    CHECK(math::t_order((y * cos(x - y) + x), {"y", "x", "y"}) == 2);
+    CHECK(math::t_order((y * cos(x - y) + cos(x + y)), {"y", "x", "y", "z"}) == 2);
+    CHECK(math::t_order((y * cos(x - y) + cos(x + y)), {"x"}) == 1);
+    CHECK(math::t_order((y * sin(x - y) + cos(x + y)), symbol_fset{}) == 0);
+    CHECK(math::t_order(p_type1{}, symbol_fset{}) == 0);
+    CHECK(math::t_order(p_type1{}, {"x"}) == 0);
+    CHECK(math::t_order(p_type1{}) == 0);
+    CHECK(math::t_order(p_type1{2}) == 0);
     // Low trigonometric order.
-    BOOST_CHECK_EQUAL(math::t_lorder(x), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder(cos(3 * x)), 3);
-    BOOST_CHECK_EQUAL(math::t_lorder(cos(3 * x - 4 * y)), 7);
-    BOOST_CHECK_EQUAL(math::t_lorder((cos(3 * x - 4 * y) + sin(x + y))), 2);
-    BOOST_CHECK_EQUAL(math::t_lorder((cos(-3 * x - 4 * y) + sin(-x - y))), 2);
-    BOOST_CHECK_EQUAL(math::t_lorder((cos(-3 * x - 2 * y) + sin(-x + y))), 2);
-    BOOST_CHECK_EQUAL(math::t_lorder(cos(2 * x), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_lorder(cos(2 * x), {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder((cos(2 * x) + cos(3 * x + y)), {"x"}), 2);
-    BOOST_CHECK_EQUAL(math::t_lorder((cos(2 * x) + cos(x + y)), {"x"}), 1);
-    BOOST_CHECK_EQUAL(math::t_lorder((x * cos(2 * x) - y * cos(x + y)), {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder((y * cos(x - y)), {"y"}), 1);
-    BOOST_CHECK_EQUAL(math::t_lorder((y * cos(x - y) + x), {"y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder((y * cos(x - y) + x), {"y", "x", "y"}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder((y * cos(x - y) + cos(x + y)), {"y", "x", "y", "z"}), 2);
-    BOOST_CHECK_EQUAL(math::t_lorder((y * cos(x - y) + cos(x + y)), {"x"}), 1);
-    BOOST_CHECK_EQUAL(math::t_lorder((y * sin(x - y) + cos(x + y)), symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder(p_type1{}, symbol_fset{}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder(p_type1{}, {"x"}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder(p_type1{}), 0);
-    BOOST_CHECK_EQUAL(math::t_lorder(p_type1{2}), 0);
+    CHECK(math::t_lorder(x) == 0);
+    CHECK(math::t_lorder(cos(3 * x)) == 3);
+    CHECK(math::t_lorder(cos(3 * x - 4 * y)) == 7);
+    CHECK(math::t_lorder((cos(3 * x - 4 * y) + sin(x + y))) == 2);
+    CHECK(math::t_lorder((cos(-3 * x - 4 * y) + sin(-x - y))) == 2);
+    CHECK(math::t_lorder((cos(-3 * x - 2 * y) + sin(-x + y))) == 2);
+    CHECK(math::t_lorder(cos(2 * x), {"x"}) == 2);
+    CHECK(math::t_lorder(cos(2 * x), {"y"}) == 0);
+    CHECK(math::t_lorder((cos(2 * x) + cos(3 * x + y)), {"x"}) == 2);
+    CHECK(math::t_lorder((cos(2 * x) + cos(x + y)), {"x"}) == 1);
+    CHECK(math::t_lorder((x * cos(2 * x) - y * cos(x + y)), {"y"}) == 0);
+    CHECK(math::t_lorder((y * cos(x - y)), {"y"}) == 1);
+    CHECK(math::t_lorder((y * cos(x - y) + x), {"y"}) == 0);
+    CHECK(math::t_lorder((y * cos(x - y) + x), {"y", "x", "y"}) == 0);
+    CHECK(math::t_lorder((y * cos(x - y) + cos(x + y)), {"y", "x", "y", "z"}) == 2);
+    CHECK(math::t_lorder((y * cos(x - y) + cos(x + y)), {"x"}) == 1);
+    CHECK(math::t_lorder((y * sin(x - y) + cos(x + y)), symbol_fset{}) == 0);
+    CHECK(math::t_lorder(p_type1{}, symbol_fset{}) == 0);
+    CHECK(math::t_lorder(p_type1{}, {"x"}) == 0);
+    CHECK(math::t_lorder(p_type1{}) == 0);
+    CHECK(math::t_lorder(p_type1{2}) == 0);
     // Type traits checks.
-    BOOST_CHECK(has_t_degree<p_type1>::value);
-    BOOST_CHECK(has_t_degree<const p_type1>::value);
-    BOOST_CHECK(has_t_degree<p_type1 &>::value);
-    BOOST_CHECK(has_t_degree<p_type1 const &>::value);
-    BOOST_CHECK(has_t_ldegree<p_type1>::value);
-    BOOST_CHECK(has_t_ldegree<const p_type1>::value);
-    BOOST_CHECK(has_t_ldegree<p_type1 &>::value);
-    BOOST_CHECK(has_t_ldegree<p_type1 const &>::value);
-    BOOST_CHECK(has_t_order<p_type1>::value);
-    BOOST_CHECK(has_t_order<const p_type1>::value);
-    BOOST_CHECK(has_t_order<p_type1 &>::value);
-    BOOST_CHECK(has_t_order<p_type1 const &>::value);
-    BOOST_CHECK(has_t_lorder<p_type1>::value);
-    BOOST_CHECK(has_t_lorder<const p_type1>::value);
-    BOOST_CHECK(has_t_lorder<p_type1 &>::value);
-    BOOST_CHECK(has_t_lorder<p_type1 const &>::value);
+    CHECK(has_t_degree<p_type1>::value);
+    CHECK(has_t_degree<const p_type1>::value);
+    CHECK(has_t_degree<p_type1 &>::value);
+    CHECK(has_t_degree<p_type1 const &>::value);
+    CHECK(has_t_ldegree<p_type1>::value);
+    CHECK(has_t_ldegree<const p_type1>::value);
+    CHECK(has_t_ldegree<p_type1 &>::value);
+    CHECK(has_t_ldegree<p_type1 const &>::value);
+    CHECK(has_t_order<p_type1>::value);
+    CHECK(has_t_order<const p_type1>::value);
+    CHECK(has_t_order<p_type1 &>::value);
+    CHECK(has_t_order<p_type1 const &>::value);
+    CHECK(has_t_lorder<p_type1>::value);
+    CHECK(has_t_lorder<const p_type1>::value);
+    CHECK(has_t_lorder<p_type1 &>::value);
+    CHECK(has_t_lorder<p_type1 const &>::value);
     // Trigonometric properties in the coefficients.
-    BOOST_CHECK(!has_t_degree<poisson_series<p_type1>>::value);
-    BOOST_CHECK(!has_t_ldegree<poisson_series<p_type1>>::value);
-    BOOST_CHECK(!has_t_order<poisson_series<p_type1>>::value);
-    BOOST_CHECK(!has_t_lorder<poisson_series<p_type1>>::value);
+    CHECK(!has_t_degree<poisson_series<p_type1>>::value);
+    CHECK(!has_t_ldegree<poisson_series<p_type1>>::value);
+    CHECK(!has_t_order<poisson_series<p_type1>>::value);
+    CHECK(!has_t_lorder<poisson_series<p_type1>>::value);
     typedef polynomial<p_type1, monomial<short>> p_type2;
-    BOOST_CHECK(has_t_degree<p_type2>::value);
-    BOOST_CHECK(has_t_ldegree<p_type2>::value);
-    BOOST_CHECK(has_t_order<p_type2>::value);
-    BOOST_CHECK(has_t_lorder<p_type2>::value);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type2{}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type2{"x"}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type2{p_type1{"x"}}), 0);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type2{piranha::cos(p_type1{"x"})}), 1);
-    BOOST_CHECK_EQUAL(math::t_degree(p_type2{piranha::cos(p_type1{"x"} - p_type1{"y"})}), 0);
-    BOOST_CHECK_EQUAL(math::t_ldegree(p_type2{1 + piranha::cos(p_type1{"x"} + p_type1{"y"})}), 0);
-    BOOST_CHECK_EQUAL(math::t_order(p_type2{piranha::cos(p_type1{"x"} - p_type1{"y"})}), 2);
-    BOOST_CHECK_EQUAL(
-        math::t_lorder(p_type2{piranha::cos(p_type1{"x"} - p_type1{"y"}) + piranha::cos(p_type1{"x"} + p_type1{"y"})}),
+    CHECK(has_t_degree<p_type2>::value);
+    CHECK(has_t_ldegree<p_type2>::value);
+    CHECK(has_t_order<p_type2>::value);
+    CHECK(has_t_lorder<p_type2>::value);
+    CHECK(math::t_degree(p_type2{}) == 0);
+    CHECK(math::t_degree(p_type2{"x"}) == 0);
+    CHECK(math::t_degree(p_type2{p_type1{"x"}}) == 0);
+    CHECK(math::t_degree(p_type2{piranha::cos(p_type1{"x"})}) == 1);
+    CHECK(math::t_degree(p_type2{piranha::cos(p_type1{"x"} - p_type1{"y"})}) == 0);
+    CHECK(math::t_ldegree(p_type2{1 + piranha::cos(p_type1{"x"} + p_type1{"y"})}) == 0);
+    CHECK(math::t_order(p_type2{piranha::cos(p_type1{"x"} - p_type1{"y"})}) == 2);
+    CHECK(
+        math::t_lorder(p_type2{piranha::cos(p_type1{"x"} - p_type1{"y"}) + piranha::cos(p_type1{"x"} + p_type1{"y"})}) ==
         2);
     // Type traits checks.
     using t_deg_type = decltype(std::make_signed<std::size_t>::type(0) + std::make_signed<std::size_t>::type(0));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_degree(p_type1{}))>::value));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_degree(p_type1{}, symbol_fset{}))>::value));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_ldegree(p_type1{}))>::value));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_ldegree(p_type1{}, symbol_fset{}))>::value));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_order(p_type1{}))>::value));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_order(p_type1{}, symbol_fset{}))>::value));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_lorder(p_type1{}))>::value));
-    BOOST_CHECK((std::is_same<t_deg_type, decltype(math::t_lorder(p_type1{}, symbol_fset{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_degree(p_type1{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_degree(p_type1{}, symbol_fset{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_ldegree(p_type1{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_ldegree(p_type1{}, symbol_fset{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_order(p_type1{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_order(p_type1{}, symbol_fset{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_lorder(p_type1{}))>::value));
+    CHECK((std::is_same<t_deg_type, decltype(math::t_lorder(p_type1{}, symbol_fset{}))>::value));
 }
 
 struct key02 {
@@ -372,23 +371,23 @@ public:
     PIRANHA_FORWARDING_ASSIGNMENT(g_series_type, base)
 };
 
-BOOST_AUTO_TEST_CASE(trigonometric_series_failures_test)
+TEST_CASE("trigonometric_series_failures_test")
 {
-    BOOST_CHECK((has_t_degree<g_series_type<double, key02>>::value));
-    BOOST_CHECK((has_t_ldegree<g_series_type<double, key02>>::value));
-    BOOST_CHECK((has_t_order<g_series_type<double, key02>>::value));
-    BOOST_CHECK((has_t_lorder<g_series_type<double, key02>>::value));
-    BOOST_CHECK((!has_t_degree<g_series_type<double, key03>>::value));
-    BOOST_CHECK((!has_t_ldegree<g_series_type<double, key03>>::value));
-    BOOST_CHECK((!has_t_order<g_series_type<double, key03>>::value));
-    BOOST_CHECK((!has_t_lorder<g_series_type<double, key03>>::value));
-    BOOST_CHECK((has_t_lorder<g_series_type<double, key04>>::value));
-    BOOST_CHECK((!has_t_lorder<g_series_type<double, key05>>::value));
+    CHECK((has_t_degree<g_series_type<double, key02>>::value));
+    CHECK((has_t_ldegree<g_series_type<double, key02>>::value));
+    CHECK((has_t_order<g_series_type<double, key02>>::value));
+    CHECK((has_t_lorder<g_series_type<double, key02>>::value));
+    CHECK((!has_t_degree<g_series_type<double, key03>>::value));
+    CHECK((!has_t_ldegree<g_series_type<double, key03>>::value));
+    CHECK((!has_t_order<g_series_type<double, key03>>::value));
+    CHECK((!has_t_lorder<g_series_type<double, key03>>::value));
+    CHECK((has_t_lorder<g_series_type<double, key04>>::value));
+    CHECK((!has_t_lorder<g_series_type<double, key05>>::value));
 }
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
-BOOST_AUTO_TEST_CASE(trigonometric_series_serialization_test)
+TEST_CASE("trigonometric_series_serialization_test")
 {
     using stype = poisson_series<polynomial<rational, monomial<short>>>;
     stype x("x"), y("y"), z = y + piranha::cos(x + y), tmp;
@@ -401,7 +400,7 @@ BOOST_AUTO_TEST_CASE(trigonometric_series_serialization_test)
         boost::archive::text_iarchive ia(ss);
         ia >> tmp;
     }
-    BOOST_CHECK_EQUAL(z, tmp);
+    CHECK(z == tmp);
 }
 
 #endif

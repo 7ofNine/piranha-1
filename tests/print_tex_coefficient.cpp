@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/print_tex_coefficient.hpp>
 
-#define BOOST_TEST_MODULE print_tex_coefficient_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 #include <string>
@@ -42,6 +39,8 @@ see https://www.gnu.org/licenses/. */
 #if defined(MPPP_WITH_MPFR)
 #include <piranha/real.hpp>
 #endif
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -58,31 +57,31 @@ struct trivial_with_stream_wrong {
 
 std::ostream &operator<<(std::ostream &, trivial_with_stream &);
 
-BOOST_AUTO_TEST_CASE(print_tex_coefficient_main_test)
+TEST_CASE("print_tex_coefficient_main_test")
 {
     std::ostringstream oss;
     print_tex_coefficient(oss, -10);
-    BOOST_CHECK_EQUAL(oss.str(), "-10");
+    CHECK(oss.str() == "-10");
     oss.str("");
     print_tex_coefficient(oss, 11ull);
-    BOOST_CHECK_EQUAL(oss.str(), "11");
+    CHECK(oss.str() == "11");
     oss.str("");
     print_tex_coefficient(oss, integer(-20));
-    BOOST_CHECK_EQUAL(oss.str(), "-20");
+    CHECK(oss.str() == "-20");
     oss.str("");
 #if defined(MPPP_WITH_MPFR)
     print_tex_coefficient(oss, real("-1.2345", 23));
-    BOOST_CHECK_EQUAL(oss.str(), boost::lexical_cast<std::string>(real("-1.2345", 23)));
+    CHECK(oss.str() == boost::lexical_cast<std::string>(real("-1.2345", 23)));
 #endif
-    BOOST_CHECK((std::is_same<decltype(print_tex_coefficient(oss, 42)), std::ostream &>::value));
-    BOOST_CHECK((std::is_same<decltype(print_tex_coefficient(oss, integer(-5))), std::ostream &>::value));
+    CHECK((std::is_same<decltype(print_tex_coefficient(oss, 42)), std::ostream &>::value));
+    CHECK((std::is_same<decltype(print_tex_coefficient(oss, integer(-5))), std::ostream &>::value));
 }
 
-BOOST_AUTO_TEST_CASE(print_tex_coefficient_has_print_coefficient_test)
+TEST_CASE("print_tex_coefficient_has_print_coefficient_test")
 {
-    BOOST_CHECK(has_print_tex_coefficient<int>::value);
-    BOOST_CHECK(has_print_tex_coefficient<std::string>::value);
-    BOOST_CHECK(!has_print_tex_coefficient<trivial>::value);
-    BOOST_CHECK(has_print_tex_coefficient<trivial_with_stream>::value);
-    BOOST_CHECK(!has_print_tex_coefficient<trivial_with_stream_wrong>::value);
+    CHECK(has_print_tex_coefficient<int>::value);
+    CHECK(has_print_tex_coefficient<std::string>::value);
+    CHECK(!has_print_tex_coefficient<trivial>::value);
+    CHECK(has_print_tex_coefficient<trivial_with_stream>::value);
+    CHECK(!has_print_tex_coefficient<trivial_with_stream_wrong>::value);
 }

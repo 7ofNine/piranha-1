@@ -195,7 +195,8 @@ public:
         // NOTE: here and elsewhere, the standard implies (3.9/2) that we can use this optimisation
         // for trivially copyable types. GCC does not support the type trait yet, so we restrict the
         // optimisation to POD types (which are trivially copyable).
-        if (std::is_pod<T>::value) {
+        //if (std::is_pod<T>::value) { // TODO:: is is_trivially_copyable enough??
+        if (std::is_trivially_copyable_v<T>) {
             // NOTE: we need to def init objects of type T inside the buffer. Unlike in C, objects with trivial default
             // constructors cannot be created by simply reinterpreting suitably aligned storage,
             // such as memory allocated with std::malloc: placement-new is required to formally introduce a new objects
@@ -222,7 +223,8 @@ public:
     static_vector(static_vector &&other) noexcept : m_tag(1u), m_size(0u)
     {
         const auto size = other.size();
-        if (std::is_pod<T>::value) {
+       // if (std::is_pod<T>::value) {  //TODO:: is is_trivially_copyable enough??
+        if (std::is_trivially_copyable_v<T>){
             default_init(ptr(), ptr() + size);
             std::memcpy(vs(), other.vs(), size * sizeof(T));
             m_size = size;
@@ -279,7 +281,8 @@ public:
     static_vector &operator=(const static_vector &other)
     {
         if (likely(this != &other)) {
-            if (std::is_pod<T>::value) {
+ //           if (std::is_pod<T>::value) {  //TODO::is is_trivially_copyable enough??
+            if (std::is_trivially_copyable_v<T>){
                 if (other.m_size > m_size) {
                     // If other is larger, we need to make sure we have created the excess objects
                     // before writing into them.
@@ -303,7 +306,8 @@ public:
     static_vector &operator=(static_vector &&other) noexcept
     {
         if (likely(this != &other)) {
-            if (std::is_pod<T>::value) {
+ //           if (std::is_pod<T>::value) {    //TODO:: is trivially_copyable enough??
+            if (std::is_trivially_copyable_v<T>) {
                 if (other.m_size > m_size) {
                     default_init(ptr() + m_size, ptr() + other.m_size);
                 }

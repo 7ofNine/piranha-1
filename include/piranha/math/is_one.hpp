@@ -68,7 +68,7 @@ using is_is_one_type = std::is_convertible<detected_t<is_one_t_, T>, bool>;
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool IsOneType = is_is_one_type<T>::value;
+concept IsOneType = is_is_one_type<T>::value;
 
 #endif
 

@@ -77,7 +77,7 @@ using is_key_is_zero_type = std::is_convertible<detected_t<key_is_zero_t_, T>, b
 #if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
-concept bool KeyIsZeroType = is_key_is_zero_type<T>::value;
+concept KeyIsZeroType = is_key_is_zero_type<T>::value;
 
 #endif
 

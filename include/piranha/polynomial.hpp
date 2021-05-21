@@ -1533,12 +1533,12 @@ public:
 private:
     // NOTE: wrapper to multadd that treats specially rational coefficients. We need to decide in the future
     // if this stays here or if it is better to generalise it.
-    template <typename T, typename std::enable_if<!mppp::is_rational<T>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<!mppp::detail::is_rational<T>::value, int>::type = 0>
     static void fma_wrap(T &a, const T &b, const T &c)
     {
         math::multiply_accumulate(a, b, c);
     }
-    template <typename T, typename std::enable_if<mppp::is_rational<T>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<mppp::detail::is_rational<T>::value, int>::type = 0>
     static void fma_wrap(T &a, const T &b, const T &c)
     {
         math::multiply_accumulate(a._get_num(), b.get_num(), c.get_num());

@@ -28,9 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/type_traits.hpp>
 
-#define BOOST_TEST_MODULE type_traits_test
-#include <boost/test/included/unit_test.hpp>
-
 #include <piranha/config.hpp>
 
 #include <complex>
@@ -55,20 +52,22 @@ see https://www.gnu.org/licenses/. */
 #include <utility>
 #include <vector>
 
+#include "catch.hpp"
+
 using namespace piranha;
 
-BOOST_AUTO_TEST_CASE(type_traits_is_nonconst_rvalue_ref_test)
+TEST_CASE("type_traits_is_nonconst_rvalue_ref_test")
 {
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<int>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<int &>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<const int>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<const volatile int>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<const volatile int &>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<volatile int>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<volatile int &&>::value, true);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<volatile int const &&>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<const int &&>::value, false);
-    BOOST_CHECK_EQUAL(is_nonconst_rvalue_ref<int &&>::value, true);
+    CHECK(is_nonconst_rvalue_ref<int>::value == false);
+    CHECK(is_nonconst_rvalue_ref<int &>::value == false);
+    CHECK(is_nonconst_rvalue_ref<const int>::value == false);
+    CHECK(is_nonconst_rvalue_ref<const volatile int>::value == false);
+    CHECK(is_nonconst_rvalue_ref<const volatile int &>::value == false);
+    CHECK(is_nonconst_rvalue_ref<volatile int>::value == false);
+    CHECK(is_nonconst_rvalue_ref<volatile int &&>::value == true);
+    CHECK(is_nonconst_rvalue_ref<volatile int const &&>::value == false);
+    CHECK(is_nonconst_rvalue_ref<const int &&>::value == false);
+    CHECK(is_nonconst_rvalue_ref<int &&>::value == true);
 }
 
 struct trivial {
@@ -104,239 +103,239 @@ struct nontrivial_dtor {
     int n;
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_is_addable_test)
+TEST_CASE("type_traits_is_addable_test")
 {
-    BOOST_CHECK(is_addable<int>::value);
-    BOOST_CHECK(!is_addable<void>::value);
-    BOOST_CHECK(is_addable<const int>::value);
-    BOOST_CHECK((is_addable<const int, int>::value));
-    BOOST_CHECK((is_addable<int, const int>::value));
-    BOOST_CHECK((is_addable<const int &, int &>::value));
-    BOOST_CHECK((is_addable<int &&, const int &>::value));
-    BOOST_CHECK(is_addable<double>::value);
-    BOOST_CHECK((!is_addable<double, void>::value));
-    BOOST_CHECK((!is_addable<void, double>::value));
-    BOOST_CHECK(is_addable<std::complex<double>>::value);
-    BOOST_CHECK((is_addable<const std::complex<double>, double>::value));
-    BOOST_CHECK((is_addable<std::complex<double>, const double>::value));
-    BOOST_CHECK((is_addable<int, int>::value));
-    BOOST_CHECK((is_addable<int, double>::value));
-    BOOST_CHECK((is_addable<double, int>::value));
-    BOOST_CHECK((is_addable<std::complex<double>, double>::value));
-    BOOST_CHECK((is_addable<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_addable<trivial, std::complex<double>>::value));
+    CHECK(is_addable<int>::value);
+    CHECK(!is_addable<void>::value);
+    CHECK(is_addable<const int>::value);
+    CHECK((is_addable<const int, int>::value));
+    CHECK((is_addable<int, const int>::value));
+    CHECK((is_addable<const int &, int &>::value));
+    CHECK((is_addable<int &&, const int &>::value));
+    CHECK(is_addable<double>::value);
+    CHECK((!is_addable<double, void>::value));
+    CHECK((!is_addable<void, double>::value));
+    CHECK(is_addable<std::complex<double>>::value);
+    CHECK((is_addable<const std::complex<double>, double>::value));
+    CHECK((is_addable<std::complex<double>, const double>::value));
+    CHECK((is_addable<int, int>::value));
+    CHECK((is_addable<int, double>::value));
+    CHECK((is_addable<double, int>::value));
+    CHECK((is_addable<std::complex<double>, double>::value));
+    CHECK((is_addable<double, std::complex<double>>::value));
+    CHECK((!is_addable<trivial, std::complex<double>>::value));
 // The Intel compiler seems to have some nonstandard extensions to the complex class.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK((!is_addable<int, std::complex<double>>::value));
-    BOOST_CHECK((!is_addable<std::complex<double>, int>::value));
+    CHECK((!is_addable<int, std::complex<double>>::value));
+    CHECK((!is_addable<std::complex<double>, int>::value));
 #endif
-    BOOST_CHECK((is_addable<std::string, std::string>::value));
-    BOOST_CHECK((is_addable<std::string, const char *>::value));
-    BOOST_CHECK((is_addable<const char *, std::string>::value));
-    BOOST_CHECK((is_addable<int *, std::size_t>::value));
-    BOOST_CHECK((is_addable<std::size_t, int *>::value));
-    BOOST_CHECK(!is_addable<int *>::value);
-    BOOST_CHECK(is_addable<int &>::value);
-    BOOST_CHECK((is_addable<int &, double &>::value));
-    BOOST_CHECK((is_addable<double &, int &>::value));
-    BOOST_CHECK(is_addable<int const &>::value);
-    BOOST_CHECK((is_addable<int const &, double &>::value));
-    BOOST_CHECK((is_addable<double const &, int &>::value));
-    BOOST_CHECK(is_addable<int &&>::value);
-    BOOST_CHECK((is_addable<int &&, double &&>::value));
-    BOOST_CHECK((is_addable<double &&, int &&>::value));
-    BOOST_CHECK((!is_addable<int &&, std::string &>::value));
-    BOOST_CHECK((is_addable<int *&, int>::value));
+    CHECK((is_addable<std::string, std::string>::value));
+    CHECK((is_addable<std::string, const char *>::value));
+    CHECK((is_addable<const char *, std::string>::value));
+    CHECK((is_addable<int *, std::size_t>::value));
+    CHECK((is_addable<std::size_t, int *>::value));
+    CHECK(!is_addable<int *>::value);
+    CHECK(is_addable<int &>::value);
+    CHECK((is_addable<int &, double &>::value));
+    CHECK((is_addable<double &, int &>::value));
+    CHECK(is_addable<int const &>::value);
+    CHECK((is_addable<int const &, double &>::value));
+    CHECK((is_addable<double const &, int &>::value));
+    CHECK(is_addable<int &&>::value);
+    CHECK((is_addable<int &&, double &&>::value));
+    CHECK((is_addable<double &&, int &&>::value));
+    CHECK((!is_addable<int &&, std::string &>::value));
+    CHECK((is_addable<int *&, int>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_addable_in_place_test)
+TEST_CASE("type_traits_is_addable_in_place_test")
 {
-    BOOST_CHECK((!is_addable_in_place<void>::value));
-    BOOST_CHECK((!is_addable_in_place<void, int>::value));
-    BOOST_CHECK((!is_addable_in_place<int, void>::value));
-    BOOST_CHECK((is_addable_in_place<int>::value));
-    BOOST_CHECK((is_addable_in_place<int, int>::value));
-    BOOST_CHECK((is_addable_in_place<int, double>::value));
-    BOOST_CHECK((is_addable_in_place<double, int>::value));
-    BOOST_CHECK((is_addable_in_place<std::complex<double>, double>::value));
-    BOOST_CHECK((!is_addable_in_place<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_addable_in_place<trivial, std::complex<double>>::value));
-    BOOST_CHECK((is_addable_in_place<std::string, std::string>::value));
-    BOOST_CHECK((is_addable_in_place<int, const int>::value));
-    BOOST_CHECK((!is_addable_in_place<const int, int>::value));
-    BOOST_CHECK((!is_addable_in_place<const int &, int>::value));
-    BOOST_CHECK((is_addable_in_place<int &&, const int &>::value));
+    CHECK((!is_addable_in_place<void>::value));
+    CHECK((!is_addable_in_place<void, int>::value));
+    CHECK((!is_addable_in_place<int, void>::value));
+    CHECK((is_addable_in_place<int>::value));
+    CHECK((is_addable_in_place<int, int>::value));
+    CHECK((is_addable_in_place<int, double>::value));
+    CHECK((is_addable_in_place<double, int>::value));
+    CHECK((is_addable_in_place<std::complex<double>, double>::value));
+    CHECK((!is_addable_in_place<double, std::complex<double>>::value));
+    CHECK((!is_addable_in_place<trivial, std::complex<double>>::value));
+    CHECK((is_addable_in_place<std::string, std::string>::value));
+    CHECK((is_addable_in_place<int, const int>::value));
+    CHECK((!is_addable_in_place<const int, int>::value));
+    CHECK((!is_addable_in_place<const int &, int>::value));
+    CHECK((is_addable_in_place<int &&, const int &>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_subtractable_test)
+TEST_CASE("type_traits_is_subtractable_test")
 {
-    BOOST_CHECK((!is_subtractable<void>::value));
-    BOOST_CHECK((!is_subtractable<void, int>::value));
-    BOOST_CHECK((!is_subtractable<int, void>::value));
-    BOOST_CHECK(is_subtractable<int>::value);
-    BOOST_CHECK(is_subtractable<const int>::value);
-    BOOST_CHECK((is_subtractable<const int, int>::value));
-    BOOST_CHECK((is_subtractable<int, const int>::value));
-    BOOST_CHECK((is_subtractable<const int &, int &>::value));
-    BOOST_CHECK((is_subtractable<int &&, const int &>::value));
-    BOOST_CHECK(is_subtractable<double>::value);
-    BOOST_CHECK(is_subtractable<std::complex<double>>::value);
-    BOOST_CHECK((is_subtractable<const std::complex<double>, double>::value));
-    BOOST_CHECK((is_subtractable<std::complex<double>, const double>::value));
-    BOOST_CHECK((is_subtractable<int, int>::value));
-    BOOST_CHECK((is_subtractable<int, double>::value));
-    BOOST_CHECK((is_subtractable<double, int>::value));
-    BOOST_CHECK((is_subtractable<std::complex<double>, double>::value));
-    BOOST_CHECK((is_subtractable<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_subtractable<trivial, std::complex<double>>::value));
+    CHECK((!is_subtractable<void>::value));
+    CHECK((!is_subtractable<void, int>::value));
+    CHECK((!is_subtractable<int, void>::value));
+    CHECK(is_subtractable<int>::value);
+    CHECK(is_subtractable<const int>::value);
+    CHECK((is_subtractable<const int, int>::value));
+    CHECK((is_subtractable<int, const int>::value));
+    CHECK((is_subtractable<const int &, int &>::value));
+    CHECK((is_subtractable<int &&, const int &>::value));
+    CHECK(is_subtractable<double>::value);
+    CHECK(is_subtractable<std::complex<double>>::value);
+    CHECK((is_subtractable<const std::complex<double>, double>::value));
+    CHECK((is_subtractable<std::complex<double>, const double>::value));
+    CHECK((is_subtractable<int, int>::value));
+    CHECK((is_subtractable<int, double>::value));
+    CHECK((is_subtractable<double, int>::value));
+    CHECK((is_subtractable<std::complex<double>, double>::value));
+    CHECK((is_subtractable<double, std::complex<double>>::value));
+    CHECK((!is_subtractable<trivial, std::complex<double>>::value));
 // Same as above.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK((!is_subtractable<int, std::complex<double>>::value));
-    BOOST_CHECK((!is_subtractable<std::complex<double>, int>::value));
+    CHECK((!is_subtractable<int, std::complex<double>>::value));
+    CHECK((!is_subtractable<std::complex<double>, int>::value));
 #endif
-    BOOST_CHECK((!is_subtractable<std::string, std::string>::value));
-    BOOST_CHECK((!is_subtractable<std::string, const char *>::value));
-    BOOST_CHECK((!is_subtractable<const char *, std::string>::value));
-    BOOST_CHECK((is_subtractable<int *, std::size_t>::value));
-    BOOST_CHECK((!is_subtractable<std::size_t, int *>::value));
-    BOOST_CHECK(is_subtractable<int *>::value);
-    BOOST_CHECK(is_subtractable<int &>::value);
-    BOOST_CHECK((is_subtractable<int &, double &>::value));
-    BOOST_CHECK((is_subtractable<double &, int &>::value));
-    BOOST_CHECK(is_subtractable<int const &>::value);
-    BOOST_CHECK((is_subtractable<int const &, double &>::value));
-    BOOST_CHECK((is_subtractable<double const &, int &>::value));
-    BOOST_CHECK(is_subtractable<int &&>::value);
-    BOOST_CHECK((is_subtractable<int &&, double &&>::value));
-    BOOST_CHECK((is_subtractable<double &&, int &&>::value));
-    BOOST_CHECK((!is_subtractable<int &&, std::string &>::value));
+    CHECK((!is_subtractable<std::string, std::string>::value));
+    CHECK((!is_subtractable<std::string, const char *>::value));
+    CHECK((!is_subtractable<const char *, std::string>::value));
+    CHECK((is_subtractable<int *, std::size_t>::value));
+    CHECK((!is_subtractable<std::size_t, int *>::value));
+    CHECK(is_subtractable<int *>::value);
+    CHECK(is_subtractable<int &>::value);
+    CHECK((is_subtractable<int &, double &>::value));
+    CHECK((is_subtractable<double &, int &>::value));
+    CHECK(is_subtractable<int const &>::value);
+    CHECK((is_subtractable<int const &, double &>::value));
+    CHECK((is_subtractable<double const &, int &>::value));
+    CHECK(is_subtractable<int &&>::value);
+    CHECK((is_subtractable<int &&, double &&>::value));
+    CHECK((is_subtractable<double &&, int &&>::value));
+    CHECK((!is_subtractable<int &&, std::string &>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_subtractable_in_place_test)
+TEST_CASE("type_traits_is_subtractable_in_place_test")
 {
-    BOOST_CHECK((!is_subtractable_in_place<void>::value));
-    BOOST_CHECK((!is_subtractable_in_place<void, int>::value));
-    BOOST_CHECK((!is_subtractable_in_place<int, void>::value));
-    BOOST_CHECK((is_subtractable_in_place<int>::value));
-    BOOST_CHECK((is_subtractable_in_place<int, int>::value));
-    BOOST_CHECK((is_subtractable_in_place<int, double>::value));
-    BOOST_CHECK((is_subtractable_in_place<double, int>::value));
-    BOOST_CHECK((is_subtractable_in_place<std::complex<double>, double>::value));
-    BOOST_CHECK((!is_subtractable_in_place<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_subtractable_in_place<trivial, std::complex<double>>::value));
-    BOOST_CHECK((!is_subtractable_in_place<std::string, std::string>::value));
-    BOOST_CHECK((is_subtractable_in_place<int, const int>::value));
-    BOOST_CHECK((!is_subtractable_in_place<const int, int>::value));
-    BOOST_CHECK((!is_subtractable_in_place<const int &, int>::value));
-    BOOST_CHECK((is_subtractable_in_place<int &&, const int &>::value));
+    CHECK((!is_subtractable_in_place<void>::value));
+    CHECK((!is_subtractable_in_place<void, int>::value));
+    CHECK((!is_subtractable_in_place<int, void>::value));
+    CHECK((is_subtractable_in_place<int>::value));
+    CHECK((is_subtractable_in_place<int, int>::value));
+    CHECK((is_subtractable_in_place<int, double>::value));
+    CHECK((is_subtractable_in_place<double, int>::value));
+    CHECK((is_subtractable_in_place<std::complex<double>, double>::value));
+    CHECK((!is_subtractable_in_place<double, std::complex<double>>::value));
+    CHECK((!is_subtractable_in_place<trivial, std::complex<double>>::value));
+    CHECK((!is_subtractable_in_place<std::string, std::string>::value));
+    CHECK((is_subtractable_in_place<int, const int>::value));
+    CHECK((!is_subtractable_in_place<const int, int>::value));
+    CHECK((!is_subtractable_in_place<const int &, int>::value));
+    CHECK((is_subtractable_in_place<int &&, const int &>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_multipliable_test)
+TEST_CASE("type_traits_is_multipliable_test")
 {
-    BOOST_CHECK((!is_multipliable<void>::value));
-    BOOST_CHECK((!is_multipliable<void, int>::value));
-    BOOST_CHECK((!is_multipliable<int, void>::value));
-    BOOST_CHECK(is_multipliable<int>::value);
-    BOOST_CHECK(is_multipliable<const int>::value);
-    BOOST_CHECK((is_multipliable<const int, int>::value));
-    BOOST_CHECK((is_multipliable<int, const int>::value));
-    BOOST_CHECK((is_multipliable<const int &, int &>::value));
-    BOOST_CHECK((is_multipliable<int &&, const int &>::value));
-    BOOST_CHECK(is_multipliable<double>::value);
-    BOOST_CHECK(is_multipliable<std::complex<double>>::value);
-    BOOST_CHECK((is_multipliable<const std::complex<double>, double>::value));
-    BOOST_CHECK((is_multipliable<std::complex<double>, const double>::value));
-    BOOST_CHECK((is_multipliable<int, int>::value));
-    BOOST_CHECK((is_multipliable<int, double>::value));
-    BOOST_CHECK((is_multipliable<double, int>::value));
-    BOOST_CHECK((is_multipliable<std::complex<double>, double>::value));
-    BOOST_CHECK((is_multipliable<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_multipliable<trivial, std::complex<double>>::value));
-    BOOST_CHECK((!is_multipliable<int *, std::size_t>::value));
-    BOOST_CHECK((!is_multipliable<std::size_t, int *>::value));
-    BOOST_CHECK(!is_multipliable<int *>::value);
-    BOOST_CHECK(is_multipliable<int &>::value);
-    BOOST_CHECK((is_multipliable<int &, double &>::value));
-    BOOST_CHECK((is_multipliable<double &, int &>::value));
-    BOOST_CHECK(is_multipliable<int const &>::value);
-    BOOST_CHECK((is_multipliable<int const &, double &>::value));
-    BOOST_CHECK((is_multipliable<double const &, int &>::value));
-    BOOST_CHECK(is_multipliable<int &&>::value);
-    BOOST_CHECK((is_multipliable<int &&, double &&>::value));
-    BOOST_CHECK((is_multipliable<double &&, int &&>::value));
-    BOOST_CHECK((!is_multipliable<int *&, int>::value));
+    CHECK((!is_multipliable<void>::value));
+    CHECK((!is_multipliable<void, int>::value));
+    CHECK((!is_multipliable<int, void>::value));
+    CHECK(is_multipliable<int>::value);
+    CHECK(is_multipliable<const int>::value);
+    CHECK((is_multipliable<const int, int>::value));
+    CHECK((is_multipliable<int, const int>::value));
+    CHECK((is_multipliable<const int &, int &>::value));
+    CHECK((is_multipliable<int &&, const int &>::value));
+    CHECK(is_multipliable<double>::value);
+    CHECK(is_multipliable<std::complex<double>>::value);
+    CHECK((is_multipliable<const std::complex<double>, double>::value));
+    CHECK((is_multipliable<std::complex<double>, const double>::value));
+    CHECK((is_multipliable<int, int>::value));
+    CHECK((is_multipliable<int, double>::value));
+    CHECK((is_multipliable<double, int>::value));
+    CHECK((is_multipliable<std::complex<double>, double>::value));
+    CHECK((is_multipliable<double, std::complex<double>>::value));
+    CHECK((!is_multipliable<trivial, std::complex<double>>::value));
+    CHECK((!is_multipliable<int *, std::size_t>::value));
+    CHECK((!is_multipliable<std::size_t, int *>::value));
+    CHECK(!is_multipliable<int *>::value);
+    CHECK(is_multipliable<int &>::value);
+    CHECK((is_multipliable<int &, double &>::value));
+    CHECK((is_multipliable<double &, int &>::value));
+    CHECK(is_multipliable<int const &>::value);
+    CHECK((is_multipliable<int const &, double &>::value));
+    CHECK((is_multipliable<double const &, int &>::value));
+    CHECK(is_multipliable<int &&>::value);
+    CHECK((is_multipliable<int &&, double &&>::value));
+    CHECK((is_multipliable<double &&, int &&>::value));
+    CHECK((!is_multipliable<int *&, int>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_multipliable_in_place_test)
+TEST_CASE("type_traits_is_multipliable_in_place_test")
 {
-    BOOST_CHECK((!is_multipliable_in_place<void>::value));
-    BOOST_CHECK((!is_multipliable_in_place<void, int>::value));
-    BOOST_CHECK((!is_multipliable_in_place<int, void>::value));
-    BOOST_CHECK((is_multipliable_in_place<int>::value));
-    BOOST_CHECK((is_multipliable_in_place<int, int>::value));
-    BOOST_CHECK((is_multipliable_in_place<int, double>::value));
-    BOOST_CHECK((is_multipliable_in_place<double, int>::value));
-    BOOST_CHECK((is_multipliable_in_place<std::complex<double>, double>::value));
-    BOOST_CHECK((!is_multipliable_in_place<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_multipliable_in_place<trivial, std::complex<double>>::value));
-    BOOST_CHECK((is_multipliable_in_place<int, const int>::value));
-    BOOST_CHECK((!is_multipliable_in_place<const int, int>::value));
-    BOOST_CHECK((!is_multipliable_in_place<const int &, int>::value));
-    BOOST_CHECK((is_multipliable_in_place<int &&, const int &>::value));
+    CHECK((!is_multipliable_in_place<void>::value));
+    CHECK((!is_multipliable_in_place<void, int>::value));
+    CHECK((!is_multipliable_in_place<int, void>::value));
+    CHECK((is_multipliable_in_place<int>::value));
+    CHECK((is_multipliable_in_place<int, int>::value));
+    CHECK((is_multipliable_in_place<int, double>::value));
+    CHECK((is_multipliable_in_place<double, int>::value));
+    CHECK((is_multipliable_in_place<std::complex<double>, double>::value));
+    CHECK((!is_multipliable_in_place<double, std::complex<double>>::value));
+    CHECK((!is_multipliable_in_place<trivial, std::complex<double>>::value));
+    CHECK((is_multipliable_in_place<int, const int>::value));
+    CHECK((!is_multipliable_in_place<const int, int>::value));
+    CHECK((!is_multipliable_in_place<const int &, int>::value));
+    CHECK((is_multipliable_in_place<int &&, const int &>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_divisible_test)
+TEST_CASE("type_traits_is_divisible_test")
 {
-    BOOST_CHECK((!is_divisible<void>::value));
-    BOOST_CHECK((!is_divisible<void, int>::value));
-    BOOST_CHECK((!is_divisible<int, void>::value));
-    BOOST_CHECK(is_divisible<int>::value);
-    BOOST_CHECK(is_divisible<const int>::value);
-    BOOST_CHECK((is_divisible<const int, int>::value));
-    BOOST_CHECK((is_divisible<int, const int>::value));
-    BOOST_CHECK((is_divisible<const int &, int &>::value));
-    BOOST_CHECK((is_divisible<int &&, const int &>::value));
-    BOOST_CHECK(is_divisible<double>::value);
-    BOOST_CHECK(is_divisible<std::complex<double>>::value);
-    BOOST_CHECK((is_divisible<const std::complex<double>, double>::value));
-    BOOST_CHECK((is_divisible<std::complex<double>, const double>::value));
-    BOOST_CHECK((is_divisible<int, int>::value));
-    BOOST_CHECK((is_divisible<int, double>::value));
-    BOOST_CHECK((is_divisible<double, int>::value));
-    BOOST_CHECK((is_divisible<std::complex<double>, double>::value));
-    BOOST_CHECK((is_divisible<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_divisible<trivial, std::complex<double>>::value));
-    BOOST_CHECK((!is_divisible<int *, std::size_t>::value));
-    BOOST_CHECK((!is_divisible<std::size_t, int *>::value));
-    BOOST_CHECK(!is_divisible<int *>::value);
-    BOOST_CHECK(is_divisible<int &>::value);
-    BOOST_CHECK((is_divisible<int &, double &>::value));
-    BOOST_CHECK((is_divisible<double &, int &>::value));
-    BOOST_CHECK(is_divisible<int const &>::value);
-    BOOST_CHECK((is_divisible<int const &, double &>::value));
-    BOOST_CHECK((is_divisible<double const &, int &>::value));
-    BOOST_CHECK(is_divisible<int &&>::value);
-    BOOST_CHECK((is_divisible<int &&, double &&>::value));
-    BOOST_CHECK((is_divisible<double &&, int &&>::value));
-    BOOST_CHECK((!is_divisible<int *&, int>::value));
+    CHECK((!is_divisible<void>::value));
+    CHECK((!is_divisible<void, int>::value));
+    CHECK((!is_divisible<int, void>::value));
+    CHECK(is_divisible<int>::value);
+    CHECK(is_divisible<const int>::value);
+    CHECK((is_divisible<const int, int>::value));
+    CHECK((is_divisible<int, const int>::value));
+    CHECK((is_divisible<const int &, int &>::value));
+    CHECK((is_divisible<int &&, const int &>::value));
+    CHECK(is_divisible<double>::value);
+    CHECK(is_divisible<std::complex<double>>::value);
+    CHECK((is_divisible<const std::complex<double>, double>::value));
+    CHECK((is_divisible<std::complex<double>, const double>::value));
+    CHECK((is_divisible<int, int>::value));
+    CHECK((is_divisible<int, double>::value));
+    CHECK((is_divisible<double, int>::value));
+    CHECK((is_divisible<std::complex<double>, double>::value));
+    CHECK((is_divisible<double, std::complex<double>>::value));
+    CHECK((!is_divisible<trivial, std::complex<double>>::value));
+    CHECK((!is_divisible<int *, std::size_t>::value));
+    CHECK((!is_divisible<std::size_t, int *>::value));
+    CHECK(!is_divisible<int *>::value);
+    CHECK(is_divisible<int &>::value);
+    CHECK((is_divisible<int &, double &>::value));
+    CHECK((is_divisible<double &, int &>::value));
+    CHECK(is_divisible<int const &>::value);
+    CHECK((is_divisible<int const &, double &>::value));
+    CHECK((is_divisible<double const &, int &>::value));
+    CHECK(is_divisible<int &&>::value);
+    CHECK((is_divisible<int &&, double &&>::value));
+    CHECK((is_divisible<double &&, int &&>::value));
+    CHECK((!is_divisible<int *&, int>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_divisible_in_place_test)
+TEST_CASE("type_traits_is_divisible_in_place_test")
 {
-    BOOST_CHECK((!is_divisible_in_place<void>::value));
-    BOOST_CHECK((!is_divisible_in_place<void, int>::value));
-    BOOST_CHECK((!is_divisible_in_place<int, void>::value));
-    BOOST_CHECK((is_divisible_in_place<int>::value));
-    BOOST_CHECK((is_divisible_in_place<int, int>::value));
-    BOOST_CHECK((is_divisible_in_place<int, double>::value));
-    BOOST_CHECK((is_divisible_in_place<double, int>::value));
-    BOOST_CHECK((is_divisible_in_place<std::complex<double>, double>::value));
-    BOOST_CHECK((!is_divisible_in_place<double, std::complex<double>>::value));
-    BOOST_CHECK((!is_divisible_in_place<trivial, std::complex<double>>::value));
-    BOOST_CHECK((is_divisible_in_place<int, const int>::value));
-    BOOST_CHECK((!is_divisible_in_place<const int, int>::value));
-    BOOST_CHECK((!is_divisible_in_place<const int &, int>::value));
-    BOOST_CHECK((is_divisible_in_place<int &&, const int &>::value));
+    CHECK((!is_divisible_in_place<void>::value));
+    CHECK((!is_divisible_in_place<void, int>::value));
+    CHECK((!is_divisible_in_place<int, void>::value));
+    CHECK((is_divisible_in_place<int>::value));
+    CHECK((is_divisible_in_place<int, int>::value));
+    CHECK((is_divisible_in_place<int, double>::value));
+    CHECK((is_divisible_in_place<double, int>::value));
+    CHECK((is_divisible_in_place<std::complex<double>, double>::value));
+    CHECK((!is_divisible_in_place<double, std::complex<double>>::value));
+    CHECK((!is_divisible_in_place<trivial, std::complex<double>>::value));
+    CHECK((is_divisible_in_place<int, const int>::value));
+    CHECK((!is_divisible_in_place<const int, int>::value));
+    CHECK((!is_divisible_in_place<const int &, int>::value));
+    CHECK((is_divisible_in_place<int &&, const int &>::value));
 }
 
 struct frob {
@@ -400,82 +399,82 @@ struct frob_mix_not_eq {
 
 bool operator!=(const frob_mix_not_eq &, const frob_mix_not_eq &);
 
-BOOST_AUTO_TEST_CASE(type_traits_is_equality_comparable_test)
+TEST_CASE("type_traits_is_equality_comparable_test")
 {
-    BOOST_CHECK((!is_equality_comparable<void>::value));
-    BOOST_CHECK((!is_equality_comparable<void, const int &>::value));
-    BOOST_CHECK((!is_equality_comparable<int, void>::value));
-    BOOST_CHECK(is_equality_comparable<const int &>::value);
-    BOOST_CHECK(!is_equality_comparable<const trivial &>::value);
-    BOOST_CHECK((is_equality_comparable<const int &, const double &>::value));
-    BOOST_CHECK((is_equality_comparable<const double &, const int &>::value));
-    BOOST_CHECK((!is_equality_comparable<const double &, const trivial &>::value));
-    BOOST_CHECK((!is_equality_comparable<const trivial &, const double &>::value));
-    BOOST_CHECK(is_equality_comparable<int &>::value);
-    BOOST_CHECK(is_equality_comparable<const int *&>::value);
-    BOOST_CHECK((is_equality_comparable<int const *, int *>::value));
-    BOOST_CHECK((is_equality_comparable<int &, const double &>::value));
-    BOOST_CHECK((is_equality_comparable<int const &, double &&>::value));
-    BOOST_CHECK(is_equality_comparable<const frob &>::value);
-    BOOST_CHECK(!is_equality_comparable<const frob_nonconst &>::value);
-    BOOST_CHECK(is_equality_comparable<frob_nonconst &>::value);
-    BOOST_CHECK(is_equality_comparable<const frob_nonbool &>::value);
-    BOOST_CHECK(!is_equality_comparable<const frob_void &>::value);
-    BOOST_CHECK(is_equality_comparable<const frob_copy &>::value);
-    BOOST_CHECK(is_equality_comparable<const frob_mix &>::value);
-    BOOST_CHECK(!is_equality_comparable<const frob_mix_wrong &>::value);
-    BOOST_CHECK(!is_equality_comparable<const frob_mix_not_ineq &>::value);
-    BOOST_CHECK(!is_equality_comparable<const frob_mix_not_eq &>::value);
+    CHECK((!is_equality_comparable<void>::value));
+    CHECK((!is_equality_comparable<void, const int &>::value));
+    CHECK((!is_equality_comparable<int, void>::value));
+    CHECK(is_equality_comparable<const int &>::value);
+    CHECK(!is_equality_comparable<const trivial &>::value);
+    CHECK((is_equality_comparable<const int &, const double &>::value));
+    CHECK((is_equality_comparable<const double &, const int &>::value));
+    CHECK((!is_equality_comparable<const double &, const trivial &>::value));
+    CHECK((!is_equality_comparable<const trivial &, const double &>::value));
+    CHECK(is_equality_comparable<int &>::value);
+    CHECK(is_equality_comparable<const int *&>::value);
+    CHECK((is_equality_comparable<int const *, int *>::value));
+    CHECK((is_equality_comparable<int &, const double &>::value));
+    CHECK((is_equality_comparable<int const &, double &&>::value));
+    CHECK(is_equality_comparable<const frob &>::value);
+    CHECK(!is_equality_comparable<const frob_nonconst &>::value);
+    CHECK(is_equality_comparable<frob_nonconst &>::value);
+    CHECK(is_equality_comparable<const frob_nonbool &>::value);
+    CHECK(!is_equality_comparable<const frob_void &>::value);
+    CHECK(is_equality_comparable<const frob_copy &>::value);
+    CHECK(is_equality_comparable<const frob_mix &>::value);
+    CHECK(!is_equality_comparable<const frob_mix_wrong &>::value);
+    CHECK(!is_equality_comparable<const frob_mix_not_ineq &>::value);    //TODO:: fails
+    CHECK(!is_equality_comparable<const frob_mix_not_eq &>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_less_than_comparable_test)
+TEST_CASE("type_traits_is_less_than_comparable_test")
 {
-    BOOST_CHECK((!is_less_than_comparable<void>::value));
-    BOOST_CHECK((!is_less_than_comparable<void, int>::value));
-    BOOST_CHECK((!is_less_than_comparable<int, void>::value));
-    BOOST_CHECK(is_less_than_comparable<int>::value);
-    BOOST_CHECK((is_less_than_comparable<int, double>::value));
-    BOOST_CHECK((is_less_than_comparable<double, int>::value));
-    BOOST_CHECK(is_less_than_comparable<int &>::value);
-    BOOST_CHECK((is_less_than_comparable<const int &, double &&>::value));
-    BOOST_CHECK((is_less_than_comparable<double, int &>::value));
-    BOOST_CHECK((is_less_than_comparable<int *>::value));
-    BOOST_CHECK((is_less_than_comparable<int const *>::value));
-    BOOST_CHECK((is_less_than_comparable<int const *, int *>::value));
-    BOOST_CHECK((!is_less_than_comparable<int *, double *>::value));
-    BOOST_CHECK((!is_less_than_comparable<int *, double *>::value));
-    BOOST_CHECK((is_less_than_comparable<frob>::value));
-    BOOST_CHECK((!is_less_than_comparable<frob_nonconst>::value));
-    BOOST_CHECK((is_less_than_comparable<frob_nonbool>::value));
-    BOOST_CHECK((!is_less_than_comparable<frob_void>::value));
-    BOOST_CHECK((is_less_than_comparable<frob_copy>::value));
-    BOOST_CHECK((is_less_than_comparable<frob_mix>::value));
-    BOOST_CHECK((!is_less_than_comparable<frob_mix_wrong>::value));
+    CHECK((!is_less_than_comparable<void>::value));
+    CHECK((!is_less_than_comparable<void, int>::value));
+    CHECK((!is_less_than_comparable<int, void>::value));
+    CHECK(is_less_than_comparable<int>::value);
+    CHECK((is_less_than_comparable<int, double>::value));
+    CHECK((is_less_than_comparable<double, int>::value));
+    CHECK(is_less_than_comparable<int &>::value);
+    CHECK((is_less_than_comparable<const int &, double &&>::value));
+    CHECK((is_less_than_comparable<double, int &>::value));
+    CHECK((is_less_than_comparable<int *>::value));
+    CHECK((is_less_than_comparable<int const *>::value));
+    CHECK((is_less_than_comparable<int const *, int *>::value));
+    CHECK((!is_less_than_comparable<int *, double *>::value));
+    CHECK((!is_less_than_comparable<int *, double *>::value));
+    CHECK((is_less_than_comparable<frob>::value));
+    CHECK((!is_less_than_comparable<frob_nonconst>::value));
+    CHECK((is_less_than_comparable<frob_nonbool>::value));
+    CHECK((!is_less_than_comparable<frob_void>::value));
+    CHECK((is_less_than_comparable<frob_copy>::value));
+    CHECK((is_less_than_comparable<frob_mix>::value));
+    CHECK((!is_less_than_comparable<frob_mix_wrong>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_greater_than_comparable_test)
+TEST_CASE("type_traits_is_greater_than_comparable_test")
 {
-    BOOST_CHECK((!is_greater_than_comparable<void>::value));
-    BOOST_CHECK((!is_greater_than_comparable<void, int>::value));
-    BOOST_CHECK((!is_greater_than_comparable<int, void>::value));
-    BOOST_CHECK(is_greater_than_comparable<int>::value);
-    BOOST_CHECK((is_greater_than_comparable<int, double>::value));
-    BOOST_CHECK((is_greater_than_comparable<double, int>::value));
-    BOOST_CHECK(is_greater_than_comparable<int &>::value);
-    BOOST_CHECK((is_greater_than_comparable<const int &, double &&>::value));
-    BOOST_CHECK((is_greater_than_comparable<double, int &>::value));
-    BOOST_CHECK((is_greater_than_comparable<int *>::value));
-    BOOST_CHECK((is_greater_than_comparable<int const *>::value));
-    BOOST_CHECK((is_greater_than_comparable<int const *, int *>::value));
-    BOOST_CHECK((!is_greater_than_comparable<int *, double *>::value));
-    BOOST_CHECK((!is_greater_than_comparable<int *, double *>::value));
-    BOOST_CHECK((is_greater_than_comparable<frob>::value));
-    BOOST_CHECK((!is_greater_than_comparable<frob_nonconst>::value));
-    BOOST_CHECK((is_greater_than_comparable<frob_nonbool>::value));
-    BOOST_CHECK((!is_greater_than_comparable<frob_void>::value));
-    BOOST_CHECK((is_greater_than_comparable<frob_copy>::value));
-    BOOST_CHECK((is_greater_than_comparable<frob_mix>::value));
-    BOOST_CHECK((!is_greater_than_comparable<frob_mix_wrong>::value));
+    CHECK((!is_greater_than_comparable<void>::value));
+    CHECK((!is_greater_than_comparable<void, int>::value));
+    CHECK((!is_greater_than_comparable<int, void>::value));
+    CHECK(is_greater_than_comparable<int>::value);
+    CHECK((is_greater_than_comparable<int, double>::value));
+    CHECK((is_greater_than_comparable<double, int>::value));
+    CHECK(is_greater_than_comparable<int &>::value);
+    CHECK((is_greater_than_comparable<const int &, double &&>::value));
+    CHECK((is_greater_than_comparable<double, int &>::value));
+    CHECK((is_greater_than_comparable<int *>::value));
+    CHECK((is_greater_than_comparable<int const *>::value));
+    CHECK((is_greater_than_comparable<int const *, int *>::value));
+    CHECK((!is_greater_than_comparable<int *, double *>::value));
+    CHECK((!is_greater_than_comparable<int *, double *>::value));
+    CHECK((is_greater_than_comparable<frob>::value));
+    CHECK((!is_greater_than_comparable<frob_nonconst>::value));
+    CHECK((is_greater_than_comparable<frob_nonbool>::value));
+    CHECK((!is_greater_than_comparable<frob_void>::value));
+    CHECK((is_greater_than_comparable<frob_copy>::value));
+    CHECK((is_greater_than_comparable<frob_mix>::value));
+    CHECK((!is_greater_than_comparable<frob_mix_wrong>::value));
 }
 
 template <typename T>
@@ -512,21 +511,21 @@ struct stream6 {
 
 const std::ostream &operator<<(std::ostream &, const stream6 &);
 
-BOOST_AUTO_TEST_CASE(type_traits_is_ostreamable_test)
+TEST_CASE("type_traits_is_ostreamable_test")
 {
-    BOOST_CHECK(is_ostreamable<int>::value);
-    BOOST_CHECK(is_ostreamable<double>::value);
-    BOOST_CHECK(is_ostreamable<int &>::value);
-    BOOST_CHECK(is_ostreamable<double &&>::value);
-    BOOST_CHECK(is_ostreamable<const int &>::value);
-    BOOST_CHECK(!is_ostreamable<iio_base<int>>::value);
-    BOOST_CHECK(is_ostreamable<stream1>::value);
-    BOOST_CHECK(is_ostreamable<stream2>::value);
-    BOOST_CHECK(!is_ostreamable<stream3>::value);
-    BOOST_CHECK(!is_ostreamable<stream4>::value);
-    BOOST_CHECK(is_ostreamable<stream5>::value);
-    BOOST_CHECK(!is_ostreamable<stream6>::value);
-    BOOST_CHECK(!is_ostreamable<void>::value);
+    CHECK(is_ostreamable<int>::value);
+    CHECK(is_ostreamable<double>::value);
+    CHECK(is_ostreamable<int &>::value);
+    CHECK(is_ostreamable<double &&>::value);
+    CHECK(is_ostreamable<const int &>::value);
+    CHECK(!is_ostreamable<iio_base<int>>::value);
+    CHECK(is_ostreamable<stream1>::value);
+    CHECK(is_ostreamable<stream2>::value);
+    CHECK(!is_ostreamable<stream3>::value);
+    CHECK(!is_ostreamable<stream4>::value);
+    CHECK(is_ostreamable<stream5>::value);
+    CHECK(!is_ostreamable<stream6>::value);
+    CHECK(!is_ostreamable<void>::value);
 }
 
 struct c_element {
@@ -550,25 +549,25 @@ struct c_element2 {
     c_element2 &operator=(c_element2 &&) noexcept;
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_is_container_element_test)
+TEST_CASE("type_traits_is_container_element_test")
 {
-    BOOST_CHECK(!is_container_element<void>::value);
-    BOOST_CHECK(is_container_element<int>::value);
-    BOOST_CHECK(!is_container_element<int const>::value);
-    BOOST_CHECK(is_container_element<double>::value);
-    BOOST_CHECK(is_container_element<c_element>::value);
-    BOOST_CHECK(!is_container_element<c_element const>::value);
-    BOOST_CHECK(!is_container_element<c_element &>::value);
-    BOOST_CHECK(!is_container_element<c_element const &>::value);
-    BOOST_CHECK(!is_container_element<nc_element1>::value);
+    CHECK(!is_container_element<void>::value);
+    CHECK(is_container_element<int>::value);
+    CHECK(!is_container_element<int const>::value);
+    CHECK(is_container_element<double>::value);
+    CHECK(is_container_element<c_element>::value);
+    CHECK(!is_container_element<c_element const>::value);
+    CHECK(!is_container_element<c_element &>::value);
+    CHECK(!is_container_element<c_element const &>::value);
+    CHECK(!is_container_element<nc_element1>::value);
 // Missing nothrow detection in the Intel compiler.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK(!is_container_element<nc_element2>::value);
+    CHECK(!is_container_element<nc_element2>::value);
 #endif
-    BOOST_CHECK(is_container_element<c_element2>::value);
-    BOOST_CHECK(!is_container_element<int &>::value);
-    BOOST_CHECK(!is_container_element<int &&>::value);
-    BOOST_CHECK(!is_container_element<int const &>::value);
+    CHECK(is_container_element<c_element2>::value);
+    CHECK(!is_container_element<int &>::value);
+    CHECK(!is_container_element<int &&>::value);
+    CHECK(!is_container_element<int const &>::value);
 }
 
 struct unhashable1 {
@@ -714,44 +713,44 @@ struct hash<hashable4> {
 };
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_hashable_test)
+TEST_CASE("type_traits_is_hashable_test")
 {
-    BOOST_CHECK(is_hashable<int>::value);
-    BOOST_CHECK(is_hashable<std::string>::value);
-    BOOST_CHECK(is_hashable<double>::value);
-    BOOST_CHECK(is_hashable<double &>::value);
-    BOOST_CHECK(is_hashable<double &&>::value);
-    BOOST_CHECK(is_hashable<const double &>::value);
-    BOOST_CHECK(is_hashable<const double>::value);
+    CHECK(is_hashable<int>::value);
+    CHECK(is_hashable<std::string>::value);
+    CHECK(is_hashable<double>::value);
+    CHECK(is_hashable<double &>::value);
+    CHECK(is_hashable<double &&>::value);
+    CHECK(is_hashable<const double &>::value);
+    CHECK(is_hashable<const double>::value);
     // This is gonna fail on GCC 4.7.2 at least, depending on whether static_assert() is used
     // in the default implementation of the hasher.
     // http://stackoverflow.com/questions/16302977/static-assertions-and-sfinae
-    // BOOST_CHECK(!is_hashable<unhashable1>::value);
-    BOOST_CHECK(is_hashable<unhashable1 *>::value);
-    BOOST_CHECK(is_hashable<unhashable1 const *>::value);
-    BOOST_CHECK(!is_hashable<unhashable2>::value);
-    BOOST_CHECK(!is_hashable<unhashable3>::value);
-    BOOST_CHECK(!is_hashable<unhashable4>::value);
-    BOOST_CHECK(!is_hashable<unhashable5>::value);
-    BOOST_CHECK(!is_hashable<unhashable6>::value);
-    BOOST_CHECK(!is_hashable<unhashable7>::value);
-    BOOST_CHECK(!is_hashable<unhashable8>::value);
-    BOOST_CHECK(!is_hashable<unhashable9>::value);
+    // CHECK(!is_hashable<unhashable1>::value);
+    CHECK(is_hashable<unhashable1 *>::value);
+    CHECK(is_hashable<unhashable1 const *>::value);
+    CHECK(!is_hashable<unhashable2>::value);
+    CHECK(!is_hashable<unhashable3>::value);
+    CHECK(!is_hashable<unhashable4>::value);
+    CHECK(!is_hashable<unhashable5>::value);
+    CHECK(!is_hashable<unhashable6>::value);
+    CHECK(!is_hashable<unhashable7>::value);
+    CHECK(!is_hashable<unhashable8>::value);
+    CHECK(!is_hashable<unhashable9>::value);
 // Missing noexcept detect.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK(!is_hashable<unhashable10>::value);
-    BOOST_CHECK(!is_hashable<unhashable11>::value);
-    BOOST_CHECK(!is_hashable<unhashable12>::value);
+    CHECK(!is_hashable<unhashable10>::value);
+    CHECK(!is_hashable<unhashable11>::value);
+    CHECK(!is_hashable<unhashable12>::value);
 #endif
-    BOOST_CHECK(is_hashable<hashable1>::value);
-    BOOST_CHECK(is_hashable<hashable2>::value);
-    BOOST_CHECK(is_hashable<hashable2 &>::value);
-    BOOST_CHECK(is_hashable<hashable2 &&>::value);
-    BOOST_CHECK(is_hashable<hashable2 const &>::value);
-    BOOST_CHECK(is_hashable<hashable2 *>::value);
-    BOOST_CHECK(is_hashable<hashable2 const *>::value);
-    BOOST_CHECK(is_hashable<hashable3>::value);
-    BOOST_CHECK(is_hashable<hashable4>::value);
+    CHECK(is_hashable<hashable1>::value);
+    CHECK(is_hashable<hashable2>::value);
+    CHECK(is_hashable<hashable2 &>::value);
+    CHECK(is_hashable<hashable2 &&>::value);
+    CHECK(is_hashable<hashable2 const &>::value);
+    CHECK(is_hashable<hashable2 *>::value);
+    CHECK(is_hashable<hashable2 const *>::value);
+    CHECK(is_hashable<hashable3>::value);
+    CHECK(is_hashable<hashable4>::value);
 }
 
 struct fo1 {
@@ -790,7 +789,7 @@ struct l6 {
     std::string const &operator()(int &);
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_is_function_object_test)
+TEST_CASE("type_traits_is_function_object_test")
 {
     // NOTE: regarding lambdas:
     // http://en.cppreference.com/w/cpp/language/lambda
@@ -799,62 +798,62 @@ BOOST_AUTO_TEST_CASE(type_traits_is_function_object_test)
     auto l2 = [](const int &) {};
     auto l3 = [](int &) {};
     auto l4 = [](int &) { return std::string{}; };
-    BOOST_CHECK((!is_function_object<void, void>::value));
-    BOOST_CHECK((!is_function_object<int, void>::value));
-    BOOST_CHECK((is_function_object<decltype(l1), void>::value));
-    BOOST_CHECK((is_function_object<const decltype(l1), void>::value));
-    BOOST_CHECK((!is_function_object<decltype(l1), void, int>::value));
-    BOOST_CHECK((!is_function_object<const decltype(l2), void>::value));
-    BOOST_CHECK((is_function_object<decltype(l2), void, int>::value));
-    BOOST_CHECK((is_function_object<const decltype(l2), void, int &>::value));
-    BOOST_CHECK((is_function_object<const decltype(l2), void, const int &>::value));
-    BOOST_CHECK((!is_function_object<decltype(l3), void>::value));
-    BOOST_CHECK((!is_function_object<const decltype(l3), void, int>::value));
-    BOOST_CHECK((is_function_object<decltype(l3), void, int &>::value));
-    BOOST_CHECK((!is_function_object<const decltype(l3), void, const int &>::value));
-    BOOST_CHECK((!is_function_object<decltype(l3) &, void, int &>::value));
-    BOOST_CHECK((!is_function_object<decltype(l3) const &, void, int &>::value));
-    BOOST_CHECK((is_function_object<decltype(l4), std::string, int &>::value));
-    BOOST_CHECK((!is_function_object<decltype(l4), std::string &, int &>::value));
-    BOOST_CHECK((!is_function_object<l5, std::string, int &>::value));
-    BOOST_CHECK((is_function_object<l5, std::string &, int &>::value));
-    BOOST_CHECK((!is_function_object<l5, std::string const &, int &>::value));
-    BOOST_CHECK((!is_function_object<l6, std::string, int &>::value));
-    BOOST_CHECK((!is_function_object<l6, std::string &, int &>::value));
-    BOOST_CHECK((is_function_object<l6, std::string const &, int &>::value));
-    BOOST_CHECK((is_function_object<std::hash<int>, std::size_t, int>::value));
-    BOOST_CHECK((is_function_object<const std::hash<int>, std::size_t, int &&>::value));
-    BOOST_CHECK((is_function_object<const std::hash<int>, std::size_t, const int &>::value));
-    BOOST_CHECK((is_function_object<const std::hash<int>, std::size_t, int &>::value));
-    BOOST_CHECK((!is_function_object<const std::hash<int> &, std::size_t, int &>::value));
-    BOOST_CHECK((!is_function_object<std::hash<int> &, std::size_t, int &>::value));
-    BOOST_CHECK((!is_function_object<const std::hash<int>, int, int &>::value));
-    BOOST_CHECK((!is_function_object<const std::hash<int>, std::size_t, int &, int &>::value));
-    BOOST_CHECK((!is_function_object<const std::hash<int>, std::size_t>::value));
-    BOOST_CHECK((!is_function_object<fo1, void>::value));
-    BOOST_CHECK((!is_function_object<fo1, void, int>::value));
-    BOOST_CHECK((is_function_object<fo2, void>::value));
-    BOOST_CHECK((!is_function_object<fo2 *, void>::value));
-    BOOST_CHECK((is_function_object<const fo2, void>::value));
-    BOOST_CHECK((is_function_object<fo3, void, int>::value));
-    BOOST_CHECK((!is_function_object<const fo3, void, int>::value));
-    BOOST_CHECK((!is_function_object<fo3, void, int, int>::value));
-    BOOST_CHECK((is_function_object<fo4, void, int>::value));
-    BOOST_CHECK((is_function_object<fo4, std::string, int, double &>::value));
-    BOOST_CHECK((!is_function_object<fo4, std::string, int, double &, int>::value));
-    BOOST_CHECK((!is_function_object<fo4, std::string, int>::value));
-    BOOST_CHECK((!is_function_object<fo4, std::string &, int, double &>::value));
-    BOOST_CHECK((!is_function_object<fo4, std::string, int, double const &>::value));
-    BOOST_CHECK((is_function_object<fo5, int>::value));
-    BOOST_CHECK((is_function_object<fo5, int, double>::value));
-    BOOST_CHECK((is_function_object<fo5, int, double, const std::string &>::value));
-    BOOST_CHECK((!is_function_object<fo5, void, double, const std::string &>::value));
-    BOOST_CHECK((is_function_object<fo6, int, int>::value));
-    BOOST_CHECK((is_function_object<fo6, int, int, int>::value));
-    BOOST_CHECK((!is_function_object<fo6, int, int, int, double>::value));
-    BOOST_CHECK((!is_function_object<decltype(not_fo), void>::value));
-    BOOST_CHECK((is_function_object<std::function<void(int)>, void, int>::value));
-    BOOST_CHECK((!is_function_object<std::function<void(int)>, void>::value));
+    CHECK((!is_function_object<void, void>::value));
+    CHECK((!is_function_object<int, void>::value));
+    CHECK((is_function_object<decltype(l1), void>::value));
+    CHECK((is_function_object<const decltype(l1), void>::value));
+    CHECK((!is_function_object<decltype(l1), void, int>::value));
+    CHECK((!is_function_object<const decltype(l2), void>::value));
+    CHECK((is_function_object<decltype(l2), void, int>::value));
+    CHECK((is_function_object<const decltype(l2), void, int &>::value));
+    CHECK((is_function_object<const decltype(l2), void, const int &>::value));
+    CHECK((!is_function_object<decltype(l3), void>::value));
+    CHECK((!is_function_object<const decltype(l3), void, int>::value));
+    CHECK((is_function_object<decltype(l3), void, int &>::value));
+    CHECK((!is_function_object<const decltype(l3), void, const int &>::value));
+    CHECK((!is_function_object<decltype(l3) &, void, int &>::value));
+    CHECK((!is_function_object<decltype(l3) const &, void, int &>::value));
+    CHECK((is_function_object<decltype(l4), std::string, int &>::value));
+    CHECK((!is_function_object<decltype(l4), std::string &, int &>::value));
+    CHECK((!is_function_object<l5, std::string, int &>::value));
+    CHECK((is_function_object<l5, std::string &, int &>::value));
+    CHECK((!is_function_object<l5, std::string const &, int &>::value));
+    CHECK((!is_function_object<l6, std::string, int &>::value));
+    CHECK((!is_function_object<l6, std::string &, int &>::value));
+    CHECK((is_function_object<l6, std::string const &, int &>::value));
+    CHECK((is_function_object<std::hash<int>, std::size_t, int>::value));
+    CHECK((is_function_object<const std::hash<int>, std::size_t, int &&>::value));
+    CHECK((is_function_object<const std::hash<int>, std::size_t, const int &>::value));
+    CHECK((is_function_object<const std::hash<int>, std::size_t, int &>::value));
+    CHECK((!is_function_object<const std::hash<int> &, std::size_t, int &>::value));
+    CHECK((!is_function_object<std::hash<int> &, std::size_t, int &>::value));
+    CHECK((!is_function_object<const std::hash<int>, int, int &>::value));
+    CHECK((!is_function_object<const std::hash<int>, std::size_t, int &, int &>::value));
+    CHECK((!is_function_object<const std::hash<int>, std::size_t>::value));
+    CHECK((!is_function_object<fo1, void>::value));
+    CHECK((!is_function_object<fo1, void, int>::value));
+    CHECK((is_function_object<fo2, void>::value));
+    CHECK((!is_function_object<fo2 *, void>::value));
+    CHECK((is_function_object<const fo2, void>::value));
+    CHECK((is_function_object<fo3, void, int>::value));
+    CHECK((!is_function_object<const fo3, void, int>::value));
+    CHECK((!is_function_object<fo3, void, int, int>::value));
+    CHECK((is_function_object<fo4, void, int>::value));
+    CHECK((is_function_object<fo4, std::string, int, double &>::value));
+    CHECK((!is_function_object<fo4, std::string, int, double &, int>::value));
+    CHECK((!is_function_object<fo4, std::string, int>::value));
+    CHECK((!is_function_object<fo4, std::string &, int, double &>::value));
+    CHECK((!is_function_object<fo4, std::string, int, double const &>::value));
+    CHECK((is_function_object<fo5, int>::value));
+    CHECK((is_function_object<fo5, int, double>::value));
+    CHECK((is_function_object<fo5, int, double, const std::string &>::value));
+    CHECK((!is_function_object<fo5, void, double, const std::string &>::value));
+    CHECK((is_function_object<fo6, int, int>::value));
+    CHECK((is_function_object<fo6, int, int, int>::value));
+    CHECK((!is_function_object<fo6, int, int, int, double>::value));
+    CHECK((!is_function_object<decltype(not_fo), void>::value));
+    CHECK((is_function_object<std::function<void(int)>, void, int>::value));
+    CHECK((!is_function_object<std::function<void(int)>, void>::value));
 }
 
 struct hfo1 {
@@ -912,33 +911,33 @@ struct hfo9 {
     hfo9 &operator=(hfo9 &&) noexcept(false);
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_is_hash_function_object_test)
+TEST_CASE("type_traits_is_hash_function_object_test")
 {
-    BOOST_CHECK((!is_hash_function_object<void, int>::value));
-    BOOST_CHECK((!is_hash_function_object<int, void>::value));
-    BOOST_CHECK((!is_hash_function_object<void, void>::value));
-    BOOST_CHECK((is_hash_function_object<std::hash<int>, int>::value));
-    BOOST_CHECK((is_hash_function_object<std::hash<int const *>, int const *>::value));
-    BOOST_CHECK((is_hash_function_object<std::hash<int const *>, int *>::value));
-    BOOST_CHECK((!is_hash_function_object<const std::hash<int const *>, int *>::value));
-    BOOST_CHECK((!is_hash_function_object<std::hash<int> &, int &>::value));
-    BOOST_CHECK((!is_hash_function_object<std::hash<int> const &, int &>::value));
-    BOOST_CHECK((!is_hash_function_object<std::hash<int> &, const int &>::value));
-    BOOST_CHECK((is_hash_function_object<std::hash<std::string>, std::string>::value));
-    BOOST_CHECK((!is_hash_function_object<std::hash<int>, std::string>::value));
-    BOOST_CHECK((!is_hash_function_object<int, int>::value));
-    BOOST_CHECK((!is_hash_function_object<hfo1, int>::value));
-    BOOST_CHECK((!is_hash_function_object<hfo2, int>::value));
-    BOOST_CHECK((is_hash_function_object<hfo3, int>::value));
-    BOOST_CHECK((is_hash_function_object<hfo3, short>::value));
-    BOOST_CHECK((!is_hash_function_object<hfo4, int>::value));
-    BOOST_CHECK((is_hash_function_object<hfo5, int>::value));
-    BOOST_CHECK((!is_hash_function_object<hfo6, int>::value));
-    BOOST_CHECK((is_hash_function_object<hfo7, int>::value));
-    BOOST_CHECK((!is_hash_function_object<hfo8, int>::value));
+    CHECK((!is_hash_function_object<void, int>::value));
+    CHECK((!is_hash_function_object<int, void>::value));
+    CHECK((!is_hash_function_object<void, void>::value));
+    CHECK((is_hash_function_object<std::hash<int>, int>::value));
+    CHECK((is_hash_function_object<std::hash<int const *>, int const *>::value));
+    CHECK((is_hash_function_object<std::hash<int const *>, int *>::value));
+    CHECK((!is_hash_function_object<const std::hash<int const *>, int *>::value));
+    CHECK((!is_hash_function_object<std::hash<int> &, int &>::value));
+    CHECK((!is_hash_function_object<std::hash<int> const &, int &>::value));
+    CHECK((!is_hash_function_object<std::hash<int> &, const int &>::value));
+    CHECK((is_hash_function_object<std::hash<std::string>, std::string>::value));
+    CHECK((!is_hash_function_object<std::hash<int>, std::string>::value));
+    CHECK((!is_hash_function_object<int, int>::value));
+    CHECK((!is_hash_function_object<hfo1, int>::value));
+    CHECK((!is_hash_function_object<hfo2, int>::value));
+    CHECK((is_hash_function_object<hfo3, int>::value));
+    CHECK((is_hash_function_object<hfo3, short>::value));
+    CHECK((!is_hash_function_object<hfo4, int>::value));
+    CHECK((is_hash_function_object<hfo5, int>::value));
+    CHECK((!is_hash_function_object<hfo6, int>::value));
+    CHECK((is_hash_function_object<hfo7, int>::value));
+    CHECK((!is_hash_function_object<hfo8, int>::value));
 // Missing noexcept.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK((!is_hash_function_object<hfo9, int>::value));
+    CHECK((!is_hash_function_object<hfo9, int>::value));
 #endif
 }
 
@@ -1001,77 +1000,77 @@ struct efo10 {
     bool operator()(int, int, int) const;
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_is_equality_function_object_test)
+TEST_CASE("type_traits_is_equality_function_object_test")
 {
-    BOOST_CHECK((!is_equality_function_object<void, int>::value));
-    BOOST_CHECK((!is_equality_function_object<int, void>::value));
-    BOOST_CHECK((!is_equality_function_object<void, void>::value));
-    BOOST_CHECK((is_equality_function_object<std::equal_to<int>, int>::value));
-    BOOST_CHECK((is_equality_function_object<std::equal_to<int>, short>::value));
-    BOOST_CHECK((!is_equality_function_object<const std::equal_to<int>, short>::value));
-    BOOST_CHECK((!is_equality_function_object<std::equal_to<int> &, short>::value));
-    BOOST_CHECK((!is_equality_function_object<std::equal_to<int> &&, short>::value));
-    BOOST_CHECK((!is_equality_function_object<std::hash<int>, int>::value));
-    BOOST_CHECK((!is_equality_function_object<bool, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo1, int>::value));
-    BOOST_CHECK((is_equality_function_object<efo2, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo3, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo4, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo5, int>::value));
-    BOOST_CHECK((is_equality_function_object<efo6, int>::value));
-    BOOST_CHECK((is_equality_function_object<efo6, std::string>::value));
-    BOOST_CHECK((is_equality_function_object<efo7, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo7 const, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo7 const &, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo7 &, int>::value));
+    CHECK((!is_equality_function_object<void, int>::value));
+    CHECK((!is_equality_function_object<int, void>::value));
+    CHECK((!is_equality_function_object<void, void>::value));
+    CHECK((is_equality_function_object<std::equal_to<int>, int>::value));
+    CHECK((is_equality_function_object<std::equal_to<int>, short>::value));
+    CHECK((!is_equality_function_object<const std::equal_to<int>, short>::value));
+    CHECK((!is_equality_function_object<std::equal_to<int> &, short>::value));
+    CHECK((!is_equality_function_object<std::equal_to<int> &&, short>::value));
+    CHECK((!is_equality_function_object<std::hash<int>, int>::value));
+    CHECK((!is_equality_function_object<bool, int>::value));
+    CHECK((!is_equality_function_object<efo1, int>::value));
+    CHECK((is_equality_function_object<efo2, int>::value));
+    CHECK((!is_equality_function_object<efo3, int>::value));
+    CHECK((!is_equality_function_object<efo4, int>::value));
+    CHECK((!is_equality_function_object<efo5, int>::value));
+    CHECK((is_equality_function_object<efo6, int>::value));
+    CHECK((is_equality_function_object<efo6, std::string>::value));
+    CHECK((is_equality_function_object<efo7, int>::value));
+    CHECK((!is_equality_function_object<efo7 const, int>::value));
+    CHECK((!is_equality_function_object<efo7 const &, int>::value));
+    CHECK((!is_equality_function_object<efo7 &, int>::value));
 // Missing noexcept.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK((!is_equality_function_object<efo8, int>::value));
-    BOOST_CHECK((!is_equality_function_object<efo9, int>::value));
+    CHECK((!is_equality_function_object<efo8, int>::value));
+    CHECK((!is_equality_function_object<efo9, int>::value));
 #endif
-    BOOST_CHECK((!is_equality_function_object<efo10, int>::value));
+    CHECK((!is_equality_function_object<efo10, int>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_min_max_int_test)
+TEST_CASE("type_traits_min_max_int_test")
 {
-    BOOST_CHECK((std::is_same<int, min_int<int>>::value));
-    BOOST_CHECK((std::is_same<unsigned, min_int<unsigned>>::value));
-    BOOST_CHECK((std::is_same<int, max_int<int>>::value));
-    BOOST_CHECK((std::is_same<unsigned, max_int<unsigned>>::value));
-    BOOST_CHECK((std::is_same<int, max_int<short, int>>::value));
-    BOOST_CHECK((std::is_same<unsigned, max_int<unsigned short, unsigned>>::value));
+    CHECK((std::is_same<int, min_int<int>>::value));
+    CHECK((std::is_same<unsigned, min_int<unsigned>>::value));
+    CHECK((std::is_same<int, max_int<int>>::value));
+    CHECK((std::is_same<unsigned, max_int<unsigned>>::value));
+    CHECK((std::is_same<int, max_int<short, int>>::value));
+    CHECK((std::is_same<unsigned, max_int<unsigned short, unsigned>>::value));
     if (std::numeric_limits<long long>::max() > std::numeric_limits<int>::max()
         && std::numeric_limits<long long>::min() < std::numeric_limits<int>::min()) {
-        BOOST_CHECK((std::is_same<long long, max_int<short, int, signed char, long long>>::value));
-        BOOST_CHECK((std::is_same<long long, max_int<long long, int, signed char, short>>::value));
-        BOOST_CHECK((std::is_same<long long, max_int<int, long long, signed char, short>>::value));
-        BOOST_CHECK((std::is_same<long long, max_int<short, signed char, long long, int>>::value));
+        CHECK((std::is_same<long long, max_int<short, int, signed char, long long>>::value));
+        CHECK((std::is_same<long long, max_int<long long, int, signed char, short>>::value));
+        CHECK((std::is_same<long long, max_int<int, long long, signed char, short>>::value));
+        CHECK((std::is_same<long long, max_int<short, signed char, long long, int>>::value));
     }
     if (std::numeric_limits<unsigned long long>::max() > std::numeric_limits<unsigned>::max()) {
-        BOOST_CHECK((std::is_same<unsigned long long,
+        CHECK((std::is_same<unsigned long long,
                                   max_int<unsigned short, unsigned, unsigned char, unsigned long long>>::value));
-        BOOST_CHECK((std::is_same<unsigned long long,
+        CHECK((std::is_same<unsigned long long,
                                   max_int<unsigned long long, unsigned, unsigned char, unsigned short>>::value));
-        BOOST_CHECK((std::is_same<unsigned long long,
+        CHECK((std::is_same<unsigned long long,
                                   max_int<unsigned, unsigned long long, unsigned char, unsigned short>>::value));
-        BOOST_CHECK((std::is_same<unsigned long long,
+        CHECK((std::is_same<unsigned long long,
                                   max_int<unsigned short, unsigned char, unsigned long long, unsigned>>::value));
     }
     if (std::numeric_limits<signed char>::max() < std::numeric_limits<short>::max()
         && std::numeric_limits<signed char>::min() > std::numeric_limits<short>::min()) {
-        BOOST_CHECK((std::is_same<signed char, min_int<short, int, signed char, long long>>::value));
-        BOOST_CHECK((std::is_same<signed char, min_int<long long, int, signed char, short>>::value));
-        BOOST_CHECK((std::is_same<signed char, min_int<int, long long, signed char, short>>::value));
-        BOOST_CHECK((std::is_same<signed char, min_int<short, signed char, long long, int>>::value));
+        CHECK((std::is_same<signed char, min_int<short, int, signed char, long long>>::value));
+        CHECK((std::is_same<signed char, min_int<long long, int, signed char, short>>::value));
+        CHECK((std::is_same<signed char, min_int<int, long long, signed char, short>>::value));
+        CHECK((std::is_same<signed char, min_int<short, signed char, long long, int>>::value));
     }
     if (std::numeric_limits<unsigned char>::min() < std::numeric_limits<unsigned short>::max()) {
-        BOOST_CHECK(
+        CHECK(
             (std::is_same<unsigned char, min_int<unsigned short, unsigned, unsigned char, unsigned long long>>::value));
-        BOOST_CHECK(
+        CHECK(
             (std::is_same<unsigned char, min_int<unsigned long long, unsigned, unsigned char, unsigned short>>::value));
-        BOOST_CHECK(
+        CHECK(
             (std::is_same<unsigned char, min_int<unsigned, unsigned long long, unsigned char, unsigned short>>::value));
-        BOOST_CHECK(
+        CHECK(
             (std::is_same<unsigned char, min_int<unsigned short, unsigned char, unsigned long long, unsigned>>::value));
     }
 }
@@ -1460,199 +1459,199 @@ PIRANHA_DECL_ITT_SPEC(iter21, fake_it_traits_forward<iter21_v>)
 
 #undef PIRANHA_DECL_ITT_SPEC
 
-BOOST_AUTO_TEST_CASE(type_traits_iterator_test)
+TEST_CASE("type_traits_iterator_test")
 {
     // Check the arrow operator type trait.
-    BOOST_CHECK((!is_detected<arrow_operator_t, void>::value));
-    BOOST_CHECK((std::is_same<int *, detected_t<arrow_operator_t, int *&>>::value));
-    BOOST_CHECK((!is_detected<arrow_operator_t, int &>::value));
-    BOOST_CHECK((std::is_same<int *, detected_t<arrow_operator_t, arrow01 &>>::value));
-    BOOST_CHECK((std::is_same<int *, detected_t<arrow_operator_t, arrow02 &>>::value));
-    BOOST_CHECK((!is_detected<arrow_operator_t, const arrow02 &>::value));
-    BOOST_CHECK((!is_detected<arrow_operator_t, arrow03 &>::value));
-    BOOST_CHECK((std::is_same<int *, detected_t<arrow_operator_t, arrow03a &>>::value));
+    CHECK((!is_detected<arrow_operator_t, void>::value));
+    CHECK((std::is_same<int *, detected_t<arrow_operator_t, int *&>>::value));
+    CHECK((!is_detected<arrow_operator_t, int &>::value));
+    CHECK((std::is_same<int *, detected_t<arrow_operator_t, arrow01 &>>::value));
+    CHECK((std::is_same<int *, detected_t<arrow_operator_t, arrow02 &>>::value));
+    CHECK((!is_detected<arrow_operator_t, const arrow02 &>::value));
+    CHECK((!is_detected<arrow_operator_t, arrow03 &>::value));
+    CHECK((std::is_same<int *, detected_t<arrow_operator_t, arrow03a &>>::value));
     // Iterator.
-    BOOST_CHECK(has_iterator_traits<int *>::value);
-    BOOST_CHECK(has_iterator_traits<const int *>::value);
-    BOOST_CHECK(!has_iterator_traits<int>::value);
-    BOOST_CHECK(!has_iterator_traits<double>::value);
-    BOOST_CHECK(has_iterator_traits<std::vector<int>::iterator>::value);
-    BOOST_CHECK(has_iterator_traits<std::vector<int>::const_iterator>::value);
-    BOOST_CHECK(!is_iterator<void>::value);
-    BOOST_CHECK(is_iterator<int *>::value);
-    BOOST_CHECK(is_iterator<const int *>::value);
-    BOOST_CHECK(is_iterator<std::vector<int>::iterator>::value);
-    BOOST_CHECK(is_iterator<std::vector<int>::const_iterator>::value);
-    BOOST_CHECK(!is_iterator<std::vector<int>::iterator &>::value);
-    BOOST_CHECK(!is_iterator<int>::value);
-    BOOST_CHECK(!is_iterator<std::string>::value);
-    BOOST_CHECK(is_iterator<iter01>::value);
-    BOOST_CHECK(!is_iterator<iter01 &>::value);
-    BOOST_CHECK(!is_iterator<const iter01>::value);
-    BOOST_CHECK(is_iterator<iter02>::value);
-    BOOST_CHECK(!is_iterator<iter02 &>::value);
-    BOOST_CHECK(!is_iterator<const iter02>::value);
-    BOOST_CHECK(!is_iterator<iter03>::value);
-    BOOST_CHECK(!is_iterator<iter03 &>::value);
-    BOOST_CHECK(!is_iterator<const iter03>::value);
-    BOOST_CHECK(is_iterator<std::istreambuf_iterator<char>>::value);
+    CHECK(has_iterator_traits<int *>::value);
+    CHECK(has_iterator_traits<const int *>::value);
+    CHECK(!has_iterator_traits<int>::value);
+    CHECK(!has_iterator_traits<double>::value);
+    CHECK(has_iterator_traits<std::vector<int>::iterator>::value);
+    CHECK(has_iterator_traits<std::vector<int>::const_iterator>::value);
+    CHECK(!is_iterator<void>::value);
+    CHECK(is_iterator<int *>::value);
+    CHECK(is_iterator<const int *>::value);
+    CHECK(is_iterator<std::vector<int>::iterator>::value);
+    CHECK(is_iterator<std::vector<int>::const_iterator>::value);
+    CHECK(!is_iterator<std::vector<int>::iterator &>::value);
+    CHECK(!is_iterator<int>::value);
+    CHECK(!is_iterator<std::string>::value);
+    CHECK(is_iterator<iter01>::value);
+    CHECK(!is_iterator<iter01 &>::value);
+    CHECK(!is_iterator<const iter01>::value);
+    CHECK(is_iterator<iter02>::value);
+    CHECK(!is_iterator<iter02 &>::value);
+    CHECK(!is_iterator<const iter02>::value);
+    CHECK(!is_iterator<iter03>::value);
+    CHECK(!is_iterator<iter03 &>::value);
+    CHECK(!is_iterator<const iter03>::value);
+    CHECK(is_iterator<std::istreambuf_iterator<char>>::value);
     // The Intel compiler has problems with the destructible
     // type-trait.
 #if !defined(PIRANHA_COMPILER_IS_INTEL)
-    BOOST_CHECK(!is_iterator<iter04>::value);
-    BOOST_CHECK(!is_iterator<iter04 &>::value);
-    BOOST_CHECK(!is_iterator<const iter04>::value);
+    CHECK(!is_iterator<iter04>::value);
+    CHECK(!is_iterator<iter04 &>::value);
+    CHECK(!is_iterator<const iter04>::value);
 #endif
-    BOOST_CHECK(!is_iterator<iter05>::value);
-    BOOST_CHECK(!is_iterator<iter05 &>::value);
-    BOOST_CHECK(!is_iterator<const iter05>::value);
-    BOOST_CHECK(is_iterator<std::ostream_iterator<int>>::value);
-    BOOST_CHECK(is_iterator<std::insert_iterator<std::list<int>>>::value);
+    CHECK(!is_iterator<iter05>::value);
+    CHECK(!is_iterator<iter05 &>::value);
+    CHECK(!is_iterator<const iter05>::value);
+    CHECK(is_iterator<std::ostream_iterator<int>>::value);
+    CHECK(is_iterator<std::insert_iterator<std::list<int>>>::value);
     // Input iterator.
-    BOOST_CHECK(!is_input_iterator<void>::value);
-    BOOST_CHECK(is_input_iterator<int *>::value);
-    BOOST_CHECK(is_input_iterator<const int *>::value);
-    BOOST_CHECK(is_input_iterator<std::vector<int>::iterator>::value);
-    BOOST_CHECK(is_input_iterator<std::vector<int>::const_iterator>::value);
-    BOOST_CHECK(!is_input_iterator<std::vector<int>::iterator &>::value);
-    BOOST_CHECK(is_input_iterator<std::istream_iterator<char>>::value);
-    BOOST_CHECK(is_input_iterator<std::istreambuf_iterator<char>>::value);
-    BOOST_CHECK(is_input_iterator<iter01>::value);
-    BOOST_CHECK((is_output_iterator<iter01, int &>::value));
-    BOOST_CHECK((!is_output_iterator<iter01, void>::value));
-    BOOST_CHECK(!is_input_iterator<iter01 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter01>::value);
-    BOOST_CHECK(!is_input_iterator<iter02>::value);
-    BOOST_CHECK(!is_input_iterator<iter02 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter02>::value);
-    BOOST_CHECK(is_input_iterator<iter06>::value);
-    BOOST_CHECK(!is_input_iterator<iter06 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter06>::value);
-    BOOST_CHECK(is_iterator<iter06>::value);
-    BOOST_CHECK(!is_iterator<iter06 &>::value);
-    BOOST_CHECK(!is_iterator<const iter06>::value);
-    BOOST_CHECK(!is_input_iterator<iter06a>::value);
-    BOOST_CHECK(!is_input_iterator<iter07>::value);
-    BOOST_CHECK(!is_input_iterator<iter07 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter07>::value);
-    BOOST_CHECK(is_iterator<iter07>::value);
-    BOOST_CHECK(!is_iterator<iter07 &>::value);
-    BOOST_CHECK(!is_iterator<const iter07>::value);
-    BOOST_CHECK(!is_input_iterator<iter08>::value);
-    BOOST_CHECK(!is_input_iterator<iter08 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter08>::value);
-    BOOST_CHECK(!is_iterator<iter08>::value);
-    BOOST_CHECK(!is_iterator<iter08 &>::value);
-    BOOST_CHECK(!is_iterator<const iter08>::value);
-    BOOST_CHECK(is_input_iterator<iter09>::value);
-    BOOST_CHECK(!is_input_iterator<iter09 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter09>::value);
-    BOOST_CHECK(!is_input_iterator<iter09a>::value);
-    BOOST_CHECK(is_input_iterator<iter10>::value);
-    BOOST_CHECK((is_output_iterator<iter10, int &>::value));
-    BOOST_CHECK(!is_input_iterator<iter10 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter10>::value);
-    BOOST_CHECK(is_input_iterator<iter11>::value);
-    BOOST_CHECK(!is_input_iterator<iter11 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter11>::value);
-    BOOST_CHECK(is_iterator<iter11>::value);
-    BOOST_CHECK(!is_iterator<iter11 &>::value);
-    BOOST_CHECK(!is_iterator<const iter11>::value);
-    BOOST_CHECK(!is_input_iterator<iter12>::value);
-    BOOST_CHECK(!is_input_iterator<iter12 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter12>::value);
-    BOOST_CHECK(is_iterator<iter12>::value);
-    BOOST_CHECK(!is_iterator<iter12 &>::value);
-    BOOST_CHECK(!is_iterator<const iter12>::value);
-    BOOST_CHECK(is_input_iterator<iter13>::value);
+    CHECK(!is_input_iterator<void>::value);
+    CHECK(is_input_iterator<int *>::value);
+    CHECK(is_input_iterator<const int *>::value);
+    CHECK(is_input_iterator<std::vector<int>::iterator>::value);
+    CHECK(is_input_iterator<std::vector<int>::const_iterator>::value);
+    CHECK(!is_input_iterator<std::vector<int>::iterator &>::value);
+    CHECK(is_input_iterator<std::istream_iterator<char>>::value);
+    CHECK(is_input_iterator<std::istreambuf_iterator<char>>::value);
+    CHECK(is_input_iterator<iter01>::value);
+    CHECK((is_output_iterator<iter01, int &>::value));
+    CHECK((!is_output_iterator<iter01, void>::value));
+    CHECK(!is_input_iterator<iter01 &>::value);
+    CHECK(!is_input_iterator<const iter01>::value);
+    CHECK(!is_input_iterator<iter02>::value);
+    CHECK(!is_input_iterator<iter02 &>::value);
+    CHECK(!is_input_iterator<const iter02>::value);
+    CHECK(is_input_iterator<iter06>::value);
+    CHECK(!is_input_iterator<iter06 &>::value);
+    CHECK(!is_input_iterator<const iter06>::value);
+    CHECK(is_iterator<iter06>::value);
+    CHECK(!is_iterator<iter06 &>::value);
+    CHECK(!is_iterator<const iter06>::value);
+    CHECK(!is_input_iterator<iter06a>::value);
+    CHECK(!is_input_iterator<iter07>::value);
+    CHECK(!is_input_iterator<iter07 &>::value);
+    CHECK(!is_input_iterator<const iter07>::value);
+    CHECK(is_iterator<iter07>::value);
+    CHECK(!is_iterator<iter07 &>::value);
+    CHECK(!is_iterator<const iter07>::value);
+    CHECK(!is_input_iterator<iter08>::value);
+    CHECK(!is_input_iterator<iter08 &>::value);
+    CHECK(!is_input_iterator<const iter08>::value);
+    CHECK(!is_iterator<iter08>::value);                         //TODO:: fails but works for C++17. Did the iterators change??
+    CHECK(!is_iterator<iter08 &>::value);
+    CHECK(!is_iterator<const iter08>::value);
+    CHECK(is_input_iterator<iter09>::value);
+    CHECK(!is_input_iterator<iter09 &>::value);
+    CHECK(!is_input_iterator<const iter09>::value);
+    CHECK(!is_input_iterator<iter09a>::value);
+    CHECK(is_input_iterator<iter10>::value);
+    CHECK((is_output_iterator<iter10, int &>::value));
+    CHECK(!is_input_iterator<iter10 &>::value);
+    CHECK(!is_input_iterator<const iter10>::value);
+    CHECK(is_input_iterator<iter11>::value);
+    CHECK(!is_input_iterator<iter11 &>::value);
+    CHECK(!is_input_iterator<const iter11>::value);
+    CHECK(is_iterator<iter11>::value);
+    CHECK(!is_iterator<iter11 &>::value);
+    CHECK(!is_iterator<const iter11>::value);
+    CHECK(!is_input_iterator<iter12>::value);
+    CHECK(!is_input_iterator<iter12 &>::value);
+    CHECK(!is_input_iterator<const iter12>::value);
+    CHECK(is_iterator<iter12>::value);
+    CHECK(!is_iterator<iter12 &>::value);
+    CHECK(!is_iterator<const iter12>::value);
+    CHECK(is_input_iterator<iter13>::value);
     // NOTE: cannot use iter13 for writing, as it dereferences
     // to an int rather than int &.
-    BOOST_CHECK((!is_output_iterator<iter13, int &>::value));
-    BOOST_CHECK(!is_input_iterator<iter13 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter13>::value);
+    CHECK((!is_output_iterator<iter13, int &>::value));
+    CHECK(!is_input_iterator<iter13 &>::value);
+    CHECK(!is_input_iterator<const iter13>::value);
     // Forward iterator.
-    BOOST_CHECK(!is_forward_iterator<void>::value);
-    BOOST_CHECK(is_forward_iterator<int *>::value);
-    BOOST_CHECK((is_output_iterator<int *, int &>::value));
-    BOOST_CHECK(is_forward_iterator<const int *>::value);
-    BOOST_CHECK(is_forward_iterator<std::vector<int>::iterator>::value);
-    BOOST_CHECK((is_output_iterator<std::vector<int>::iterator, int &>::value));
-    BOOST_CHECK((is_output_iterator<std::vector<int>::iterator, double &>::value));
-    BOOST_CHECK((!is_output_iterator<std::vector<int>::iterator, std::string &>::value));
-    BOOST_CHECK(is_forward_iterator<std::vector<int>::const_iterator>::value);
-    BOOST_CHECK(!is_forward_iterator<std::vector<int>::iterator &>::value);
-    BOOST_CHECK(!is_forward_iterator<std::istream_iterator<char>>::value);
-    BOOST_CHECK((is_forward_iterator<std::map<int, int>::iterator>::value));
-    BOOST_CHECK(is_forward_iterator<iter14>::value);
-    BOOST_CHECK((is_output_iterator<iter14, int>::value));
-    BOOST_CHECK(!is_forward_iterator<iter14 &>::value);
-    BOOST_CHECK(!is_forward_iterator<const iter14>::value);
-    BOOST_CHECK(!is_forward_iterator<iter15>::value);
-    BOOST_CHECK(!is_forward_iterator<iter15 &>::value);
-    BOOST_CHECK(!is_forward_iterator<const iter15>::value);
-    BOOST_CHECK(is_input_iterator<iter15>::value);
-    BOOST_CHECK(!is_input_iterator<iter15 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter15>::value);
-    BOOST_CHECK(!is_forward_iterator<iter17>::value);
-    BOOST_CHECK(!is_forward_iterator<iter17 &>::value);
-    BOOST_CHECK(!is_forward_iterator<const iter17>::value);
-    BOOST_CHECK(is_iterator<iter17>::value);
-    BOOST_CHECK(!is_iterator<iter17 &>::value);
-    BOOST_CHECK(!is_iterator<const iter17>::value);
-    BOOST_CHECK(!is_forward_iterator<iter18>::value);
-    BOOST_CHECK(!is_forward_iterator<iter18 &>::value);
-    BOOST_CHECK(!is_forward_iterator<const iter18>::value);
-    BOOST_CHECK(!is_iterator<iter18>::value);
-    BOOST_CHECK(!is_iterator<iter18 &>::value);
-    BOOST_CHECK(!is_iterator<const iter18>::value);
-    BOOST_CHECK(!is_forward_iterator<iter19>::value);
-    BOOST_CHECK(!is_forward_iterator<iter19 &>::value);
-    BOOST_CHECK(!is_forward_iterator<const iter19>::value);
-    BOOST_CHECK(!is_input_iterator<iter19>::value);
-    BOOST_CHECK(!is_input_iterator<iter19 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter19>::value);
-    BOOST_CHECK(!is_forward_iterator<iter20>::value);
-    BOOST_CHECK(!is_forward_iterator<iter20 &>::value);
-    BOOST_CHECK(!is_forward_iterator<const iter20>::value);
-    BOOST_CHECK(!is_input_iterator<iter20>::value);
-    BOOST_CHECK(!is_input_iterator<iter20 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter20>::value);
-    BOOST_CHECK(!is_forward_iterator<iter21>::value);
-    BOOST_CHECK(!is_forward_iterator<iter21 &>::value);
-    BOOST_CHECK(!is_forward_iterator<const iter21>::value);
-    BOOST_CHECK(!is_input_iterator<iter21>::value);
-    BOOST_CHECK(!is_input_iterator<iter21 &>::value);
-    BOOST_CHECK(!is_input_iterator<const iter21>::value);
-    BOOST_CHECK(is_iterator<iter21>::value);
-    BOOST_CHECK(!is_iterator<iter21 &>::value);
-    BOOST_CHECK(!is_iterator<const iter21>::value);
+    CHECK(!is_forward_iterator<void>::value);
+    CHECK(is_forward_iterator<int *>::value);
+    CHECK((is_output_iterator<int *, int &>::value));
+    CHECK(is_forward_iterator<const int *>::value);
+    CHECK(is_forward_iterator<std::vector<int>::iterator>::value);
+    CHECK((is_output_iterator<std::vector<int>::iterator, int &>::value));
+    CHECK((is_output_iterator<std::vector<int>::iterator, double &>::value));
+    CHECK((!is_output_iterator<std::vector<int>::iterator, std::string &>::value));
+    CHECK(is_forward_iterator<std::vector<int>::const_iterator>::value);
+    CHECK(!is_forward_iterator<std::vector<int>::iterator &>::value);
+    CHECK(!is_forward_iterator<std::istream_iterator<char>>::value);
+    CHECK((is_forward_iterator<std::map<int, int>::iterator>::value));
+    CHECK(is_forward_iterator<iter14>::value);
+    CHECK((is_output_iterator<iter14, int>::value));
+    CHECK(!is_forward_iterator<iter14 &>::value);
+    CHECK(!is_forward_iterator<const iter14>::value);
+    CHECK(!is_forward_iterator<iter15>::value);
+    CHECK(!is_forward_iterator<iter15 &>::value);
+    CHECK(!is_forward_iterator<const iter15>::value);
+    CHECK(is_input_iterator<iter15>::value);
+    CHECK(!is_input_iterator<iter15 &>::value);
+    CHECK(!is_input_iterator<const iter15>::value);
+    CHECK(!is_forward_iterator<iter17>::value);
+    CHECK(!is_forward_iterator<iter17 &>::value);
+    CHECK(!is_forward_iterator<const iter17>::value);
+    CHECK(is_iterator<iter17>::value);
+    CHECK(!is_iterator<iter17 &>::value);
+    CHECK(!is_iterator<const iter17>::value);
+    CHECK(!is_forward_iterator<iter18>::value);
+    CHECK(!is_forward_iterator<iter18 &>::value);
+    CHECK(!is_forward_iterator<const iter18>::value);
+    CHECK(!is_iterator<iter18>::value);
+    CHECK(!is_iterator<iter18 &>::value);
+    CHECK(!is_iterator<const iter18>::value);
+    CHECK(!is_forward_iterator<iter19>::value);
+    CHECK(!is_forward_iterator<iter19 &>::value);
+    CHECK(!is_forward_iterator<const iter19>::value);
+    CHECK(!is_input_iterator<iter19>::value);
+    CHECK(!is_input_iterator<iter19 &>::value);
+    CHECK(!is_input_iterator<const iter19>::value);
+    CHECK(!is_forward_iterator<iter20>::value);
+    CHECK(!is_forward_iterator<iter20 &>::value);
+    CHECK(!is_forward_iterator<const iter20>::value);
+    CHECK(!is_input_iterator<iter20>::value);
+    CHECK(!is_input_iterator<iter20 &>::value);
+    CHECK(!is_input_iterator<const iter20>::value);
+    CHECK(!is_forward_iterator<iter21>::value);
+    CHECK(!is_forward_iterator<iter21 &>::value);
+    CHECK(!is_forward_iterator<const iter21>::value);
+    CHECK(!is_input_iterator<iter21>::value);
+    CHECK(!is_input_iterator<iter21 &>::value);
+    CHECK(!is_input_iterator<const iter21>::value);
+    CHECK(is_iterator<iter21>::value);
+    CHECK(!is_iterator<iter21 &>::value);
+    CHECK(!is_iterator<const iter21>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_mutable_forward_iterator)
+TEST_CASE("type_traits_mutable_forward_iterator")
 {
-    BOOST_CHECK((!is_mutable_forward_iterator<void>::value));
-    BOOST_CHECK((is_mutable_forward_iterator<int *>::value));
-    BOOST_CHECK((is_mutable_forward_iterator<std::vector<int>::iterator>::value));
-    BOOST_CHECK((is_mutable_forward_iterator<std::list<int>::iterator>::value));
-    BOOST_CHECK((!is_mutable_forward_iterator<const int *>::value));
-    BOOST_CHECK((!is_mutable_forward_iterator<std::vector<int>::const_iterator>::value));
-    BOOST_CHECK((!is_mutable_forward_iterator<std::istreambuf_iterator<char>>::value));
-    BOOST_CHECK((!is_mutable_forward_iterator<std::list<int>::const_iterator>::value));
-    BOOST_CHECK((!is_mutable_forward_iterator<std::set<int>::iterator>::value));
-    BOOST_CHECK((is_mutable_forward_iterator<std::map<int, int>::iterator>::value));
-    BOOST_CHECK((!is_mutable_forward_iterator<std::map<int, int>::const_iterator>::value));
+    CHECK((!is_mutable_forward_iterator<void>::value));
+    CHECK((is_mutable_forward_iterator<int *>::value));
+    CHECK((is_mutable_forward_iterator<std::vector<int>::iterator>::value));
+    CHECK((is_mutable_forward_iterator<std::list<int>::iterator>::value));
+    CHECK((!is_mutable_forward_iterator<const int *>::value));
+    CHECK((!is_mutable_forward_iterator<std::vector<int>::const_iterator>::value));
+    CHECK((!is_mutable_forward_iterator<std::istreambuf_iterator<char>>::value));
+    CHECK((!is_mutable_forward_iterator<std::list<int>::const_iterator>::value));
+    CHECK((!is_mutable_forward_iterator<std::set<int>::iterator>::value));
+    CHECK((is_mutable_forward_iterator<std::map<int, int>::iterator>::value));
+    CHECK((!is_mutable_forward_iterator<std::map<int, int>::const_iterator>::value));
 }
 
 template <typename S>
 using sai = safe_abs_sint<S>;
 
-BOOST_AUTO_TEST_CASE(type_traits_safe_abs_sint_test)
+TEST_CASE("type_traits_safe_abs_sint_test")
 {
-    BOOST_CHECK(sai<signed char>::value > 1);
-    BOOST_CHECK(sai<short>::value > 1);
-    BOOST_CHECK(sai<int>::value > 1);
-    BOOST_CHECK(sai<long>::value > 1);
-    BOOST_CHECK(sai<long long>::value > 1);
+    CHECK(sai<signed char>::value > 1);
+    CHECK(sai<short>::value > 1);
+    CHECK(sai<int>::value > 1);
+    CHECK(sai<long>::value > 1);
+    CHECK(sai<long long>::value > 1);
 }
 
 struct good_begin_end_mut {
@@ -1713,131 +1712,131 @@ struct forward_adl_02 {
 
 int *begin(const forward_adl_02 &);
 
-BOOST_AUTO_TEST_CASE(type_traits_input_range_test)
+TEST_CASE("type_traits_input_range_test")
 {
-    BOOST_CHECK((!is_input_range<void>::value));
-    BOOST_CHECK((is_input_range<std::vector<int> &>::value));
-    BOOST_CHECK((is_input_range<const std::vector<int> &>::value));
-    BOOST_CHECK((is_input_range<std::vector<int> &&>::value));
-    BOOST_CHECK((is_input_range<std::initializer_list<int> &&>::value));
-    BOOST_CHECK(is_input_range<std::list<int> &>::value);
-    BOOST_CHECK(is_input_range<const std::list<double> &>::value);
-    BOOST_CHECK(is_input_range<std::set<int> &>::value);
-    BOOST_CHECK(is_input_range<const std::set<long> &>::value);
-    BOOST_CHECK(is_input_range<int(&)[3]>::value);
-    BOOST_CHECK(is_input_range<good_begin_end_mut &>::value);
-    BOOST_CHECK(!is_input_range<const good_begin_end_mut &>::value);
-    BOOST_CHECK(is_input_range<good_begin_end_const &>::value);
-    BOOST_CHECK(is_input_range<const good_begin_end_const &>::value);
-    BOOST_CHECK(!is_input_range<bad_begin_end_00 &>::value);
-    BOOST_CHECK(is_input_range<input_only_00 &>::value);
-    BOOST_CHECK(is_input_range<forward_adl_00 &>::value);
-    BOOST_CHECK(!is_input_range<forward_adl_01 &>::value);
-    BOOST_CHECK(!is_input_range<forward_adl_02 &>::value);
+    CHECK((!is_input_range<void>::value));
+    CHECK((is_input_range<std::vector<int> &>::value));
+    CHECK((is_input_range<const std::vector<int> &>::value));
+    CHECK((is_input_range<std::vector<int> &&>::value));
+    CHECK((is_input_range<std::initializer_list<int> &&>::value));
+    CHECK(is_input_range<std::list<int> &>::value);
+    CHECK(is_input_range<const std::list<double> &>::value);
+    CHECK(is_input_range<std::set<int> &>::value);
+    CHECK(is_input_range<const std::set<long> &>::value);
+    CHECK(is_input_range<int(&)[3]>::value);
+    CHECK(is_input_range<good_begin_end_mut &>::value);
+    CHECK(!is_input_range<const good_begin_end_mut &>::value);
+    CHECK(is_input_range<good_begin_end_const &>::value);
+    CHECK(is_input_range<const good_begin_end_const &>::value);
+    CHECK(!is_input_range<bad_begin_end_00 &>::value);
+    CHECK(is_input_range<input_only_00 &>::value);
+    CHECK(is_input_range<forward_adl_00 &>::value);
+    CHECK(!is_input_range<forward_adl_01 &>::value);
+    CHECK(!is_input_range<forward_adl_02 &>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_forward_range_test)
+TEST_CASE("type_traits_forward_range_test")
 {
-    BOOST_CHECK((!is_forward_range<void>::value));
-    BOOST_CHECK((is_forward_range<std::vector<int> &>::value));
-    BOOST_CHECK((is_forward_range<const std::vector<int> &>::value));
-    BOOST_CHECK((is_forward_range<std::vector<int> &&>::value));
-    BOOST_CHECK((is_forward_range<std::initializer_list<int> &&>::value));
-    BOOST_CHECK(is_forward_range<std::list<int> &>::value);
-    BOOST_CHECK(is_forward_range<const std::list<double> &>::value);
-    BOOST_CHECK(is_forward_range<std::set<int> &>::value);
-    BOOST_CHECK(is_forward_range<const std::set<long> &>::value);
-    BOOST_CHECK(is_forward_range<int(&)[3]>::value);
-    BOOST_CHECK(is_forward_range<good_begin_end_mut &>::value);
-    BOOST_CHECK(!is_forward_range<const good_begin_end_mut &>::value);
-    BOOST_CHECK(is_forward_range<good_begin_end_const &>::value);
-    BOOST_CHECK(is_forward_range<const good_begin_end_const &>::value);
-    BOOST_CHECK(!is_forward_range<bad_begin_end_00 &>::value);
-    BOOST_CHECK(!is_forward_range<input_only_00 &>::value);
-    BOOST_CHECK(is_forward_range<forward_adl_00 &>::value);
-    BOOST_CHECK(!is_forward_range<forward_adl_01 &>::value);
-    BOOST_CHECK(!is_forward_range<forward_adl_02 &>::value);
-    BOOST_CHECK((is_forward_range<std::map<int, int> &>::value));
-    BOOST_CHECK((is_forward_range<const std::map<int, int> &>::value));
+    CHECK((!is_forward_range<void>::value));
+    CHECK((is_forward_range<std::vector<int> &>::value));
+    CHECK((is_forward_range<const std::vector<int> &>::value));
+    CHECK((is_forward_range<std::vector<int> &&>::value));
+    CHECK((is_forward_range<std::initializer_list<int> &&>::value));
+    CHECK(is_forward_range<std::list<int> &>::value);
+    CHECK(is_forward_range<const std::list<double> &>::value);
+    CHECK(is_forward_range<std::set<int> &>::value);
+    CHECK(is_forward_range<const std::set<long> &>::value);
+    CHECK(is_forward_range<int(&)[3]>::value);
+    CHECK(is_forward_range<good_begin_end_mut &>::value);
+    CHECK(!is_forward_range<const good_begin_end_mut &>::value);
+    CHECK(is_forward_range<good_begin_end_const &>::value);
+    CHECK(is_forward_range<const good_begin_end_const &>::value);
+    CHECK(!is_forward_range<bad_begin_end_00 &>::value);
+    CHECK(!is_forward_range<input_only_00 &>::value);
+    CHECK(is_forward_range<forward_adl_00 &>::value);
+    CHECK(!is_forward_range<forward_adl_01 &>::value);
+    CHECK(!is_forward_range<forward_adl_02 &>::value);
+    CHECK((is_forward_range<std::map<int, int> &>::value));
+    CHECK((is_forward_range<const std::map<int, int> &>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_mutable_forward_range_test)
+TEST_CASE("type_traits_mutable_forward_range_test")
 {
-    BOOST_CHECK((!is_mutable_forward_range<void>::value));
-    BOOST_CHECK((is_mutable_forward_range<std::vector<int> &>::value));
-    BOOST_CHECK((!is_mutable_forward_range<const std::vector<int> &>::value));
-    BOOST_CHECK((!is_mutable_forward_range<std::vector<int> &&>::value));
-    BOOST_CHECK((!is_mutable_forward_range<std::initializer_list<int> &&>::value));
-    BOOST_CHECK(is_mutable_forward_range<std::list<int> &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<const std::list<double> &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<std::set<int> &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<const std::set<long> &>::value);
-    BOOST_CHECK(is_mutable_forward_range<int(&)[3]>::value);
-    BOOST_CHECK(!is_mutable_forward_range<const int(&)[3]>::value);
-    BOOST_CHECK(is_mutable_forward_range<good_begin_end_mut &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<const good_begin_end_mut &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<good_begin_end_const &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<const good_begin_end_const &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<bad_begin_end_00 &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<input_only_00 &>::value);
-    BOOST_CHECK(is_mutable_forward_range<forward_adl_00 &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<forward_adl_01 &>::value);
-    BOOST_CHECK(!is_mutable_forward_range<forward_adl_02 &>::value);
-    BOOST_CHECK((is_mutable_forward_range<std::map<int, int> &>::value));
-    BOOST_CHECK((!is_mutable_forward_range<const std::map<int, int> &>::value));
+    CHECK((!is_mutable_forward_range<void>::value));
+    CHECK((is_mutable_forward_range<std::vector<int> &>::value));
+    CHECK((!is_mutable_forward_range<const std::vector<int> &>::value));
+    CHECK((!is_mutable_forward_range<std::vector<int> &&>::value));
+    CHECK((!is_mutable_forward_range<std::initializer_list<int> &&>::value));
+    CHECK(is_mutable_forward_range<std::list<int> &>::value);
+    CHECK(!is_mutable_forward_range<const std::list<double> &>::value);
+    CHECK(!is_mutable_forward_range<std::set<int> &>::value);
+    CHECK(!is_mutable_forward_range<const std::set<long> &>::value);
+    CHECK(is_mutable_forward_range<int(&)[3]>::value);
+    CHECK(!is_mutable_forward_range<const int(&)[3]>::value);
+    CHECK(is_mutable_forward_range<good_begin_end_mut &>::value);
+    CHECK(!is_mutable_forward_range<const good_begin_end_mut &>::value);
+    CHECK(!is_mutable_forward_range<good_begin_end_const &>::value);
+    CHECK(!is_mutable_forward_range<const good_begin_end_const &>::value);
+    CHECK(!is_mutable_forward_range<bad_begin_end_00 &>::value);
+    CHECK(!is_mutable_forward_range<input_only_00 &>::value);
+    CHECK(is_mutable_forward_range<forward_adl_00 &>::value);
+    CHECK(!is_mutable_forward_range<forward_adl_01 &>::value);
+    CHECK(!is_mutable_forward_range<forward_adl_02 &>::value);
+    CHECK((is_mutable_forward_range<std::map<int, int> &>::value));
+    CHECK((!is_mutable_forward_range<const std::map<int, int> &>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_shift_test)
+TEST_CASE("type_traits_shift_test")
 {
-    BOOST_CHECK(has_left_shift<int>::value);
-    BOOST_CHECK((!has_left_shift<void>::value));
-    BOOST_CHECK((!has_left_shift<void, int>::value));
-    BOOST_CHECK((!has_left_shift<int, void>::value));
-    BOOST_CHECK((has_left_shift<int, long>::value));
-    BOOST_CHECK((has_left_shift<int &, char &&>::value));
-    BOOST_CHECK((has_left_shift<int &, const short &>::value));
-    BOOST_CHECK(!has_left_shift<double>::value);
-    BOOST_CHECK((!has_left_shift<double, long>::value));
-    BOOST_CHECK((!has_left_shift<long, double>::value));
-    BOOST_CHECK((!has_left_shift<long, std::string>::value));
-    BOOST_CHECK((!has_left_shift<std::string, long>::value));
+    CHECK(has_left_shift<int>::value);
+    CHECK((!has_left_shift<void>::value));
+    CHECK((!has_left_shift<void, int>::value));
+    CHECK((!has_left_shift<int, void>::value));
+    CHECK((has_left_shift<int, long>::value));
+    CHECK((has_left_shift<int &, char &&>::value));
+    CHECK((has_left_shift<int &, const short &>::value));
+    CHECK(!has_left_shift<double>::value);
+    CHECK((!has_left_shift<double, long>::value));
+    CHECK((!has_left_shift<long, double>::value));
+    CHECK((!has_left_shift<long, std::string>::value));
+    CHECK((!has_left_shift<std::string, long>::value));
     // lshift operator for ostream has incompatible signature, as
     // the first argument is passed as mutable reference.
-    BOOST_CHECK((!has_left_shift<std::ostream, long>::value));
-    BOOST_CHECK((!has_left_shift_in_place<void>::value));
-    BOOST_CHECK((!has_left_shift_in_place<void, int>::value));
-    BOOST_CHECK((!has_left_shift_in_place<int, void>::value));
-    BOOST_CHECK(has_left_shift_in_place<int>::value);
-    BOOST_CHECK((has_left_shift_in_place<int, long>::value));
-    BOOST_CHECK((has_left_shift_in_place<int &, long const>::value));
-    BOOST_CHECK((!has_left_shift_in_place<const int, long>::value));
-    BOOST_CHECK((!has_left_shift_in_place<float, long>::value));
-    BOOST_CHECK((!has_left_shift_in_place<long, float>::value));
-    BOOST_CHECK((!has_left_shift_in_place<long, std::string>::value));
+    CHECK((!has_left_shift<std::ostream, long>::value));
+    CHECK((!has_left_shift_in_place<void>::value));
+    CHECK((!has_left_shift_in_place<void, int>::value));
+    CHECK((!has_left_shift_in_place<int, void>::value));
+    CHECK(has_left_shift_in_place<int>::value);
+    CHECK((has_left_shift_in_place<int, long>::value));
+    CHECK((has_left_shift_in_place<int &, long const>::value));
+    CHECK((!has_left_shift_in_place<const int, long>::value));
+    CHECK((!has_left_shift_in_place<float, long>::value));
+    CHECK((!has_left_shift_in_place<long, float>::value));
+    CHECK((!has_left_shift_in_place<long, std::string>::value));
     // Right shift.
-    BOOST_CHECK((!has_right_shift<void>::value));
-    BOOST_CHECK((!has_right_shift<void, int>::value));
-    BOOST_CHECK((!has_right_shift<int, void>::value));
-    BOOST_CHECK(has_right_shift<int>::value);
-    BOOST_CHECK((has_right_shift<int, long>::value));
-    BOOST_CHECK((has_right_shift<int &, char &&>::value));
-    BOOST_CHECK((has_right_shift<int &, const short &>::value));
-    BOOST_CHECK(!has_right_shift<double>::value);
-    BOOST_CHECK((!has_right_shift<double, long>::value));
-    BOOST_CHECK((!has_right_shift<long, double>::value));
-    BOOST_CHECK((!has_right_shift<long, std::string>::value));
-    BOOST_CHECK((!has_right_shift<std::string, long>::value));
-    BOOST_CHECK((!has_right_shift<std::istream, long>::value));
-    BOOST_CHECK((!has_right_shift_in_place<void>::value));
-    BOOST_CHECK((!has_right_shift_in_place<void, int>::value));
-    BOOST_CHECK((!has_right_shift_in_place<int, void>::value));
-    BOOST_CHECK(has_right_shift_in_place<int>::value);
-    BOOST_CHECK((has_right_shift_in_place<int, long>::value));
-    BOOST_CHECK((has_right_shift_in_place<int &, long const>::value));
-    BOOST_CHECK((!has_right_shift_in_place<const int, long>::value));
-    BOOST_CHECK((!has_right_shift_in_place<float, long>::value));
-    BOOST_CHECK((!has_right_shift_in_place<long, float>::value));
-    BOOST_CHECK((!has_right_shift_in_place<long, std::string>::value));
+    CHECK((!has_right_shift<void>::value));
+    CHECK((!has_right_shift<void, int>::value));
+    CHECK((!has_right_shift<int, void>::value));
+    CHECK(has_right_shift<int>::value);
+    CHECK((has_right_shift<int, long>::value));
+    CHECK((has_right_shift<int &, char &&>::value));
+    CHECK((has_right_shift<int &, const short &>::value));
+    CHECK(!has_right_shift<double>::value);
+    CHECK((!has_right_shift<double, long>::value));
+    CHECK((!has_right_shift<long, double>::value));
+    CHECK((!has_right_shift<long, std::string>::value));
+    CHECK((!has_right_shift<std::string, long>::value));
+    CHECK((!has_right_shift<std::istream, long>::value));
+    CHECK((!has_right_shift_in_place<void>::value));
+    CHECK((!has_right_shift_in_place<void, int>::value));
+    CHECK((!has_right_shift_in_place<int, void>::value));
+    CHECK(has_right_shift_in_place<int>::value);
+    CHECK((has_right_shift_in_place<int, long>::value));
+    CHECK((has_right_shift_in_place<int &, long const>::value));
+    CHECK((!has_right_shift_in_place<const int, long>::value));
+    CHECK((!has_right_shift_in_place<float, long>::value));
+    CHECK((!has_right_shift_in_place<long, float>::value));
+    CHECK((!has_right_shift_in_place<long, std::string>::value));
 }
 
 struct unreturnable_00 {
@@ -1849,74 +1848,74 @@ struct unreturnable_01 {
     ~unreturnable_01() = delete;
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_is_returnable_test)
+TEST_CASE("type_traits_is_returnable_test")
 {
-    BOOST_CHECK(is_returnable<void>::value);
-    BOOST_CHECK(is_returnable<int>::value);
-    BOOST_CHECK(is_returnable<int &>::value);
-    BOOST_CHECK(is_returnable<const int &>::value);
-    BOOST_CHECK(is_returnable<int &&>::value);
-    BOOST_CHECK(is_returnable<int *>::value);
-    BOOST_CHECK(is_returnable<std::string>::value);
-    BOOST_CHECK(is_returnable<std::thread>::value);
-    BOOST_CHECK(is_returnable<std::unique_ptr<int>>::value);
-    BOOST_CHECK(is_returnable<std::shared_ptr<int>>::value);
-    BOOST_CHECK(!is_returnable<unreturnable_00>::value);
-    BOOST_CHECK(is_returnable<unreturnable_00 &>::value);
-    BOOST_CHECK(!is_returnable<unreturnable_01>::value);
-    BOOST_CHECK(is_returnable<unreturnable_01 &>::value);
+    CHECK(is_returnable<void>::value);
+    CHECK(is_returnable<int>::value);
+    CHECK(is_returnable<int &>::value);
+    CHECK(is_returnable<const int &>::value);
+    CHECK(is_returnable<int &&>::value);
+    CHECK(is_returnable<int *>::value);
+    CHECK(is_returnable<std::string>::value);
+    CHECK(is_returnable<std::thread>::value);
+    CHECK(is_returnable<std::unique_ptr<int>>::value);
+    CHECK(is_returnable<std::shared_ptr<int>>::value);
+    CHECK(!is_returnable<unreturnable_00>::value);
+    CHECK(is_returnable<unreturnable_00 &>::value);
+    CHECK(!is_returnable<unreturnable_01>::value);
+    CHECK(is_returnable<unreturnable_01 &>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_ref_mod_t)
+TEST_CASE("type_traits_ref_mod_t")
 {
-    BOOST_CHECK((std::is_same<int, uncvref_t<int>>::value));
-    BOOST_CHECK((std::is_same<int, uncvref_t<int &>>::value));
-    BOOST_CHECK((std::is_same<int, uncvref_t<const int &>>::value));
-    BOOST_CHECK((std::is_same<int, uncvref_t<const int &&>>::value));
-    BOOST_CHECK((std::is_same<int, uncvref_t<const int>>::value));
-    BOOST_CHECK((std::is_same<int, uncvref_t<volatile int &>>::value));
-    BOOST_CHECK((std::is_same<int, unref_t<int>>::value));
-    BOOST_CHECK((std::is_same<int, unref_t<int &>>::value));
-    BOOST_CHECK((!std::is_same<int, unref_t<int volatile &>>::value));
-    BOOST_CHECK((std::is_same<const int, unref_t<int const &>>::value));
-    BOOST_CHECK((!std::is_same<int, unref_t<int const &>>::value));
-    BOOST_CHECK((std::is_same<int &, addlref_t<int>>::value));
-    BOOST_CHECK((std::is_same<int &, addlref_t<int &>>::value));
-    BOOST_CHECK((std::is_same<int &, addlref_t<int &&>>::value));
-    BOOST_CHECK((std::is_same<void, addlref_t<void>>::value));
-    BOOST_CHECK((std::is_same<int, decay_t<int>>::value));
-    BOOST_CHECK((std::is_same<int, decay_t<int &>>::value));
-    BOOST_CHECK((std::is_same<int, decay_t<const int &>>::value));
-    BOOST_CHECK((std::is_same<int, decay_t<int &&>>::value));
-    BOOST_CHECK((std::is_same<int *, decay_t<int[2]>>::value));
+    CHECK((std::is_same<int, uncvref_t<int>>::value));
+    CHECK((std::is_same<int, uncvref_t<int &>>::value));
+    CHECK((std::is_same<int, uncvref_t<const int &>>::value));
+    CHECK((std::is_same<int, uncvref_t<const int &&>>::value));
+    CHECK((std::is_same<int, uncvref_t<const int>>::value));
+    CHECK((std::is_same<int, uncvref_t<volatile int &>>::value));
+    CHECK((std::is_same<int, unref_t<int>>::value));
+    CHECK((std::is_same<int, unref_t<int &>>::value));
+    CHECK((!std::is_same<int, unref_t<int volatile &>>::value));
+    CHECK((std::is_same<const int, unref_t<int const &>>::value));
+    CHECK((!std::is_same<int, unref_t<int const &>>::value));
+    CHECK((std::is_same<int &, addlref_t<int>>::value));
+    CHECK((std::is_same<int &, addlref_t<int &>>::value));
+    CHECK((std::is_same<int &, addlref_t<int &&>>::value));
+    CHECK((std::is_same<void, addlref_t<void>>::value));
+    CHECK((std::is_same<int, decay_t<int>>::value));
+    CHECK((std::is_same<int, decay_t<int &>>::value));
+    CHECK((std::is_same<int, decay_t<const int &>>::value));
+    CHECK((std::is_same<int, decay_t<int &&>>::value));
+    CHECK((std::is_same<int *, decay_t<int[2]>>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_detected)
+TEST_CASE("type_traits_is_detected")
 {
-    BOOST_CHECK((is_detected<add_t, int, int>::value));
-    BOOST_CHECK((std::is_same<detected_t<add_t, int, int>, int>::value));
-    BOOST_CHECK((is_detected<add_t, double, int>::value));
-    BOOST_CHECK((std::is_same<detected_t<add_t, int, double>, double>::value));
-    BOOST_CHECK((is_detected<add_t, char, char>::value));
-    BOOST_CHECK((std::is_same<detected_t<add_t, char, char>, int>::value));
-    BOOST_CHECK((!is_detected<add_t, double, std::string>::value));
-    BOOST_CHECK((std::is_same<detected_t<add_t, double, std::string>, nonesuch>::value));
+    CHECK((is_detected<add_t, int, int>::value));
+    CHECK((std::is_same<detected_t<add_t, int, int>, int>::value));
+    CHECK((is_detected<add_t, double, int>::value));
+    CHECK((std::is_same<detected_t<add_t, int, double>, double>::value));
+    CHECK((is_detected<add_t, char, char>::value));
+    CHECK((std::is_same<detected_t<add_t, char, char>, int>::value));
+    CHECK((!is_detected<add_t, double, std::string>::value));
+    CHECK((std::is_same<detected_t<add_t, double, std::string>, nonesuch>::value));
 }
 
 template <typename T>
 struct tt_0 {
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_conj_disj_neg)
+TEST_CASE("type_traits_conj_disj_neg")
 {
-    BOOST_CHECK((conjunction<std::is_same<int, int>, std::is_convertible<float, int>>::value));
-    BOOST_CHECK((!conjunction<std::is_same<float, int>, std::is_convertible<float, int>>::value));
-    BOOST_CHECK((!conjunction<std::is_same<float, int>, tt_0<float>>::value));
-    BOOST_CHECK((disjunction<std::is_same<float, int>, std::is_convertible<float, int>>::value));
-    BOOST_CHECK((!disjunction<std::is_same<float, int>, std::is_convertible<float, tt_0<int>>>::value));
-    BOOST_CHECK((disjunction<std::is_same<float, float>, tt_0<float>>::value));
-    BOOST_CHECK((conjunction<negation<std::is_same<float, int>>, std::is_convertible<float, int>>::value));
-    BOOST_CHECK((disjunction<negation<std::is_same<float, int>>, std::is_convertible<float, tt_0<int>>>::value));
+    CHECK((conjunction<std::is_same<int, int>, std::is_convertible<float, int>>::value));
+    CHECK((!conjunction<std::is_same<float, int>, std::is_convertible<float, int>>::value));
+    CHECK((!conjunction<std::is_same<float, int>, tt_0<float>>::value));
+    CHECK((disjunction<std::is_same<float, int>, std::is_convertible<float, int>>::value));
+    CHECK((!disjunction<std::is_same<float, int>, std::is_convertible<float, tt_0<int>>>::value));
+    CHECK((disjunction<std::is_same<float, float>, tt_0<float>>::value));
+    CHECK((conjunction<negation<std::is_same<float, int>>, std::is_convertible<float, int>>::value));
+    CHECK((disjunction<negation<std::is_same<float, int>>, std::is_convertible<float, tt_0<int>>>::value));
 }
 
 struct times_two {
@@ -1935,163 +1934,163 @@ struct minus_one {
     }
 };
 
-BOOST_AUTO_TEST_CASE(type_traits_tuple_for_each)
+TEST_CASE("type_traits_tuple_for_each")
 {
     auto t = std::make_tuple(1, 2., 3l, 4ll);
     tuple_for_each(t, times_two{});
-    BOOST_CHECK(t == std::make_tuple(2, 4., 6l, 8ll));
+    CHECK(t == std::make_tuple(2, 4., 6l, 8ll));
     tuple_for_each(t, minus_one{});
-    BOOST_CHECK(t == std::make_tuple(1, 3., 5l, 7ll));
+    CHECK(t == std::make_tuple(1, 3., 5l, 7ll));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_zero_is_absorbing)
+TEST_CASE("type_traits_zero_is_absorbing")
 {
-    BOOST_CHECK((zero_is_absorbing<int>::value));
-    BOOST_CHECK((zero_is_absorbing<short>::value));
-    BOOST_CHECK((zero_is_absorbing<long long>::value));
-    BOOST_CHECK((zero_is_absorbing<unsigned long>::value));
-    BOOST_CHECK((zero_is_absorbing<int &>::value));
-    BOOST_CHECK((zero_is_absorbing<const short>::value));
-    BOOST_CHECK((zero_is_absorbing<long long &&>::value));
-    BOOST_CHECK((zero_is_absorbing<const unsigned long &>::value));
+    CHECK((zero_is_absorbing<int>::value));
+    CHECK((zero_is_absorbing<short>::value));
+    CHECK((zero_is_absorbing<long long>::value));
+    CHECK((zero_is_absorbing<unsigned long>::value));
+    CHECK((zero_is_absorbing<int &>::value));
+    CHECK((zero_is_absorbing<const short>::value));
+    CHECK((zero_is_absorbing<long long &&>::value));
+    CHECK((zero_is_absorbing<const unsigned long &>::value));
     if (std::numeric_limits<double>::has_quiet_NaN || std::numeric_limits<double>::has_signaling_NaN) {
-        BOOST_CHECK((!zero_is_absorbing<double>::value));
-        BOOST_CHECK((!zero_is_absorbing<double &>::value));
-        BOOST_CHECK((!zero_is_absorbing<const double &>::value));
-        BOOST_CHECK((!zero_is_absorbing<double &&>::value));
+        CHECK((!zero_is_absorbing<double>::value));
+        CHECK((!zero_is_absorbing<double &>::value));
+        CHECK((!zero_is_absorbing<const double &>::value));
+        CHECK((!zero_is_absorbing<double &&>::value));
     }
     if (std::numeric_limits<long double>::has_quiet_NaN || std::numeric_limits<long double>::has_signaling_NaN) {
-        BOOST_CHECK((!zero_is_absorbing<long double>::value));
-        BOOST_CHECK((!zero_is_absorbing<long double &>::value));
-        BOOST_CHECK((!zero_is_absorbing<const long double &>::value));
-        BOOST_CHECK((!zero_is_absorbing<long double &&>::value));
+        CHECK((!zero_is_absorbing<long double>::value));
+        CHECK((!zero_is_absorbing<long double &>::value));
+        CHECK((!zero_is_absorbing<const long double &>::value));
+        CHECK((!zero_is_absorbing<long double &&>::value));
     }
     if (std::numeric_limits<float>::has_quiet_NaN || std::numeric_limits<float>::has_signaling_NaN) {
-        BOOST_CHECK((!zero_is_absorbing<float>::value));
-        BOOST_CHECK((!zero_is_absorbing<float &>::value));
-        BOOST_CHECK((!zero_is_absorbing<const float &>::value));
-        BOOST_CHECK((!zero_is_absorbing<float &&>::value));
+        CHECK((!zero_is_absorbing<float>::value));
+        CHECK((!zero_is_absorbing<float &>::value));
+        CHECK((!zero_is_absorbing<const float &>::value));
+        CHECK((!zero_is_absorbing<float &&>::value));
     }
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_disj_idx)
+TEST_CASE("type_traits_disj_idx")
 {
-    BOOST_CHECK(disjunction_idx<>::value == 0u);
-    BOOST_CHECK((disjunction_idx<std::is_same<int, int>>::value == 0u));
-    BOOST_CHECK((disjunction_idx<std::is_same<int, long>>::value == 1u));
-    BOOST_CHECK((disjunction_idx<std::is_same<int, long>, std::is_same<int, int>>::value == 1u));
-    BOOST_CHECK((disjunction_idx<std::is_same<int, long>, std::is_same<int, double>>::value == 2u));
-    BOOST_CHECK((disjunction_idx<std::is_same<int, int>, std::is_same<int, double>>::value == 0u));
-    BOOST_CHECK(
+    CHECK(disjunction_idx<>::value == 0u);
+    CHECK((disjunction_idx<std::is_same<int, int>>::value == 0u));
+    CHECK((disjunction_idx<std::is_same<int, long>>::value == 1u));
+    CHECK((disjunction_idx<std::is_same<int, long>, std::is_same<int, int>>::value == 1u));
+    CHECK((disjunction_idx<std::is_same<int, long>, std::is_same<int, double>>::value == 2u));
+    CHECK((disjunction_idx<std::is_same<int, int>, std::is_same<int, double>>::value == 0u));
+    CHECK(
         (disjunction_idx<std::is_same<int, int>, std::is_same<int, double>, std::is_same<int, std::string>>::value
          == 0u));
-    BOOST_CHECK(
+    CHECK(
         (disjunction_idx<std::is_same<int, float>, std::is_same<int, int>, std::is_same<int, std::string>>::value
          == 1u));
-    BOOST_CHECK(
+    CHECK(
         (disjunction_idx<std::is_same<int, float>, std::is_same<int, float>, std::is_same<int, int>>::value == 2u));
-    BOOST_CHECK(
+    CHECK(
         (disjunction_idx<std::is_same<int, float>, std::is_same<int, float>, std::is_same<int, std::string>>::value
          == 3u));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_cpp_complex)
+TEST_CASE("type_traits_cpp_complex")
 {
-    BOOST_CHECK(!is_cpp_complex<void>::value);
-    BOOST_CHECK(!is_cpp_complex<float>::value);
-    BOOST_CHECK(!is_cpp_complex<float &>::value);
-    BOOST_CHECK(is_cpp_complex<std::complex<float>>::value);
-    BOOST_CHECK(is_cpp_complex<std::complex<double>>::value);
-    BOOST_CHECK(is_cpp_complex<std::complex<long double>>::value);
-    BOOST_CHECK(is_cpp_complex<const std::complex<float>>::value);
-    BOOST_CHECK(is_cpp_complex<const std::complex<double>>::value);
-    BOOST_CHECK(is_cpp_complex<const std::complex<long double>>::value);
-    BOOST_CHECK(is_cpp_complex<const volatile std::complex<float>>::value);
-    BOOST_CHECK(is_cpp_complex<const volatile std::complex<double>>::value);
-    BOOST_CHECK(is_cpp_complex<const volatile std::complex<long double>>::value);
-    BOOST_CHECK(is_cpp_complex<volatile std::complex<float>>::value);
-    BOOST_CHECK(is_cpp_complex<volatile std::complex<double>>::value);
-    BOOST_CHECK(is_cpp_complex<volatile std::complex<long double>>::value);
-    BOOST_CHECK(!is_cpp_complex<std::complex<float> &>::value);
-    BOOST_CHECK(!is_cpp_complex<std::complex<double> &&>::value);
-    BOOST_CHECK(!is_cpp_complex<const std::complex<long double> &>::value);
+    CHECK(!is_cpp_complex<void>::value);
+    CHECK(!is_cpp_complex<float>::value);
+    CHECK(!is_cpp_complex<float &>::value);
+    CHECK(is_cpp_complex<std::complex<float>>::value);
+    CHECK(is_cpp_complex<std::complex<double>>::value);
+    CHECK(is_cpp_complex<std::complex<long double>>::value);
+    CHECK(is_cpp_complex<const std::complex<float>>::value);
+    CHECK(is_cpp_complex<const std::complex<double>>::value);
+    CHECK(is_cpp_complex<const std::complex<long double>>::value);
+    CHECK(is_cpp_complex<const volatile std::complex<float>>::value);
+    CHECK(is_cpp_complex<const volatile std::complex<double>>::value);
+    CHECK(is_cpp_complex<const volatile std::complex<long double>>::value);
+    CHECK(is_cpp_complex<volatile std::complex<float>>::value);
+    CHECK(is_cpp_complex<volatile std::complex<double>>::value);
+    CHECK(is_cpp_complex<volatile std::complex<long double>>::value);
+    CHECK(!is_cpp_complex<std::complex<float> &>::value);
+    CHECK(!is_cpp_complex<std::complex<double> &&>::value);
+    CHECK(!is_cpp_complex<const std::complex<long double> &>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_is_string_type_test)
+TEST_CASE("type_traits_is_string_type_test")
 {
-    BOOST_CHECK(is_string_type<char *>::value);
-    BOOST_CHECK(is_string_type<const char *>::value);
-    BOOST_CHECK(is_string_type<char[10]>::value);
-    BOOST_CHECK(is_string_type<char[]>::value);
-    BOOST_CHECK(is_string_type<std::string>::value);
+    CHECK(is_string_type<char *>::value);
+    CHECK(is_string_type<const char *>::value);
+    CHECK(is_string_type<char[10]>::value);
+    CHECK(is_string_type<char[]>::value);
+    CHECK(is_string_type<std::string>::value);
 #if PIRANHA_CPLUSPLUS >= 201703L
-    BOOST_CHECK(is_string_type<std::string_view>::value);
+    CHECK(is_string_type<std::string_view>::value);
 #endif
-    BOOST_CHECK(!is_string_type<std::string &>::value);
-    BOOST_CHECK(!is_string_type<std::string &&>::value);
-    BOOST_CHECK(!is_string_type<const std::string &>::value);
-    BOOST_CHECK(is_string_type<const std::string>::value);
-    BOOST_CHECK(!is_string_type<void>::value);
-    BOOST_CHECK(!is_string_type<int>::value);
+    CHECK(!is_string_type<std::string &>::value);
+    CHECK(!is_string_type<std::string &&>::value);
+    CHECK(!is_string_type<const std::string &>::value);
+    CHECK(is_string_type<const std::string>::value);
+    CHECK(!is_string_type<void>::value);
+    CHECK(!is_string_type<int>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_same_test)
+TEST_CASE("type_traits_same_test")
 {
-    BOOST_CHECK((are_same<void>::value));
-    BOOST_CHECK((are_same<int>::value));
-    BOOST_CHECK((are_same<const int>::value));
-    BOOST_CHECK((are_same<int &>::value));
-    BOOST_CHECK((are_same<const int &>::value));
-    BOOST_CHECK((are_same<int, int>::value));
-    BOOST_CHECK((!are_same<const int, int>::value));
-    BOOST_CHECK((!are_same<int, int &>::value));
-    BOOST_CHECK((!are_same<int, double>::value));
-    BOOST_CHECK((are_same<int, int, int>::value));
-    BOOST_CHECK((are_same<double, double, double>::value));
-    BOOST_CHECK((!are_same<int, int, const int>::value));
-    BOOST_CHECK((!are_same<const int, int, int>::value));
-    BOOST_CHECK((!are_same<const int, double &, void>::value));
-    BOOST_CHECK((!are_same<double, int, const int>::value));
-    BOOST_CHECK((!are_same<int, volatile int, const int>::value));
+    CHECK((are_same<void>::value));
+    CHECK((are_same<int>::value));
+    CHECK((are_same<const int>::value));
+    CHECK((are_same<int &>::value));
+    CHECK((are_same<const int &>::value));
+    CHECK((are_same<int, int>::value));
+    CHECK((!are_same<const int, int>::value));
+    CHECK((!are_same<int, int &>::value));
+    CHECK((!are_same<int, double>::value));
+    CHECK((are_same<int, int, int>::value));
+    CHECK((are_same<double, double, double>::value));
+    CHECK((!are_same<int, int, const int>::value));
+    CHECK((!are_same<const int, int, int>::value));
+    CHECK((!are_same<const int, double &, void>::value));
+    CHECK((!are_same<double, int, const int>::value));
+    CHECK((!are_same<int, volatile int, const int>::value));
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_preinc_test)
+TEST_CASE("type_traits_preinc_test")
 {
-    BOOST_CHECK(is_preincrementable<int &>::value);
-    BOOST_CHECK(!is_preincrementable<int>::value);
-    BOOST_CHECK(!is_preincrementable<const int>::value);
-    BOOST_CHECK(!is_preincrementable<const int &>::value);
-    BOOST_CHECK(is_preincrementable<double &>::value);
-    BOOST_CHECK(is_preincrementable<int *&>::value);
-    BOOST_CHECK(!is_preincrementable<void>::value);
+    CHECK(is_preincrementable<int &>::value);
+    CHECK(!is_preincrementable<int>::value);
+    CHECK(!is_preincrementable<const int>::value);
+    CHECK(!is_preincrementable<const int &>::value);
+    CHECK(is_preincrementable<double &>::value);
+    CHECK(is_preincrementable<int *&>::value);
+    CHECK(!is_preincrementable<void>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_postinc_test)
+TEST_CASE("type_traits_postinc_test")
 {
-    BOOST_CHECK(is_postincrementable<int &>::value);
-    BOOST_CHECK(!is_postincrementable<int>::value);
-    BOOST_CHECK(!is_postincrementable<const int>::value);
-    BOOST_CHECK(!is_postincrementable<const int &>::value);
-    BOOST_CHECK(is_postincrementable<double &>::value);
-    BOOST_CHECK(is_postincrementable<int *&>::value);
-    BOOST_CHECK(!is_postincrementable<void>::value);
+    CHECK(is_postincrementable<int &>::value);
+    CHECK(!is_postincrementable<int>::value);
+    CHECK(!is_postincrementable<const int>::value);
+    CHECK(!is_postincrementable<const int &>::value);
+    CHECK(is_postincrementable<double &>::value);
+    CHECK(is_postincrementable<int *&>::value);
+    CHECK(!is_postincrementable<void>::value);
 }
 
-BOOST_AUTO_TEST_CASE(type_traits_output_it)
+TEST_CASE("type_traits_output_it")
 {
-    BOOST_CHECK((!is_output_iterator<void, void>::value));
-    BOOST_CHECK((!is_output_iterator<void, double>::value));
-    BOOST_CHECK((!is_output_iterator<double, void>::value));
-    BOOST_CHECK((is_output_iterator<std::ostream_iterator<double>, double &>::value));
-    BOOST_CHECK((is_output_iterator<std::ostream_iterator<double>, int>::value));
-    BOOST_CHECK((!is_output_iterator<std::ostream_iterator<double>, std::string &>::value));
-    BOOST_CHECK((!is_input_iterator<std::ostream_iterator<double>>::value));
-    BOOST_CHECK((is_output_iterator<int *, int &>::value));
-    BOOST_CHECK((is_output_iterator<int *, int &&>::value));
-    BOOST_CHECK((is_output_iterator<int *, double &&>::value));
-    BOOST_CHECK((!is_output_iterator<int *, std::string &>::value));
-    BOOST_CHECK((is_output_iterator<std::list<int>::iterator, int &>::value));
-    BOOST_CHECK((!is_output_iterator<std::list<int>::const_iterator, int &>::value));
+    CHECK((!is_output_iterator<void, void>::value));
+    CHECK((!is_output_iterator<void, double>::value));
+    CHECK((!is_output_iterator<double, void>::value));
+    CHECK((is_output_iterator<std::ostream_iterator<double>, double &>::value));
+    CHECK((is_output_iterator<std::ostream_iterator<double>, int>::value));
+    CHECK((!is_output_iterator<std::ostream_iterator<double>, std::string &>::value));
+    CHECK((!is_input_iterator<std::ostream_iterator<double>>::value));
+    CHECK((is_output_iterator<int *, int &>::value));
+    CHECK((is_output_iterator<int *, int &&>::value));
+    CHECK((is_output_iterator<int *, double &&>::value));
+    CHECK((!is_output_iterator<int *, std::string &>::value));
+    CHECK((is_output_iterator<std::list<int>::iterator, int &>::value));
+    CHECK((!is_output_iterator<std::list<int>::const_iterator, int &>::value));
 }
 
 // Swappable via std::swap().
@@ -2137,47 +2136,47 @@ struct swap04 {
 
 void swap(swap03 &, swap04 &);
 
-BOOST_AUTO_TEST_CASE(type_traits_swappable)
+TEST_CASE("type_traits_swappable")
 {
-    BOOST_CHECK((!is_swappable<void>::value));
-    BOOST_CHECK((!is_swappable<void, int &>::value));
-    BOOST_CHECK((!is_swappable<int &, void>::value));
-    BOOST_CHECK((is_swappable<int &>::value));
-    BOOST_CHECK((!is_swappable<const int &>::value));
-    BOOST_CHECK((!is_swappable<int &&>::value));
-    BOOST_CHECK((is_swappable<swap00 &>::value));
-    BOOST_CHECK((is_swappable<swap00a &>::value));
-    BOOST_CHECK((!is_swappable<swap01 &>::value));
-    BOOST_CHECK((is_swappable<swap01 &, swap00 &>::value));
-    BOOST_CHECK((is_swappable<swap00 &, swap01 &>::value));
-    BOOST_CHECK((!is_swappable<swap02 &>::value));
-    BOOST_CHECK((is_swappable<swap02 &, swap01 &>::value));
-    BOOST_CHECK((is_swappable<swap01 &, swap02 &>::value));
-    BOOST_CHECK((is_swappable<swap03 &>::value));
-    BOOST_CHECK((is_swappable<const swap03 &>::value));
-    BOOST_CHECK((is_swappable<const swap03 &, swap03 &>::value));
-    BOOST_CHECK((!is_swappable<swap03 &, swap04 &>::value));
-    BOOST_CHECK((!is_swappable<swap04 &, swap03 &>::value));
-    BOOST_CHECK((is_swappable<int(&)[3]>::value));
-    BOOST_CHECK((is_swappable<swap00(&)[3]>::value));
-    BOOST_CHECK((is_swappable<std::string(&)[3]>::value));
-    BOOST_CHECK((!is_swappable<swap01(&)[3]>::value));
-    BOOST_CHECK((!is_swappable<swap01(&)[3], swap00(&)[3]>::value));
+    CHECK((!is_swappable<void>::value));
+    CHECK((!is_swappable<void, int &>::value));
+    CHECK((!is_swappable<int &, void>::value));
+    CHECK((is_swappable<int &>::value));
+    CHECK((!is_swappable<const int &>::value));
+    CHECK((!is_swappable<int &&>::value));
+    CHECK((is_swappable<swap00 &>::value));
+    CHECK((is_swappable<swap00a &>::value));
+    CHECK((!is_swappable<swap01 &>::value));
+    CHECK((is_swappable<swap01 &, swap00 &>::value));
+    CHECK((is_swappable<swap00 &, swap01 &>::value));
+    CHECK((!is_swappable<swap02 &>::value));
+    CHECK((is_swappable<swap02 &, swap01 &>::value));
+    CHECK((is_swappable<swap01 &, swap02 &>::value));
+    CHECK((is_swappable<swap03 &>::value));
+    CHECK((is_swappable<const swap03 &>::value));
+    CHECK((is_swappable<const swap03 &, swap03 &>::value));
+    CHECK((!is_swappable<swap03 &, swap04 &>::value));
+    CHECK((!is_swappable<swap04 &, swap03 &>::value));
+    CHECK((is_swappable<int(&)[3]>::value));
+    CHECK((is_swappable<swap00(&)[3]>::value));
+    CHECK((is_swappable<std::string(&)[3]>::value));
+    CHECK((!is_swappable<swap01(&)[3]>::value));
+    CHECK((!is_swappable<swap01(&)[3], swap00(&)[3]>::value));
 #if PIRANHA_CPLUSPLUS < 201703L
-    BOOST_CHECK((std_swap_viable<swap00 &, swap00 &>::value));
-    BOOST_CHECK((using_std_adl_swap::detected<swap00 &, swap00 &>::value));
-    BOOST_CHECK((std_swap_viable<swap00a &, swap00a &>::value));
-    BOOST_CHECK((!adl_swap::detected<swap00 &, swap00 &>::value));
-    BOOST_CHECK((adl_swap::detected<swap00a &, swap00a &>::value));
-    BOOST_CHECK((!std_swap_viable<swap01 &, swap01 &>::value));
-    BOOST_CHECK((adl_swap::detected<swap01 &, swap00 &>::value));
-    BOOST_CHECK((!std_swap_viable<swap02 &, swap02 &>::value));
-    BOOST_CHECK((adl_swap::detected<swap01 &, swap02 &>::value));
-    BOOST_CHECK((!std_swap_viable<swap03 &, swap03 &>::value));
-    BOOST_CHECK((adl_swap::detected<swap03 &, swap03 &>::value));
-    BOOST_CHECK((adl_swap::detected<const swap03 &, const swap03 &>::value));
-    BOOST_CHECK((adl_swap::detected<const swap03 &, swap03 &>::value));
-    BOOST_CHECK((adl_swap::detected<swap03 &, const swap03 &>::value));
+    CHECK((std_swap_viable<swap00 &, swap00 &>::value));
+    CHECK((using_std_adl_swap::detected<swap00 &, swap00 &>::value));
+    CHECK((std_swap_viable<swap00a &, swap00a &>::value));
+    CHECK((!adl_swap::detected<swap00 &, swap00 &>::value));
+    CHECK((adl_swap::detected<swap00a &, swap00a &>::value));
+    CHECK((!std_swap_viable<swap01 &, swap01 &>::value));
+    CHECK((adl_swap::detected<swap01 &, swap00 &>::value));
+    CHECK((!std_swap_viable<swap02 &, swap02 &>::value));
+    CHECK((adl_swap::detected<swap01 &, swap02 &>::value));
+    CHECK((!std_swap_viable<swap03 &, swap03 &>::value));
+    CHECK((adl_swap::detected<swap03 &, swap03 &>::value));
+    CHECK((adl_swap::detected<const swap03 &, const swap03 &>::value));
+    CHECK((adl_swap::detected<const swap03 &, swap03 &>::value));
+    CHECK((adl_swap::detected<swap03 &, const swap03 &>::value));
 #endif
 }
 
@@ -2196,11 +2195,11 @@ template <typename T>
 using dcond_tester_2
     = conjunction<std::is_floating_point<T>, dcond<std::is_same<T, float>, foo_empty<T>, std::true_type>>;
 
-BOOST_AUTO_TEST_CASE(type_traits_dcond_test)
+TEST_CASE("type_traits_dcond_test")
 {
     // Check that dcond instantiates the condition type only when dcond itself is instantiated.
-    BOOST_CHECK(!dcond_tester_0<int>::value);
+    CHECK(!dcond_tester_0<int>::value);
     // Check that only one of the branches is instantiated.
-    BOOST_CHECK(dcond_tester_1<float>::value);
-    BOOST_CHECK(dcond_tester_2<double>::value);
+    CHECK(dcond_tester_1<float>::value);
+    CHECK(dcond_tester_2<double>::value);
 }

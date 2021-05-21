@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/hash_set.hpp>
 
-#define BOOST_TEST_MODULE hash_set_01_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <algorithm>
 #include <boost/integer_traits.hpp>
@@ -57,6 +55,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/s11n.hpp>
 #include <piranha/thread_pool.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 static const int ntries = 1000;
 
@@ -96,7 +96,7 @@ struct hash<custom_string> {
 };
 }
 
-typedef boost::mpl::vector<int, integer, custom_string> key_types;
+typedef boost::mpl::vector<int, /*integer,*/ custom_string> key_types;  // integer doesn't have an inpiut operator>>. lexical_cast fails
 
 const int N = 10000;
 
@@ -118,7 +118,7 @@ struct range_ctor_tester {
     template <typename T>
     void operator()(const T &)
     {
-        BOOST_CHECK_EQUAL(make_hash_set<T>().size(), unsigned(N));
+        CHECK(make_hash_set<T>().size() == unsigned(N));
     }
 };
 
@@ -127,12 +127,12 @@ struct copy_ctor_tester {
     void operator()(const T &)
     {
         hash_set<T> h(make_hash_set<T>()), h_copy(h);
-        BOOST_CHECK_EQUAL(h_copy.size(), unsigned(N));
+        CHECK(h_copy.size() == unsigned(N));
         auto it1 = h.begin();
         for (auto it2 = h_copy.begin(); it2 != h_copy.end(); ++it1, ++it2) {
-            BOOST_CHECK_EQUAL(*it1, *it2);
+            CHECK(*it1 == *it2);
         }
-        BOOST_CHECK(it1 == h.end());
+        CHECK(it1 == h.end());
     }
 };
 
@@ -141,14 +141,14 @@ struct move_ctor_tester {
     void operator()(const T &)
     {
         hash_set<T> h(make_hash_set<T>()), h_copy(h), h_move(std::move(h));
-        BOOST_CHECK_EQUAL(h_copy.size(), unsigned(N));
-        BOOST_CHECK_EQUAL(h_move.size(), unsigned(N));
-        BOOST_CHECK_EQUAL(h.size(), unsigned(0));
+        CHECK(h_copy.size() == unsigned(N));
+        CHECK(h_move.size() == unsigned(N));
+        CHECK(h.size() == unsigned(0));
         auto it1 = h_move.begin();
         for (auto it2 = h_copy.begin(); it2 != h_copy.end(); ++it1, ++it2) {
-            BOOST_CHECK_EQUAL(*it1, *it2);
+            CHECK(*it1 == *it2);
         }
-        BOOST_CHECK(it1 == h_move.end());
+        CHECK(it1 == h_move.end());
     }
 };
 
@@ -158,12 +158,12 @@ struct copy_assignment_tester {
     {
         hash_set<T> h(make_hash_set<T>()), h_copy;
         h_copy = h;
-        BOOST_CHECK_EQUAL(h_copy.size(), unsigned(N));
+        CHECK(h_copy.size() == unsigned(N));
         auto it1 = h.begin();
         for (auto it2 = h_copy.begin(); it2 != h_copy.end(); ++it1, ++it2) {
-            BOOST_CHECK_EQUAL(*it1, *it2);
+            CHECK(*it1 == *it2);
         }
-        BOOST_CHECK(it1 == h.end());
+        CHECK(it1 == h.end());
     }
 };
 
@@ -173,14 +173,14 @@ struct move_assignment_tester {
     {
         hash_set<T> h(make_hash_set<T>()), h_copy(h), h_move;
         h_move = std::move(h);
-        BOOST_CHECK_EQUAL(h_copy.size(), unsigned(N));
-        BOOST_CHECK_EQUAL(h_move.size(), unsigned(N));
-        BOOST_CHECK_EQUAL(h.size(), unsigned(0));
+        CHECK(h_copy.size() == unsigned(N));
+        CHECK(h_move.size() == unsigned(N));
+        CHECK(h.size() == unsigned(0));
         auto it1 = h_move.begin();
         for (auto it2 = h_copy.begin(); it2 != h_copy.end(); ++it1, ++it2) {
-            BOOST_CHECK_EQUAL(*it1, *it2);
+            CHECK(*it1 == *it2);
         }
-        BOOST_CHECK(it1 == h_move.end());
+        CHECK(it1 == h_move.end());
     }
 };
 
@@ -190,9 +190,9 @@ struct initializer_list_tester {
     {
         hash_set<T> h({boost::lexical_cast<T>("1"), boost::lexical_cast<T>("2"), boost::lexical_cast<T>("3"),
                        boost::lexical_cast<T>("4"), boost::lexical_cast<T>("4")});
-        BOOST_CHECK_EQUAL(h.size(), unsigned(4));
+        CHECK(h.size() == unsigned(4));
         for (int i = 1; i <= 4; ++i) {
-            BOOST_CHECK(h.find(boost::lexical_cast<T>(i)) != h.end());
+            CHECK(h.find(boost::lexical_cast<T>(i)) != h.end());
         }
     }
 };
@@ -245,37 +245,37 @@ struct hash<random_failure> {
 };
 }
 
-BOOST_AUTO_TEST_CASE(hash_set_constructors_test)
+TEST_CASE("hash_set_constructors_test")
 {
     // Def ctor.
     hash_set<custom_string> ht;
-    BOOST_CHECK(ht.begin() == ht.end());
-    BOOST_CHECK(ht.empty());
-    BOOST_CHECK_EQUAL(ht.size(), unsigned(0));
-    BOOST_CHECK_EQUAL(ht.bucket_count(), unsigned(0));
-    BOOST_CHECK_THROW(ht.bucket("hello"), std::invalid_argument);
+    CHECK(ht.begin() == ht.end());
+    CHECK(ht.empty());
+    CHECK(ht.size() == unsigned(0));
+    CHECK(ht.bucket_count() == unsigned(0));
+    CHECK_THROWS_AS(ht.bucket("hello"), std::invalid_argument);
     // Ctor from number of buckets.
     hash_set<custom_string> ht0(0);
-    BOOST_CHECK(ht0.bucket_count() == 0);
-    BOOST_CHECK(ht0.begin() == ht0.end());
+    CHECK(ht0.bucket_count() == 0);
+    CHECK(ht0.begin() == ht0.end());
     hash_set<custom_string> ht1(1);
-    BOOST_CHECK(ht1.bucket_count() >= 1);
-    BOOST_CHECK(ht1.begin() == ht1.end());
+    CHECK(ht1.bucket_count() >= 1);
+    CHECK(ht1.begin() == ht1.end());
     hash_set<custom_string> ht2(2);
-    BOOST_CHECK(ht2.bucket_count() >= 2);
-    BOOST_CHECK(ht2.begin() == ht2.end());
+    CHECK(ht2.bucket_count() >= 2);
+    CHECK(ht2.begin() == ht2.end());
     hash_set<custom_string> ht3(3);
-    BOOST_CHECK(ht3.bucket_count() >= 3);
-    BOOST_CHECK(ht3.begin() == ht3.end());
+    CHECK(ht3.bucket_count() >= 3);
+    CHECK(ht3.begin() == ht3.end());
     hash_set<custom_string> ht4(4);
-    BOOST_CHECK(ht4.bucket_count() >= 4);
-    BOOST_CHECK(ht4.begin() == ht4.end());
+    CHECK(ht4.bucket_count() >= 4);
+    CHECK(ht4.begin() == ht4.end());
     hash_set<custom_string> ht5(456);
-    BOOST_CHECK(ht5.bucket_count() >= 456);
-    BOOST_CHECK(ht5.begin() == ht5.end());
+    CHECK(ht5.bucket_count() >= 456);
+    CHECK(ht5.begin() == ht5.end());
     hash_set<custom_string> ht6(100001);
-    BOOST_CHECK(ht6.bucket_count() >= 100001);
-    BOOST_CHECK(ht6.begin() == ht6.end());
+    CHECK(ht6.bucket_count() >= 100001);
+    CHECK(ht6.begin() == ht6.end());
     // Range constructor.
     boost::mpl::for_each<key_types>(range_ctor_tester());
     // Copy ctor.
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(hash_set_constructors_test)
     // Initializer list.
     boost::mpl::for_each<key_types>(initializer_list_tester());
     // Check that requesting too many buckets throws.
-    BOOST_CHECK_THROW(ht6 = hash_set<custom_string>(boost::integer_traits<std::size_t>::const_max), std::bad_alloc);
+    CHECK_THROWS_AS(ht6 = hash_set<custom_string>(boost::integer_traits<std::size_t>::const_max), std::bad_alloc);
     // Check unwind on throw.
     // NOTE: prepare table with large number of buckets, so we are sure the first copy of random_failure will be
     // performed
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(hash_set_constructors_test)
         ht7.insert(random_failure(i));
     }
     hash_set<random_failure> ht8;
-    BOOST_CHECK_THROW(ht8 = ht7, std::runtime_error);
+    CHECK_THROWS_AS(ht8 = ht7, std::runtime_error);
 }
 
 struct iterator_tester {
@@ -310,11 +310,11 @@ struct iterator_tester {
         unsigned count = 0;
         for (auto it = h.begin(); it != h.end(); ++it, ++count) {
         }
-        BOOST_CHECK_EQUAL(h.size(), count);
+        CHECK(h.size() == count);
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_iterator_test)
+TEST_CASE("hash_set_iterator_test")
 {
     boost::mpl::for_each<key_types>(iterator_tester());
 }
@@ -324,16 +324,16 @@ struct find_tester {
     void operator()(const T &)
     {
         hash_set<T> h(make_hash_set<T>()), h_empty;
-        BOOST_CHECK(h_empty.find(boost::lexical_cast<T>(0)) == h_empty.end());
+        CHECK(h_empty.find(boost::lexical_cast<T>(0)) == h_empty.end());
         for (int i = 0; i < N; ++i) {
             auto it = h.find(boost::lexical_cast<T>(i));
-            BOOST_CHECK(it != h.end());
+            CHECK(it != h.end());
         }
-        BOOST_CHECK(h.find(boost::lexical_cast<T>(N + 1)) == h.end());
+        CHECK(h.find(boost::lexical_cast<T>(N + 1)) == h.end());
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_find_test)
+TEST_CASE("hash_set_find_test")
 {
     boost::mpl::for_each<key_types>(find_tester());
 }
@@ -345,18 +345,18 @@ struct insert_tester {
         hash_set<T> h;
         for (int i = 0; i < N; ++i) {
             auto r1 = h.insert(boost::lexical_cast<T>(i));
-            BOOST_CHECK_EQUAL(r1.second, true);
+            CHECK(r1.second == true);
             auto r2 = h.insert(boost::lexical_cast<T>(i));
-            BOOST_CHECK_EQUAL(r2.second, false);
-            BOOST_CHECK(r2.first == h.find(boost::lexical_cast<T>(i)));
+            CHECK(r2.second == false);
+            CHECK(r2.first == h.find(boost::lexical_cast<T>(i)));
         }
-        BOOST_CHECK_EQUAL(h.size(), unsigned(N));
+        CHECK(h.size() == unsigned(N));
     }
 };
 
 // NOTE: this test had a meaning in a previous implementation of hash_set, now it is jut a simple
 // insertion test.
-BOOST_AUTO_TEST_CASE(hash_set_insert_test)
+TEST_CASE("hash_set_insert_test")
 {
     // Check insert when the resize operation fails on the first try.
     const std::size_t critical_size = 193;
@@ -369,13 +369,13 @@ BOOST_AUTO_TEST_CASE(hash_set_insert_test)
     custom_hash ch;
     hash_set<std::size_t, custom_hash> ht(ch);
     for (std::size_t i = 0; i < critical_size; ++i) {
-        BOOST_CHECK_EQUAL(ht.insert(i * critical_size).second, true);
+        CHECK(ht.insert(i * critical_size).second == true);
     }
     // Verify insertion of all items.
     for (std::size_t i = 0; i < critical_size; ++i) {
-        BOOST_CHECK(ht.find(i * critical_size) != ht.end());
+        CHECK(ht.find(i * critical_size) != ht.end());
     }
-    BOOST_CHECK(ht.size() == critical_size);
+    CHECK(ht.size() == critical_size);
     boost::mpl::for_each<key_types>(insert_tester());
 }
 
@@ -386,15 +386,15 @@ struct erase_tester {
         hash_set<T> h(make_hash_set<T>());
         for (int i = 0; i < N; ++i) {
             auto r = h.find(boost::lexical_cast<T>(i));
-            BOOST_CHECK(r != h.end());
+            CHECK(r != h.end());
             h.erase(r);
         }
-        BOOST_CHECK_EQUAL(h.size(), unsigned(0));
+        CHECK(h.size() == unsigned(0));
         h = make_hash_set<T>();
         for (auto it = h.begin(); it != h.end();) {
             it = h.erase(it);
         }
-        BOOST_CHECK_EQUAL(h.size(), unsigned(0));
+        CHECK(h.size() == unsigned(0));
     }
 };
 
@@ -405,7 +405,7 @@ struct custom_unsigned_hash {
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_erase_test)
+TEST_CASE("hash_set_erase_test")
 {
     boost::mpl::for_each<key_types>(erase_tester());
     // Tests various possibilities of bucket setup for erase(). This first one triggered a bug
@@ -420,66 +420,66 @@ BOOST_AUTO_TEST_CASE(hash_set_erase_test)
     h.insert(8u);
     h.insert(4u);
     auto it = h.erase(h.find(4u));
-    BOOST_CHECK(it != h.end());
-    BOOST_CHECK_EQUAL(*it, 8u);
+    CHECK(it != h.end());
+    CHECK(*it == 8u);
     // Reset the h, and try erasing the first element with 0, 1 and 2 other elements.
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     it = h.erase(h.find(0u));
-    BOOST_CHECK(it == h.end());
+    CHECK(it == h.end());
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     h.insert(4u);
     it = h.erase(h.find(0u));
-    BOOST_CHECK(it != h.end());
-    BOOST_CHECK_EQUAL(*it, 4u);
+    CHECK(it != h.end());
+    CHECK(*it == 4u);
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     h.insert(8u);
     h.insert(4u);
     it = h.erase(h.find(0u));
-    BOOST_CHECK(it != h.end());
-    BOOST_CHECK_EQUAL(*it, 4u);
+    CHECK(it != h.end());
+    CHECK(*it == 4u);
     // Now try erasing the second and third element of the bucket.
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     h.insert(4u);
     it = h.erase(h.find(4u));
-    BOOST_CHECK(it == h.end());
+    CHECK(it == h.end());
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     h.insert(8u);
     h.insert(4u);
     it = h.erase(h.find(8u));
-    BOOST_CHECK(it == h.end());
+    CHECK(it == h.end());
     // Some tests with more than 1 bucket.
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     h.insert(1u);
     it = h.erase(h.find(0u));
-    BOOST_CHECK(it != h.end());
-    BOOST_CHECK_EQUAL(*it, 1u);
+    CHECK(it != h.end());
+    CHECK(*it == 1u);
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     h.insert(2u);
     h.insert(1u);
     it = h.erase(h.find(1u));
-    BOOST_CHECK(it != h.end());
-    BOOST_CHECK_EQUAL(*it, 2u);
+    CHECK(it != h.end());
+    CHECK(*it == 2u);
     h.clear();
     h.rehash(4u);
     h.insert(0u);
     h.insert(2u);
     h.insert(1u);
     it = h.erase(h.find(2u));
-    BOOST_CHECK(it == h.end());
+    CHECK(it == h.end());
     h.clear();
     h.rehash(4u);
     h.insert(0u);
@@ -487,10 +487,10 @@ BOOST_AUTO_TEST_CASE(hash_set_erase_test)
     h.insert(2u);
     h.insert(1u);
     it = h.erase(h.find(4u));
-    BOOST_CHECK(it != h.end());
-    BOOST_CHECK_EQUAL(*it, 1u);
+    CHECK(it != h.end());
+    CHECK(*it == 1u);
     it = h.erase(h.find(2u));
-    BOOST_CHECK(it == h.end());
+    CHECK(it == h.end());
 }
 
 struct clear_tester {
@@ -499,12 +499,12 @@ struct clear_tester {
     {
         hash_set<T> h(make_hash_set<T>());
         h.clear();
-        BOOST_CHECK_EQUAL(h.size(), unsigned(0));
-        BOOST_CHECK_EQUAL(h.bucket_count(), unsigned(0));
+        CHECK(h.size() == unsigned(0));
+        CHECK(h.bucket_count() == unsigned(0));
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_clear_test)
+TEST_CASE("hash_set_clear_test")
 {
     boost::mpl::for_each<key_types>(clear_tester());
 }
@@ -520,17 +520,17 @@ struct swap_tester {
         }
         const auto nb2 = h2.bucket_count(), s2 = h2.size();
         h1.swap(h2);
-        BOOST_CHECK_EQUAL(h1.bucket_count(), nb2);
-        BOOST_CHECK_EQUAL(h2.bucket_count(), nb1);
-        BOOST_CHECK_EQUAL(h1.size(), s2);
-        BOOST_CHECK_EQUAL(h2.size(), s1);
+        CHECK(h1.bucket_count() == nb2);
+        CHECK(h2.bucket_count() == nb1);
+        CHECK(h1.size() == s2);
+        CHECK(h2.size() == s1);
         for (int i = 0; i < N / 2; ++i) {
-            BOOST_CHECK(h1.find(boost::lexical_cast<T>(i)) == h1.end());
+            CHECK(h1.find(boost::lexical_cast<T>(i)) == h1.end());
         }
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_swap_test)
+TEST_CASE("hash_set_swap_test")
 {
     boost::mpl::for_each<key_types>(swap_tester());
 }
@@ -540,17 +540,17 @@ struct load_factor_tester {
     void operator()(const T &)
     {
         hash_set<T> h;
-        BOOST_CHECK(h.load_factor() == 0.);
+        CHECK(h.load_factor() == 0.);
         hash_set<T> i(10);
-        BOOST_CHECK_EQUAL(i.load_factor(), 0);
+        CHECK(i.load_factor() == 0);
         hash_set<T> j(make_hash_set<T>());
-        BOOST_CHECK(j.load_factor() > 0);
-        BOOST_CHECK(j.load_factor() <= 1);
-        BOOST_CHECK(h.max_load_factor() > 0);
+        CHECK(j.load_factor() > 0);
+        CHECK(j.load_factor() <= 1);
+        CHECK(h.max_load_factor() > 0);
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_load_factor_test)
+TEST_CASE("hash_set_load_factor_test")
 {
     boost::mpl::for_each<key_types>(load_factor_tester());
 }
@@ -560,17 +560,17 @@ struct m_iterators_tester {
     void operator()(const T &)
     {
         hash_set<T> h;
-        BOOST_CHECK(h._m_begin() == h._m_end());
+        CHECK(h._m_begin() == h._m_end());
         h.insert(T());
-        BOOST_CHECK(h._m_begin() != h._m_end());
+        CHECK(h._m_begin() != h._m_end());
         *h._m_begin() = boost::lexical_cast<T>("42");
-        BOOST_CHECK(*h._m_begin() == boost::lexical_cast<T>("42"));
+        CHECK(*h._m_begin() == boost::lexical_cast<T>("42"));
         // Check we can clear and destroy without bad consequences.
         h.clear();
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_m_iterators_test)
+TEST_CASE("hash_set_m_iterators_test")
 {
     boost::mpl::for_each<key_types>(m_iterators_tester());
 }
@@ -580,36 +580,36 @@ struct rehash_tester {
     void operator()(const T &)
     {
         hash_set<T> h;
-        BOOST_CHECK(h.bucket_count() == 0u);
+        CHECK(h.bucket_count() == 0u);
         h.rehash(100u);
-        BOOST_CHECK(h.bucket_count() >= 100u);
+        CHECK(h.bucket_count() >= 100u);
         h.rehash(10u);
-        BOOST_CHECK(h.bucket_count() >= 10u);
+        CHECK(h.bucket_count() >= 10u);
         h.rehash(1000u);
-        BOOST_CHECK(h.bucket_count() >= 1000u);
+        CHECK(h.bucket_count() >= 1000u);
         h.rehash(0u);
-        BOOST_CHECK(h.bucket_count() == 0u);
+        CHECK(h.bucket_count() == 0u);
         h = make_hash_set<T>();
         auto old = h.bucket_count();
         h.rehash(old * 2u);
-        BOOST_CHECK(h.bucket_count() >= old * 2u);
+        CHECK(h.bucket_count() >= old * 2u);
         h.rehash(old);
-        BOOST_CHECK(h.bucket_count() >= old);
+        CHECK(h.bucket_count() >= old);
         h = make_hash_set<T>();
         old = h.bucket_count();
         h.rehash(0u);
-        BOOST_CHECK(old == h.bucket_count());
+        CHECK(old == h.bucket_count());
         h = hash_set<T>(100u);
         h.rehash(0u);
-        BOOST_CHECK(h.bucket_count() == 0u);
+        CHECK(h.bucket_count() == 0u);
         h = make_hash_set<T>();
         old = h.bucket_count();
         h.rehash(1000u);
-        BOOST_CHECK(h.bucket_count() == old);
+        CHECK(h.bucket_count() == old);
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_rehash_test)
+TEST_CASE("hash_set_rehash_test")
 {
     boost::mpl::for_each<key_types>(rehash_tester());
 }
@@ -620,14 +620,14 @@ struct evaluate_sparsity_tester {
     {
         hash_set<T> h;
         using size_type = typename hash_set<T>::size_type;
-        BOOST_CHECK((h.evaluate_sparsity() == std::map<size_type, size_type>{}));
+        CHECK((h.evaluate_sparsity() == std::map<size_type, size_type>{}));
         T tmp = T();
         h.insert(tmp);
-        BOOST_CHECK((h.evaluate_sparsity() == std::map<size_type, size_type>{{1u, 1u}}));
+        CHECK((h.evaluate_sparsity() == std::map<size_type, size_type>{{1u, 1u}}));
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_evaluate_sparsity_test)
+TEST_CASE("hash_set_evaluate_sparsity_test")
 {
     boost::mpl::for_each<key_types>(evaluate_sparsity_tester());
 }
@@ -636,22 +636,22 @@ struct type_traits_tester {
     template <typename T>
     void operator()(const T &)
     {
-        BOOST_CHECK(is_container_element<hash_set<T>>::value);
-        BOOST_CHECK(!is_equality_comparable<const hash_set<T> &>::value);
-        BOOST_CHECK(!is_addable<hash_set<T>>::value);
-        BOOST_CHECK(!is_ostreamable<hash_set<T>>::value);
+        CHECK(is_container_element<hash_set<T>>::value);
+        CHECK(!is_equality_comparable<const hash_set<T> &>::value);
+        CHECK(!is_addable<hash_set<T>>::value);
+        CHECK(!is_ostreamable<hash_set<T>>::value);
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_set_type_traits_test)
+TEST_CASE("hash_set_type_traits_test")
 {
     boost::mpl::for_each<key_types>(type_traits_tester());
 }
 
-BOOST_AUTO_TEST_CASE(hash_set_mt_test)
+TEST_CASE("hash_set_mt_test")
 {
     thread_pool::resize(4u);
-    BOOST_CHECK_THROW(hash_set<int>(10000, std::hash<int>(), std::equal_to<int>(), 0u), std::invalid_argument);
+    CHECK_THROWS_AS(hash_set<int>(10000, std::hash<int>(), std::equal_to<int>(), 0u), std::invalid_argument);
     hash_set<int> h1(100000, std::hash<int>(), std::equal_to<int>(), 1u);
     hash_set<int> h2(100000, std::hash<int>(), std::equal_to<int>(), 2u);
     hash_set<int> h3(100000, std::hash<int>(), std::equal_to<int>(), 3u);
@@ -668,16 +668,16 @@ BOOST_AUTO_TEST_CASE(hash_set_mt_test)
     for (int i = 0; i < ntries; ++i) {
         auto bcount = size_dist(rng);
         hash_set<int> h(bcount, std::hash<int>(), std::equal_to<int>(), thread_dist(rng));
-        BOOST_CHECK(h.bucket_count() >= bcount);
+        CHECK(h.bucket_count() >= bcount);
         bcount = size_dist(rng);
         h.rehash(bcount, thread_dist(rng));
-        BOOST_CHECK(h.bucket_count() >= bcount);
+        CHECK(h.bucket_count() >= bcount);
     }
 }
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
-BOOST_AUTO_TEST_CASE(hash_set_serialization_test)
+TEST_CASE("hash_set_serialization_test")
 {
     {
         // Serialize and deserialize hash sets of ints built randomly.
@@ -701,9 +701,9 @@ BOOST_AUTO_TEST_CASE(hash_set_serialization_test)
                 boost::archive::text_iarchive ia(ss);
                 ia >> tmp;
             }
-            BOOST_CHECK(tmp.size() == h.size());
+            CHECK(tmp.size() == h.size());
             for (const auto &n : h) {
-                BOOST_CHECK(tmp.find(n) != tmp.end());
+                CHECK(tmp.find(n) != tmp.end());
             }
         }
     }
@@ -727,9 +727,9 @@ BOOST_AUTO_TEST_CASE(hash_set_serialization_test)
                 boost::archive::text_iarchive ia(ss);
                 ia >> tmp;
             }
-            BOOST_CHECK(tmp.size() == h.size());
+            CHECK(tmp.size() == h.size());
             for (const auto &n : h) {
-                BOOST_CHECK(tmp.find(n) != tmp.end());
+                CHECK(tmp.find(n) != tmp.end());
             }
         }
     }

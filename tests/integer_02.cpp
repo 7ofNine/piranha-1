@@ -28,8 +28,6 @@ see https://www.gnu.org/licenses/. */
 
 #include <piranha/integer.hpp>
 
-#define BOOST_TEST_MODULE integer_02_test
-#include <boost/test/included/unit_test.hpp>
 
 #include <atomic>
 #include <cstdio>
@@ -55,6 +53,8 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/exceptions.hpp>
 #include <piranha/s11n.hpp>
 #include <piranha/type_traits.hpp>
+
+#include "catch.hpp"
 
 using namespace piranha;
 
@@ -126,38 +126,38 @@ struct boost_s11n_tester {
     void operator()(const T &) const
     {
         using int_type = mppp::integer<T::value>;
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive, int_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, int_type &>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const int_type &>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::binary_oarchive &, const int_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::text_oarchive &, const int_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::text_oarchive &, int_type>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::text_oarchive &, int_type &>::value));
-        BOOST_CHECK((has_boost_save<boost::archive::xml_oarchive &, int_type &>::value));
-        BOOST_CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const int_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, int_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive, int_type &>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::binary_iarchive &, int_type &>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::text_iarchive &, int_type &>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::text_iarchive, int_type>::value));
-        BOOST_CHECK((has_boost_load<boost::archive::xml_iarchive, int_type>::value));
-        BOOST_CHECK((!has_boost_load<const boost::archive::binary_iarchive &, int_type &>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_iarchive &, const int_type &>::value));
-        BOOST_CHECK((!has_boost_load<boost::archive::binary_oarchive &, int_type &>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive, int_type>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, int_type &>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, const int_type &>::value));
+        CHECK((has_boost_save<boost::archive::binary_oarchive &, const int_type>::value));
+        CHECK((has_boost_save<boost::archive::text_oarchive &, const int_type>::value));
+        CHECK((has_boost_save<boost::archive::text_oarchive &, int_type>::value));
+        CHECK((has_boost_save<boost::archive::text_oarchive &, int_type &>::value));
+        CHECK((has_boost_save<boost::archive::xml_oarchive &, int_type &>::value));
+        CHECK((!has_boost_save<const boost::archive::binary_oarchive &, const int_type>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive, int_type>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive, int_type &>::value));
+        CHECK((has_boost_load<boost::archive::binary_iarchive &, int_type &>::value));
+        CHECK((has_boost_load<boost::archive::text_iarchive &, int_type &>::value));
+        CHECK((has_boost_load<boost::archive::text_iarchive, int_type>::value));
+        CHECK((has_boost_load<boost::archive::xml_iarchive, int_type>::value));
+        CHECK((!has_boost_load<const boost::archive::binary_iarchive &, int_type &>::value));
+        CHECK((!has_boost_load<boost::archive::binary_iarchive &, const int_type &>::value));
+        CHECK((!has_boost_load<boost::archive::binary_oarchive &, int_type &>::value));
         // A few checks with zero.
-        BOOST_CHECK_EQUAL(
-            (boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(int_type{})),
+        CHECK(
+            (boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(int_type{})) ==
             int_type{});
         int_type tmp;
         tmp.promote();
-        BOOST_CHECK_EQUAL((boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(tmp)),
+        CHECK((boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(tmp)) ==
                           int_type{});
         tmp = int_type{};
-        BOOST_CHECK_EQUAL(
-            (boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(tmp, true)), int_type{});
+        CHECK(
+            (boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(tmp, true)) == int_type{});
         tmp.promote();
-        BOOST_CHECK_EQUAL(
-            (boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(tmp, true)), int_type{});
+        CHECK(
+            (boost_roundtrip<boost::archive::binary_oarchive, boost::archive::binary_iarchive>(tmp, true)) == int_type{});
         // Random multi-threaded testing.
         std::atomic<bool> status(true);
         auto checker = [&status](unsigned n) {
@@ -213,11 +213,11 @@ struct boost_s11n_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
-BOOST_AUTO_TEST_CASE(integer_boost_s11n_test)
+TEST_CASE("integer_boost_s11n_test")
 {
     tuple_for_each(size_types{}, boost_s11n_tester{});
 }
@@ -280,11 +280,11 @@ struct save_load_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
-BOOST_AUTO_TEST_CASE(integer_save_load_test)
+TEST_CASE("integer_save_load_test")
 {
     tuple_for_each(size_types{}, save_load_tester{});
 }
@@ -311,27 +311,27 @@ struct msgpack_s11n_tester {
     void operator()(const T &) const
     {
         using int_type = mppp::integer<T::value>;
-        BOOST_CHECK((has_msgpack_pack<std::stringstream, int_type>::value));
-        BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, int_type>::value));
-        BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, int_type &>::value));
-        BOOST_CHECK((has_msgpack_pack<msgpack::sbuffer, const int_type &>::value));
-        BOOST_CHECK((!has_msgpack_pack<std::stringstream &, int_type>::value));
-        BOOST_CHECK((!has_msgpack_pack<const std::stringstream, int_type>::value));
-        BOOST_CHECK((!has_msgpack_pack<const std::stringstream &, int_type>::value));
-        BOOST_CHECK((!has_msgpack_pack<int, int_type>::value));
-        BOOST_CHECK((has_msgpack_convert<int_type>::value));
-        BOOST_CHECK((has_msgpack_convert<int_type &>::value));
-        BOOST_CHECK((!has_msgpack_convert<const int_type &>::value));
+        CHECK((has_msgpack_pack<std::stringstream, int_type>::value));
+        CHECK((has_msgpack_pack<msgpack::sbuffer, int_type>::value));
+        CHECK((has_msgpack_pack<msgpack::sbuffer, int_type &>::value));
+        CHECK((has_msgpack_pack<msgpack::sbuffer, const int_type &>::value));
+        CHECK((!has_msgpack_pack<std::stringstream &, int_type>::value));
+        CHECK((!has_msgpack_pack<const std::stringstream, int_type>::value));
+        CHECK((!has_msgpack_pack<const std::stringstream &, int_type>::value));
+        CHECK((!has_msgpack_pack<int, int_type>::value));
+        CHECK((has_msgpack_convert<int_type>::value));
+        CHECK((has_msgpack_convert<int_type &>::value));
+        CHECK((!has_msgpack_convert<const int_type &>::value));
         // A few checks with zero.
         for (auto f : {msgpack_format::portable, msgpack_format::binary}) {
-            BOOST_CHECK_EQUAL((msgpack_roundtrip(int_type{}, f)), int_type{});
+            CHECK((msgpack_roundtrip(int_type{}, f)) == int_type{});
             int_type tmp;
             tmp.promote();
-            BOOST_CHECK_EQUAL((msgpack_roundtrip(tmp, f)), int_type{});
+            CHECK((msgpack_roundtrip(tmp, f)) == int_type{});
             tmp = int_type{};
-            BOOST_CHECK_EQUAL((msgpack_roundtrip(tmp, f)), int_type{});
+            CHECK((msgpack_roundtrip(tmp, f)) == int_type{});
             tmp.promote();
-            BOOST_CHECK_EQUAL((msgpack_roundtrip(tmp, f)), int_type{});
+            CHECK((msgpack_roundtrip(tmp, f)) == int_type{});
         }
         // Random multi-threaded testing.
         std::atomic<bool> status(true);
@@ -382,11 +382,11 @@ struct msgpack_s11n_tester {
         t1.join();
         t2.join();
         t3.join();
-        BOOST_CHECK(status.load());
+        CHECK(status.load());
     }
 };
 
-BOOST_AUTO_TEST_CASE(integer_msgpack_s11n_test)
+TEST_CASE("integer_msgpack_s11n_test")
 {
     tuple_for_each(size_types{}, msgpack_s11n_tester{});
 }

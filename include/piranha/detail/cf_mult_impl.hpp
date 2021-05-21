@@ -46,14 +46,14 @@ inline namespace impl
 {
 
 // Overload if the coefficient is a rational.
-template <typename Cf, enable_if_t<mppp::is_rational<Cf>::value, int> = 0>
+template <typename Cf, enable_if_t<mppp::detail::is_rational<Cf>::value, int> = 0>
 inline void cf_mult_impl(Cf &out_cf, const Cf &cf1, const Cf &cf2)
 {
     math::mul3(out_cf._get_num(), cf1.get_num(), cf2.get_num());
 }
 
 // Overload if the coefficient is not a rational.
-template <typename Cf, enable_if_t<!mppp::is_rational<Cf>::value, int> = 0>
+template <typename Cf, enable_if_t<!mppp::detail::is_rational<Cf>::value, int> = 0>
 inline void cf_mult_impl(Cf &out_cf, const Cf &cf1, const Cf &cf2)
 {
     math::mul3(out_cf, cf1, cf2);
