@@ -202,9 +202,12 @@ if(PIRANHA_WITH_BOOST_STACKTRACE)
 endif()
 
 # Find mp++.
-#set(PIRANHA_MINIMUM_MPPP_VERSION 0.9)
-set(PIRANHA_MINIMUM_MPPP_VERSION 0.22)
-find_package(mp++ ${PIRANHA_MINIMUM_MPPP_VERSION} REQUIRED)
+set(PIRANHA_MINIMUM_MPPP_VERSION 0.23)
+find_package(mp++ REQUIRED)
+if(${mp++_VERSION} VERSION_LESS ${PIRANHA_MINIMUM_MPPP_VERSION})
+    message(FATAL_ERROR "The minimum mp++ version required by obake is ${PIRANHA_MINIMUM_MPPP_VERSION}, but version ${mp++_VERSION} was found instead.")
+endif()
+
 target_link_libraries(piranha INTERFACE mp++::mp++)
 
 if(PIRANHA_WITH_MSGPACK)
