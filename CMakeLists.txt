@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.19.0)
 
-project(piranha VERSION 0.11)
+project(piranha VERSION 0.20)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules" "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/yacma")
 
@@ -67,10 +67,13 @@ endif()
 if(YACMA_COMPILER_IS_MSVC)
 	# Disable the idiotic minmax macros on MSVC and enable the bigobj option (but not with clang).
 	list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-DNOMINMAX")
-    list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
+    list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-DWIN32_LEAN_AND_MEAN")
+#    list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
 	list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-DNOMINMAX")
-    list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
+    list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-DWIN_32_LEAN_AND_MEAN")
+#    list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
 	list(APPEND PIRANHA_CXX_FLAGS_RELWITHDEBINFO "-DNOMINMAX")#We have to fix the allocator warnings
+    list(APPEND PIRANHA_CXX_FLAGS_RELWITHDEBINFO "-DWIN_32_LEAN_AND_MEAN")
 	if(YACMA_COMPILER_IS_CLANGXX)
 		# clang-cl emits various warnings from the Boost/GMP/MPFR libraries, let's just silence them.
 		# NOTE: at one point in the recent past, MSVC added an options similar to GCC's isystem:

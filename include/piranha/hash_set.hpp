@@ -351,13 +351,18 @@ class hash_set
         static node terminator;
         node m_node;
     };
+
+
     // Allocator type.
-    // NOTE: if we move allocator choice in public interface we need to document the exception behaviour of the
+    // NOTE: if we move allocator choice into the public interface we need to document the exception behaviour of the
     // allocator. Also, check the validity
     // of the assumptions on the type returned by allocate(): must it be a pointer or just convertible to pointer?
     // NOTE: for std::allocator, pointer is guaranteed to be "T *":
     // http://en.cppreference.com/w/cpp/memory/allocator
-    typedef std::allocator<list> allocator_type;
+    // since C++20 we have to use allocator_traits to access allocator functionality.
+    // https://en.cppreference.com/w/cpp/memory/allocator_traits
+    using allocator_type = std::allocator<list>;
+    using allocator_access = std::allocator_traits<allocator_type>;
 
 public:
     /// Functor type for the calculation of hash values.
@@ -472,7 +477,7 @@ private:
         }
         const size_type log2_size = get_log2_from_hint(n_buckets);
         const size_type size = size_type(1u) << log2_size;
-        auto new_ptr = allocator().allocate(size);
+        auto new_ptr = allocator_access::allocate(allocator(), size);
         if (unlikely(!new_ptr)) {
             piranha_throw(std::bad_alloc, );
         }
@@ -480,7 +485,7 @@ private:
             // Default-construct the elements of the array.
             // NOTE: this is a noexcept operation, no need to account for rolling back.
             for (size_type i = 0u; i < size; ++i) {
-                allocator().construct(&new_ptr[i]);
+                allocator_access::construct(allocator(), &new_ptr[i]);
             }
         } else {
             // Sync variables.
@@ -494,7 +499,7 @@ private:
             auto thread_function = [this, new_ptr, &constructed_ranges](const size_type &start, const size_type &end,
                                                                         const unsigned &thread_idx) {
                 for (size_type i = start; i != end; ++i) {
-                    this->allocator().construct(&new_ptr[i]);
+                    allocator_access::construct(this->allocator(), &new_ptr[i]);
                 }
                 constructed_ranges[thread_idx] = std::make_pair(start, end);
             };
@@ -517,11 +522,11 @@ private:
                 // Destroy what was constructed.
                 for (const auto &r : constructed_ranges) {
                     for (size_type i = r.first; i != r.second; ++i) {
-                        allocator().destroy(&new_ptr[i]);
+                        allocator_access::destroy(allocator(), &new_ptr[i]);
                     }
                 }
                 // Deallocate before re-throwing.
-                allocator().deallocate(new_ptr, size);
+                allocator_access::deallocate(allocator(), new_ptr, size);
                 throw;
             }
         }
@@ -536,9 +541,9 @@ private:
         if (ptr()) {
             const size_type size = size_type(1u) << m_log2_size;
             for (size_type i = 0u; i < size; ++i) {
-                allocator().destroy(&ptr()[i]);
+                allocator_access::destroy(allocator(), &ptr()[i]);
             }
-            allocator().deallocate(ptr(), size);
+            allocator_access::deallocate(allocator(), ptr(), size);
         } else {
             piranha_assert(!m_log2_size && !m_n_elements);
         }
@@ -703,7 +708,7 @@ public:
         // Proceed to actual copy only if other has some content.
         if (other.ptr()) {
             const size_type size = size_type(1u) << other.m_log2_size;
-            auto new_ptr = allocator().allocate(size);
+            auto new_ptr = allocator_access::allocate(allocator(), size);
             if (unlikely(!new_ptr)) {
                 piranha_throw(std::bad_alloc, );
             }
@@ -711,14 +716,14 @@ public:
             try {
                 // Copy-construct the elements of the array.
                 for (; i < size; ++i) {
-                    allocator().construct(&new_ptr[i], other.ptr()[i]);
+                    allocator_access::construct(allocator(), &new_ptr[i], other.ptr()[i]);
                 }
             } catch (...) {
                 // Unwind the construction and deallocate, before re-throwing.
                 for (size_type j = 0u; j < i; ++j) {
-                    allocator().destroy(&new_ptr[j]);
+                    allocator_access::destroy(allocator(), &new_ptr[j]);
                 }
-                allocator().deallocate(new_ptr, size);
+                allocator_access::deallocate(allocator(), new_ptr, size);
                 throw;
             }
             // Assign the members.
