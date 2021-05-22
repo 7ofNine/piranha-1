@@ -64,6 +64,9 @@ see https://www.gnu.org/licenses/. */
 #endif
 
 #define PIRANHA_CPLUSPLUS MPPP_CPLUSPLUS
+#if PIRANHA_CPLUSPLUS < 201705L
+#error C++ standard less then 20 is not supported
+#endif
 
 // NOTE: clang has to go first, as it might define __GNUC__ internally.
 // Same thing could happen with ICC.

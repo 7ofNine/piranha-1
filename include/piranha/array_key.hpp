@@ -299,6 +299,8 @@ public:
     {
         return m_container.hash();
     }
+
+
     /// Move-add element at the end.
     /**
      * Move-add \p x at the end of the internal container.
@@ -307,10 +309,14 @@ public:
      *
      * @throws unspecified any exception thrown by piranha::small_vector::push_back().
      */
+
+
     void push_back(value_type &&x)
     {
         m_container.push_back(std::move(x));
     }
+
+
     /// Copy-add element at the end.
     /**
      * Copy-add \p x at the end of the internal container.
@@ -323,6 +329,8 @@ public:
     {
         m_container.push_back(x);
     }
+
+
     /// Equality operator.
     /**
      * @param other the comparison argument.

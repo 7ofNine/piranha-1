@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.19.0)
 
 project(piranha VERSION 0.20)
 
+#we only support c++20 and higher
+set (PIRANHA_MIN_CXX_STANDARD 20)
+if(${CMAKE_CXX_STANDARD} VERSION_LESS ${PIRANHA_MIN_CXX_STANDARD})
+    message(FATAL "C++ standard ${CMAKE_CXX_STANDARD} less than 20 is not supported")
+else()
+    message(STATUS "C++ standard used is ${CMAKE_CXX_STANDARD}")    
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules" "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/yacma")
 
 message(STATUS "System name: ${CMAKE_SYSTEM_NAME}")

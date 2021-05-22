@@ -34,6 +34,7 @@ see https://www.gnu.org/licenses/. */
 #if PIRANHA_CPLUSPLUS >= 201703L
 #include <numeric>
 #endif
+
 #include <type_traits>
 #include <utility>
 
