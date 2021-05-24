@@ -26,6 +26,7 @@ You should have received copies of the GNU General Public License and the
 GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
 
+#pragma once
 #ifndef PIRANHA_MATH_DEGREE_HPP
 #define PIRANHA_MATH_DEGREE_HPP
 
@@ -61,12 +62,8 @@ template <typename T>
 using is_degree_type
     = conjunction<is_returnable<detected_t<total_degree_t_, T>>, is_returnable<detected_t<partial_degree_t_, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept DegreeType = is_degree_type<T>::value;
-
-#endif
 
 inline namespace impl
 {
@@ -79,26 +76,16 @@ using partial_degree_t = enable_if_t<is_degree_type<T>::value, partial_degree_t_
 } // namespace impl
 
 // Total degree.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <DegreeType T>
 inline auto
-#else
-template <typename T>
-inline total_degree_t<T>
-#endif
 degree(T &&x)
 {
     return degree_impl<uncvref_t<T>>{}(std::forward<T>(x));
 }
 
 // Partial degree.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <DegreeType T>
 inline auto
-#else
-template <typename T>
-inline partial_degree_t<T>
-#endif
 degree(T &&x, const symbol_fset &s)
 {
     return degree_impl<uncvref_t<T>>{}(std::forward<T>(x), s);

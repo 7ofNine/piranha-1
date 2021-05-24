@@ -41,12 +41,7 @@ namespace piranha
 {
 
 // The default implementation.
-template <typename T, typename U, typename V
-#if !defined(PIRANHA_HAVE_CONCEPTS)
-          ,
-          typename = void
-#endif
-          >
+template <typename T, typename U, typename V>
 class gcd3_impl
 {
 public:
@@ -71,12 +66,9 @@ template <typename T, typename U, typename V = U>
 struct are_gcd3_types : is_detected<gcd3_t_, T, U, V> {
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U, typename V = U>
 concept Gcd3Types = are_gcd3_types<T, U, V>::value;
 
-#endif
 
 // GCD, ternary form.
 //#if defined(PIRANHA_HAVE_CONCEPTS)                                                               //TODO:: this does not work properly. How to fix????

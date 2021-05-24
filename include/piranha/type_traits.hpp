@@ -55,10 +55,9 @@ template <typename T>
 struct is_string_type : mppp::is_string_type<T> {
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename T>
 concept StringType = is_string_type<T>::value;
-#endif
+
 
 inline namespace impl
 {
@@ -187,8 +186,6 @@ using is_nonconst_rvalue_ref = conjunction<std::is_rvalue_reference<T>, negation
 template <typename T, typename... Args>
 using are_same = conjunction<std::is_same<T, Args>...>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 // Provide concept versions of a few C++ type traits.
 template <typename T>
 concept CppArithmetic = std::is_arithmetic<T>::value;
@@ -214,19 +211,14 @@ concept NonConst = !std::is_const<T>::value;
 template <typename T, typename... Args>
 concept Same = are_same<T, Args...>::value;
 
-#endif
-
 template <typename T>
 using is_cpp_complex
     = disjunction<std::is_same<uncv_t<T>, std::complex<float>>, std::is_same<uncv_t<T>, std::complex<double>>,
                   std::is_same<uncv_t<T>, std::complex<long double>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept CppComplex = is_cpp_complex<T>::value;
 
-#endif
 
 // Swappable type-trait/concept.
 
@@ -315,12 +307,9 @@ struct is_swappable : std::conditional<std_swap_viable<T, U>::value, using_std_a
 
 #endif
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U = T>
 concept Swappable = is_swappable<T, U>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -335,12 +324,9 @@ template <typename T, typename U = T>
 struct is_addable : is_detected<add_t, T, U> {
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U = T>
 concept Addable = is_addable<T, U>::value;
 
-#endif
 
 /// In-place addable type trait.
 /**
@@ -390,12 +376,9 @@ using preinc_t = decltype(++std::declval<T>());
 template <typename T>
 using is_preincrementable = is_detected<preinc_t, T>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept Preincrementable = is_preincrementable<T>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -422,12 +405,9 @@ using postinc_t = decltype(std::declval<T>()++);
 template <typename T>
 using is_postincrementable = is_detected<postinc_t, T>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept Postincrementable = is_postincrementable<T>::value;
 
-#endif
 
 /// Subtractable type trait.
 /**
@@ -684,12 +664,9 @@ struct is_equality_comparable : conjunction<std::is_convertible<detected_t<eq_t,
                                             std::is_convertible<detected_t<ineq_t, T, U>, bool>> {
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U = T>
 concept EqualityComparable = is_equality_comparable<T, U>::value;
 
-#endif
 
 /// Less-than-comparable type trait.
 /**
@@ -1042,12 +1019,9 @@ using is_iterator = conjunction<
     // (which have their own tags) to satisfy this type trait.
     base_type_in_tuple<detected_t<it_traits_iterator_category, T>, it_tags_tuple>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept Iterator = is_iterator<T>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -1157,12 +1131,9 @@ using is_input_iterator = conjunction<
     // custom categories derived from the standard ones.
     std::is_base_of<std::input_iterator_tag, detected_t<it_traits_iterator_category, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept InputIterator = is_input_iterator<T>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -1196,12 +1167,9 @@ using is_output_iterator = conjunction<
           negation<std::is_base_of<std::output_iterator_tag, detected_t<it_traits_iterator_category, T>>>,
           std::is_base_of<std::output_iterator_tag, detected_t<it_traits_iterator_category, T>>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U>
 concept OutputIterator = is_output_iterator<T, U>::value;
 
-#endif
 
 template <typename T>
 using is_forward_iterator = conjunction<
@@ -1226,24 +1194,19 @@ using is_forward_iterator = conjunction<
     // Category check.
     std::is_base_of<std::forward_iterator_tag, detected_t<it_traits_iterator_category, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept ForwardIterator = is_forward_iterator<T>::value;
 
-#endif
 
 template <typename T>
 using is_mutable_forward_iterator
     = conjunction<is_forward_iterator<T>,
                   std::is_same<detected_t<it_traits_reference, T>, addlref_t<detected_t<it_traits_value_type, T>>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept MutableForwardIterator = is_mutable_forward_iterator<T>::value;
 
-#endif
+
 
 inline namespace impl
 {
@@ -1301,24 +1264,18 @@ template <typename T>
 using is_input_range = conjunction<is_input_iterator<detected_t<begin_adl::type, T>>,
                                    std::is_same<detected_t<begin_adl::type, T>, detected_t<end_adl::type, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept InputRange = is_input_range<T>::value;
 
-#endif
 
 // Forward range.
 template <typename T>
 using is_forward_range = conjunction<is_forward_iterator<detected_t<begin_adl::type, T>>,
                                      std::is_same<detected_t<begin_adl::type, T>, detected_t<end_adl::type, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept ForwardRange = is_forward_range<T>::value;
 
-#endif
 
 // Mutable forward range.
 template <typename T>
@@ -1326,12 +1283,9 @@ using is_mutable_forward_range
     = conjunction<is_mutable_forward_iterator<detected_t<begin_adl::type, T>>,
                   std::is_same<detected_t<begin_adl::type, T>, detected_t<end_adl::type, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept MutableForwardRange = is_mutable_forward_range<T>::value;
 
-#endif
 
 // Detect if type can be returned from a function.
 // NOTE: constructability implies destructability:
@@ -1341,12 +1295,9 @@ concept MutableForwardRange = is_mutable_forward_range<T>::value;
 template <typename T>
 using is_returnable = disjunction<std::is_same<T, void>, std::is_copy_constructible<T>, std::is_move_constructible<T>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept Returnable = is_returnable<T>::value;
 
-#endif
 
 /// Detect if zero is a multiplicative absorber.
 /**

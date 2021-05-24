@@ -110,13 +110,8 @@ public:
 };
 
 // Specialisation of piranha::pow() for piranha::real.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename U, mppp::real_op_types<U> T>
 class pow_impl<T, U>
-#else
-template <typename T, typename U>
-class pow_impl<T, U, enable_if_t<mppp::are_real_op_types<T, U>::value>>
-#endif
 {
 public:
     template <typename T1, typename U1>
@@ -270,13 +265,8 @@ struct div3_impl<real> {
 } // namespace math
 
 // From real to C++ integral.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <mppp::cpp_integral To>
 class safe_convert_impl<To, real>
-#else
-template <typename To>
-class safe_convert_impl<To, real, enable_if_t<mppp::is_cpp_integral<To>::value>>
-#endif
 {
 public:
     bool operator()(To &n, const real &r) const

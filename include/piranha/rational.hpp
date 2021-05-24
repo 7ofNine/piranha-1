@@ -145,13 +145,8 @@ struct negate_impl<mppp::rational<SSize>> {
 }
 
 // Specialisation of the implementation of piranha::pow() for mp++'s rationals.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename U, mppp::rational_op_types<U> T>
 class pow_impl<T, U>
-#else
-template <typename T, typename U>
-class pow_impl<T, U, enable_if_t<mppp::are_rational_op_types<T, U>::value>>
-#endif
 {
 public:
     template <typename T1, typename U1>
@@ -162,13 +157,8 @@ public:
 };
 
 // Specialisation of the implementation of piranha::binomial() for mp++ rational top argument.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <std::size_t SSize, mppp::rational_integral_interoperable<SSize> T>
 class binomial_impl<mppp::rational<SSize>, T>
-#else
-template <std::size_t SSize, typename T>
-class binomial_impl<mppp::rational<SSize>, T, enable_if_t<mppp::is_rational_integral_interoperable<T, SSize>::value>>
-#endif
 {
 public:
     template <typename T1, typename U1>
@@ -237,14 +227,8 @@ struct partial_impl<mppp::rational<SSize>> {
 }
 
 // From rational integral interop to rational.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <std::size_t SSize, mppp::rational_integral_interoperable<SSize> From>
 class safe_convert_impl<mppp::rational<SSize>, From>
-#else
-template <std::size_t SSize, typename From>
-class safe_convert_impl<mppp::rational<SSize>, From,
-                        enable_if_t<mppp::is_rational_integral_interoperable<From, SSize>::value>>
-#endif
 {
 public:
     bool operator()(mppp::rational<SSize> &out, const From &n) const
@@ -255,14 +239,8 @@ public:
 };
 
 // From C++ FP to rational.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <std::size_t SSize, mppp::cpp_floating_point From>
 class safe_convert_impl<mppp::rational<SSize>, From>
-#else
-template <std::size_t SSize, typename From>
-class safe_convert_impl<mppp::rational<SSize>, From,
-                        enable_if_t<mppp::is_cpp_floating_point<From>::value>>
-#endif
 {
 public:
     bool operator()(mppp::rational<SSize> &out, From x) const
@@ -276,14 +254,8 @@ public:
 };
 
 // From rational to rational integral interop.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <std::size_t SSize, mppp::rational_integral_interoperable<SSize> To>
 class safe_convert_impl<To, mppp::rational<SSize>>
-#else
-template <std::size_t SSize, typename To>
-class safe_convert_impl<To, mppp::rational<SSize>,
-                        enable_if_t<mppp::is_rational_integral_interoperable<To, SSize>::value>>
-#endif
 {
 public:
     bool operator()(To &n, const mppp::rational<SSize> &q) const

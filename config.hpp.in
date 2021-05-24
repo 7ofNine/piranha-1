@@ -59,10 +59,6 @@ see https://www.gnu.org/licenses/. */
 #define PIRANHA_HAVE_THREAD_LOCAL
 #endif
 
-#if defined(MPPP_HAVE_CONCEPTS)
-#define PIRANHA_HAVE_CONCEPTS
-#endif
-
 #define PIRANHA_CPLUSPLUS MPPP_CPLUSPLUS
 #if PIRANHA_CPLUSPLUS < 201705L
 #error C++ standard less then 20 is not supported

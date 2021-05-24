@@ -10,6 +10,10 @@ else()
     message(STATUS "C++ standard used is ${CMAKE_CXX_STANDARD}")    
 endif()
 
+if(NOT MSVC)
+    message(FATAL "Only Visual Studio >= 2019 is supported")
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules" "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/yacma")
 
 message(STATUS "System name: ${CMAKE_SYSTEM_NAME}")
@@ -216,7 +220,7 @@ endif()
 set(PIRANHA_MINIMUM_MPPP_VERSION 0.23)
 find_package(mp++ REQUIRED)
 if(${mp++_VERSION} VERSION_LESS ${PIRANHA_MINIMUM_MPPP_VERSION})
-    message(FATAL_ERROR "The minimum mp++ version required by obake is ${PIRANHA_MINIMUM_MPPP_VERSION}, but version ${mp++_VERSION} was found instead.")
+    message(FATAL_ERROR "The minimum mp++ version required by piranha is ${PIRANHA_MINIMUM_MPPP_VERSION}, but version ${mp++_VERSION} was found instead.")
 endif()
 
 target_link_libraries(piranha INTERFACE mp++::mp++)

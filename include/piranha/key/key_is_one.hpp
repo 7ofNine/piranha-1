@@ -41,12 +41,7 @@ namespace piranha
 {
 
 // Default functor for the implementation of piranha::key_is_one().
-template <typename T
-#if !defined(PIRANHA_HAVE_CONCEPTS)
-          ,
-          typename = void
-#endif
-          >
+template <typename T>
 class key_is_one_impl
 {
 };
@@ -62,19 +57,12 @@ using key_is_one_t_ = decltype(key_is_one_impl<uncvref_t<T>>{}(std::declval<T>()
 template <typename T>
 using is_key_is_one_type = std::is_convertible<detected_t<key_is_one_t_, T>, bool>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept KeyIsOneType = is_key_is_one_type<T>::value;
 
-#endif
 
 // One detection for keys.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <KeyIsOneType T>
-#else
-template <typename T, enable_if_t<is_key_is_one_type<T>::value, int> = 0>
-#endif
 inline bool key_is_one(T &&x, const symbol_fset &s)
 {
     return key_is_one_impl<uncvref_t<T>>{}(std::forward<T>(x), s);

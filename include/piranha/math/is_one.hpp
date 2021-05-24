@@ -65,32 +65,20 @@ using is_one_t_ = decltype(is_one_impl<uncvref_t<T>>{}(std::declval<T>()));
 template <typename T>
 using is_is_one_type = std::is_convertible<detected_t<is_one_t_, T>, bool>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept IsOneType = is_is_one_type<T>::value;
 
-#endif
 
 // One detection.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <IsOneType T>
-#else
-template <typename T, enable_if_t<is_is_one_type<T>::value, int> = 0>
-#endif
 inline bool is_one(T &&x)
 {
     return is_one_impl<uncvref_t<T>>{}(std::forward<T>(x));
 }
 
 // Specialisation of the piranha::is_one() functor for C++ complex floating-point types.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppComplex T>
 class is_one_impl<T>
-#else
-template <typename T>
-class is_one_impl<T, enable_if_t<is_cpp_complex<T>::value>>
-#endif
 {
 public:
     bool operator()(const T &c) const

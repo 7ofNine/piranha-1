@@ -45,12 +45,7 @@ namespace piranha
 {
 
 // The default (empty) implementation.
-template <typename T, typename U
-#if !defined(PIRANHA_HAVE_CONCEPTS)
-          ,
-          typename = void
-#endif
-          >
+template <typename T, typename U>
 class gcd_impl
 {
 };
@@ -67,12 +62,8 @@ template <typename T, typename U = T>
 struct are_gcd_types : is_returnable<detected_t<gcd_t_, T, U>> {
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U = T>
 concept GcdTypes = are_gcd_types<T, U>::value;
-
-#endif
 
 inline namespace impl
 {
@@ -82,26 +73,16 @@ using gcd_t = enable_if_t<are_gcd_types<T, U>::value, gcd_t_<T, U>>;
 }
 
 // GCD.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename T, typename U> requires GcdTypes<T, U> // TODO:: is this correct???
 inline auto gcd(T &&x, U &&y)
-#else
-template <typename T, typename U>
-inline gcd_t<T, U> gcd(T &&x, U &&y)
-#endif
 {
     return gcd_impl<uncvref_t<decltype(x)>, uncvref_t<decltype(y)>>{}(std::forward<decltype(x)>(x),
                                                                       std::forward<decltype(y)>(y));
 }
 
 // Specialisation for C++ integrals.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppIntegral T, CppIntegral U>
 class gcd_impl<T, U>
-#else
-template <typename T, typename U>
-class gcd_impl<T, U, enable_if_t<conjunction<std::is_integral<T>, std::is_integral<U>>::value>>
-#endif
 {
     // NOTE: here we use the same return type as specified by std::gcd().
     // This forces us to do some casting around to avoid compiler warnings
