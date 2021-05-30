@@ -459,4 +459,10 @@ struct msgpack_convert_impl<mppp::rational<SSize>, rational_msgpack_convert_enab
 #endif
 }
 
+template <typename T>
+concept Rational = mppp::detail::is_rational<T>::value;
+
+template <typename T>
+concept NotRational = !mppp::detail::is_rational<T>::value;
+
 #endif

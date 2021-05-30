@@ -269,13 +269,16 @@ public:
      */
     eval_type operator()(const std::vector<U> &values)
     {
-        if (unlikely(values.size() != m_eval_dict.size() - m_extra_map.size())) {
+        if (values.size() != m_eval_dict.size() - m_extra_map.size()) [[unlikely]] 
+        {
             piranha_throw(std::invalid_argument, "the size of the vector of evaluation values does not "
                                                  "match the size of the symbol list used during construction");
         }
+
         piranha_assert(values.size() == m_names.size());
         decltype(values.size()) i = 0u;
-        for (; i < values.size(); ++i) {
+        for (; i < values.size(); ++i)
+        {
             auto ptr = m_ptrs[static_cast<decltype(m_ptrs.size())>(i)];
             piranha_assert(
                 ptr == std::addressof(m_eval_dict.find(m_names[static_cast<decltype(m_names.size())>(i)])->second));
@@ -287,16 +290,20 @@ public:
         // multiple times yields the same order:
         // http://stackoverflow.com/questions/18301302/is-forauto-i-unordered-map-guaranteed-to-have-the-same-order-every-time
         // https://groups.google.com/a/isocpp.org/forum/#!topic/std-discussion/kHYFUhsauhU
-        for (const auto &p : m_extra_map) {
+        for (const auto &p : m_extra_map)
+        {
             piranha_assert(i < m_ptrs.size());
             auto ptr = m_ptrs[static_cast<decltype(m_ptrs.size())>(i)];
             piranha_assert(ptr == std::addressof(m_eval_dict.find(p.first)->second));
             *ptr = p.second(values);
             ++i;
         }
+
         // NOTE: of course, this will have to be fixed in the rewrite.
         return math::evaluate(m_x, symbol_fmap<U>{m_eval_dict.begin(), m_eval_dict.end()});
     }
+
+
     /// Get evaluation object.
     /**
      * @return a const reference to the internal copy of the object of type \p T created

@@ -85,7 +85,8 @@ inline void k_monomial_load_check_sizes(T s1, U s2)
     static_assert(
         conjunction<std::is_integral<T>, std::is_unsigned<T>, std::is_integral<U>, std::is_unsigned<U>>::value,
         "Type error: this function requires unsigned integral types as input.");
-    if (unlikely(s1 != s2)) {
+    if (s1 != s2) [[unlikely]]
+    {
         piranha_throw(std::invalid_argument, "invalid size detected in the deserialization of a Kronercker "
                                              "monomial: the deserialized size ("
                                                  + std::to_string(s1)
@@ -267,7 +268,8 @@ public:
     explicit kronecker_monomial(Iterator begin, Iterator end, const symbol_fset &s)
     {
         const auto c_size = construct_from_range(begin, end);
-        if (unlikely(c_size != s.size())) {
+        if (c_size != s.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the Kronecker monomial constructor from range and symbol set "
                                                  "yielded an invalid monomial: the range length ("
                                                      + std::to_string(c_size)
@@ -275,6 +277,8 @@ public:
                                                      + std::to_string(s.size()) + ")");
         }
     }
+
+
     /// Constructor from set of symbols.
     /**
      * After construction all exponents in the monomial will be zero.
@@ -399,10 +403,10 @@ public:
         return kronecker_monomial(detail::km_merge_symbols<v_type, ka>(ins_map, args, m_value));
     }
 
-private:
-    // Enabler for multiply().
-    template <typename Cf>
-    using multiply_enabler = enable_if_t<has_mul3<Cf>::value, int>;
+//private:
+//    // Enabler for multiply().
+//    template <typename Cf>
+//    using multiply_enabler = enable_if_t<has_mul3<Cf>::value, int>;
 
 public:
     /// Multiply terms with a Kronecker monomial key.
@@ -424,7 +428,8 @@ public:
      *
      * @throws unspecified any exception thrown by piranha::math::mul3().
      */
-    template <typename Cf, multiply_enabler<Cf> = 0>
+    //template <typename Cf, multiply_enabler<Cf> = 0>
+    template <Multiply3 Cf>
     static void multiply(std::array<term<Cf, kronecker_monomial>, multiply_arity> &res,
                          const term<Cf, kronecker_monomial> &t1, const term<Cf, kronecker_monomial> &t2,
                          const symbol_fset &)
@@ -648,10 +653,12 @@ public:
         const T n(v_b[p]);
         // Decrement the exponent in the monomial.
         // NOTE: maybe replace with the safe integral subber, eventually.
-        if (unlikely(n == std::numeric_limits<T>::min())) {
+        if (n == std::numeric_limits<T>::min()) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, "negative overflow error in the calculation of the "
                                                "partial derivative of a Kronecker monomial");
         }
+
         v_b[p] = static_cast<T>(n - T(1));
         return std::make_pair(n, kronecker_monomial(ka::encode(v)));
     }
@@ -694,14 +701,17 @@ public:
             if (cur_sym == s) {
                 // NOTE: here using i is safe: if retval gained an extra exponent in the condition above,
                 // we are never going to land here as cur_sym is at this point never going to be s.
-                if (unlikely(retval[i] == std::numeric_limits<T>::max())) {
+                if (retval[i] == std::numeric_limits<T>::max()) [[unlikely]]
+                {
                     piranha_throw(
                         std::overflow_error,
                         "positive overflow error in the calculation of the antiderivative of a Kronecker monomial");
                 }
+
                 // Do the addition and check for zero later, to detect -1 expo.
                 retval[i] = static_cast<T>(retval[i] + T(1));
-                if (unlikely(piranha::is_zero(retval[i]))) {
+                if (piranha::is_zero(retval[i])) [[unlikely]]
+                {
                     piranha_throw(std::invalid_argument,
                                   "unable to perform Kronecker monomial integration: a negative "
                                   "unitary exponent was encountered in correspondence of the variable '"
@@ -710,8 +720,10 @@ public:
                 expo = retval[i];
             }
         }
+
         // If expo is still zero, it means we need to add a new exponent at the end.
-        if (expo == T(0)) {
+        if (expo == T(0))
+        {
             retval.push_back(T(1));
             expo = T(1);
         }
@@ -756,7 +768,8 @@ public:
     eval_type<U> evaluate(const std::vector<U> &values, const symbol_fset &args) const
     {
         // NOTE: here we can check the values size only against args.
-        if (unlikely(values.size() != args.size())) {
+        if (values.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(
                 std::invalid_argument,
                 "invalid vector of values for Kronecker monomial evaluation: the size of the vector of values ("
@@ -821,7 +834,8 @@ public:
     std::vector<std::pair<subs_type<U>, kronecker_monomial>> subs(const symbol_idx_fmap<U> &smap,
                                                                   const symbol_fset &args) const
     {
-        if (unlikely(smap.size() && smap.rbegin()->first >= args.size())) {
+        if (smap.size() && smap.rbegin()->first >= args.size()) [[unlikely]]
+        {
             // The last element of the substitution map must be a valid index into args.
             piranha_throw(
                 std::invalid_argument,
@@ -829,6 +843,7 @@ public:
                     + std::to_string(smap.rbegin()->first) + ") must be smaller than the monomial's size ("
                     + std::to_string(args.size()) + ")");
         }
+
         std::vector<std::pair<subs_type<U>, kronecker_monomial>> retval;
         if (smap.size()) {
             // The substitution map contains something, proceed to the substitution.
@@ -839,14 +854,16 @@ public:
             // Zero out the corresponding exponent.
             v[static_cast<decltype(v.size())>(it->first)] = T(0);
             // NOTE: move to the next element in the init statement of the for loop.
-            for (++it; it != smap.end(); ++it) {
+            for (++it; it != smap.end(); ++it)
+            {
                 ret *= piranha::pow(it->second, v[static_cast<decltype(v.size())>(it->first)]);
                 v[static_cast<decltype(v.size())>(it->first)] = T(0);
             }
             // NOTE: the is_returnable requirement ensures we can emplace back a pair
             // containing the subs type.
             retval.emplace_back(std::move(ret), kronecker_monomial(ka::encode(v)));
-        } else {
+        } else
+        {
             // Otherwise, the substitution yields 1 and the monomial is the original one.
             retval.emplace_back(subs_type<U>(1), *this);
         }
@@ -901,7 +918,8 @@ public:
     std::vector<std::pair<ipow_subs_type<U>, kronecker_monomial>> ipow_subs(const symbol_idx &p, const integer &n,
                                                                             const U &x, const symbol_fset &args) const
     {
-        if (unlikely(!n.sgn())) {
+        if (!n.sgn()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid integral power for ipow_subs() in a Kronecker monomial: the power must be nonzero");
         }
@@ -1103,7 +1121,8 @@ public:
     {
         const auto tmp = k.unpack(s);
         piranha_assert(tmp.size() == s.size());
-        if (unlikely(p.size() && *p.rbegin() >= tmp.size())) {
+        if (p.size() && *p.rbegin() >= tmp.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the largest value in the positions set for the computation of the "
                                                  "partial degree of a Kronecker monomial is "
                                                      + std::to_string(*p.rbegin())

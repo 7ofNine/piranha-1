@@ -51,7 +51,6 @@ see https://www.gnu.org/licenses/. */
 // Import a bunch of macros/definitions from mp++.
 #include <mp++/config.hpp>
 
-#define likely(x) mppp_likely(x)
 #define unlikely(x) mppp_unlikely(x)
 
 #define PIRANHA_MAYBE_TLS MPPP_MAYBE_TLS

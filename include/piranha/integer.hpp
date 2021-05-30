@@ -145,7 +145,8 @@ class sin_impl<mppp::integer<SSize>>
 public:
     mppp::integer<SSize> operator()(const mppp::integer<SSize> &n) const
     {
-        if (unlikely(!n.is_zero())) {
+        if (!n.is_zero()) [[unlikely]]
+        {
             piranha_throw(std::domain_error, "cannot compute the sine of the non-zero integer " + n.to_string());
         }
         return mppp::integer<SSize>{};
@@ -158,9 +159,11 @@ class cos_impl<mppp::integer<SSize>>
 public:
     mppp::integer<SSize> operator()(const mppp::integer<SSize> &n) const
     {
-        if (unlikely(!n.is_zero())) {
+        if (!n.is_zero()) [[unlikely]] 
+        {
             piranha_throw(std::domain_error, "cannot compute the cosine of the non-zero integer " + n.to_string());
         }
+
         return mppp::integer<SSize>{1};
     }
 };
@@ -194,13 +197,15 @@ struct partial_impl<mppp::integer<SSize>> {
 template <std::size_t SSize>
 inline mppp::integer<SSize> factorial(const mppp::integer<SSize> &n)
 {
-    if (unlikely(n.sgn() < 0)) {
+    if (n.sgn() < 0) [[unlikely]]
+    {
         piranha_throw(std::domain_error, "cannot compute the factorial of the negative integer " + n.to_string());
     }
     mppp::integer<SSize> retval;
     mppp::fac_ui(retval, static_cast<unsigned long>(n));
     return retval;
 }
+
 
 /// Default functor for the implementation of piranha::math::ipow_subs().
 /**

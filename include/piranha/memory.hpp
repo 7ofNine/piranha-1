@@ -80,7 +80,8 @@ inline void *cpp_aligned_alloc(const std::size_t &alignment, const std::size_t &
 	const std::size_t orig_a_size = a_size;
 	// Allocate enough space for payload and alignment.
 	void *u_ptr = std::malloc(a_size), *orig_u_ptr = u_ptr;
-	if (unlikely(u_ptr == nullptr)) {
+	if (u_ptr == nullptr) [[unlikely]]
+    {
 		piranha_throw(std::bad_alloc,);
 	}
 	// Try to align.
@@ -135,16 +136,19 @@ inline void *cpp_aligned_alloc(const std::size_t &alignment, const std::size_t &
 inline void *aligned_palloc(const std::size_t &alignment, const std::size_t &size)
 {
     // Platform-independent part: special values for alignment and size.
-    if (unlikely(size == 0u)) {
+    if (size == 0u) [[unlikely]]
+    {
         return nullptr;
     }
     if (alignment == 0u) {
         void *ptr = std::malloc(size);
-        if (unlikely(ptr == nullptr)) {
+        if (ptr == nullptr) [[unlikely]]
+        {
             piranha_throw(std::bad_alloc, );
         }
         return ptr;
     }
+
 #if defined(PIRANHA_HAVE_POSIX_MEMALIGN)
     void *ptr;
     const int retval = ::posix_memalign(&ptr, alignment, size);
@@ -155,11 +159,14 @@ inline void *aligned_palloc(const std::size_t &alignment, const std::size_t &siz
 #elif defined(_WIN32)
     // _aligned_malloc() wants a power-of-2 value for the alignment:
     // https://msdn.microsoft.com/en-us/library/8z34s9c6.aspx
-    if (unlikely(alignment & (alignment - 1u))) {
+    if (alignment & (alignment - 1u)) [[unlikely]]
+    {
         piranha_throw(std::bad_alloc, );
     }
+
     void *ptr = ::_aligned_malloc(size, alignment);
-    if (unlikely(ptr == nullptr)) {
+    if (ptr == nullptr) [[unlikely]]
+    {
         piranha_throw(std::bad_alloc, );
     }
     return ptr;
@@ -187,10 +194,13 @@ inline void *aligned_palloc(const std::size_t &alignment, const std::size_t &siz
  */
 inline void aligned_pfree(const std::size_t &alignment, void *ptr)
 {
-    if (unlikely(ptr == nullptr)) {
+    if (ptr == nullptr) [[unlikely]]
+    {
         return;
     }
-    if (alignment == 0u) {
+
+    if (alignment == 0u)
+    {
         std::free(ptr);
         return;
     }
@@ -202,6 +212,7 @@ inline void aligned_pfree(const std::size_t &alignment, void *ptr)
     piranha_throw(not_implemented_error, "memory alignment primitives are not available");
 #endif
 }
+
 
 /// Alignment checks.
 /**
@@ -234,12 +245,15 @@ inline bool alignment_check(const std::size_t &alignment)
         return true;
     }
     // Alignment must be power of 2.
-    if (unlikely(static_cast<bool>(alignment & (alignment - 1u)))) {
+    if (static_cast<bool>(alignment & (alignment - 1u))) [[unlikely]]
+    {
         return false;
     }
+
     // Alignment must not be less than the natural alignment of T. We just need the '<' check
     // as we already know that alignment is either a multiple of alignof(T) or a divisor.
-    if (unlikely(alignment < alignof(typename std::decay<T>::type))) {
+    if (alignment < alignof(typename std::decay<T>::type)) [[unlikely]] 
+    {
         return false;
     }
 #if defined(PIRANHA_HAVE_POSIX_MEMALIGN)
@@ -278,10 +292,12 @@ inline void parallel_value_init(T *ptr, const std::size_t &size, const unsigned 
 {
     using ranges_vector = std::vector<std::pair<T *, T *>>;
     using rv_size_type = typename ranges_vector::size_type;
-    if (unlikely(ptr == nullptr)) {
+    if (ptr == nullptr) [[unlikely]] 
+    {
         piranha_assert(!size);
         return;
     }
+
     // Initing functor.
     auto init_function = [](T *start, T *end, const unsigned &thread_idx, ranges_vector *rv) {
         auto orig_start = start;
@@ -309,7 +325,8 @@ inline void parallel_value_init(T *ptr, const std::size_t &size, const unsigned 
     } else {
         // Init the ranges vector with (ptr,ptr) pairs, so they are empty ranges.
         ranges_vector inited_ranges(static_cast<rv_size_type>(n_threads), std::make_pair(ptr, ptr));
-        if (unlikely(inited_ranges.size() != n_threads)) {
+        if (inited_ranges.size() != n_threads) [[unlikely]]
+        {
             piranha_throw(std::bad_alloc, );
         }
         // Work per thread.
@@ -357,13 +374,16 @@ inline void parallel_destroy(T *ptr, const std::size_t &size, const unsigned &n_
     using ranges_vector = std::vector<std::pair<T *, T *>>;
     using rv_size_type = typename ranges_vector::size_type;
     // Nothing to be done for null pointers.
-    if (unlikely(ptr == nullptr)) {
+    if (ptr == nullptr) [[unlikely]]
+    {
         piranha_assert(!size);
         return;
     }
+
     // Nothing needs to be done for trivially destructible types:
     // http://en.cppreference.com/w/cpp/language/lifetime
-    if (std::is_trivially_destructible<T>::value) {
+    if (std::is_trivially_destructible<T>::value)
+    {
         return;
     }
     // Destroy functor.
@@ -386,7 +406,8 @@ inline void parallel_destroy(T *ptr, const std::size_t &size, const unsigned &n_
         future_list<decltype(destroy_function(ptr, ptr))> f_list;
         try {
             d_ranges.resize(static_cast<rv_size_type>(n_threads), std::make_pair(ptr, ptr));
-            if (unlikely(d_ranges.size() != n_threads)) {
+            if (d_ranges.size() != n_threads) [[unlikely]]
+            {
                 piranha_throw(std::bad_alloc, );
             }
         } catch (...) {
@@ -481,9 +502,11 @@ template <typename T, typename = typename std::enable_if<is_container_element<T>
 inline std::unique_ptr<T[], detail::parallel_deleter<T>> make_parallel_array(const std::size_t &size,
                                                                              const unsigned &n_threads)
 {
-    if (unlikely(size > std::numeric_limits<std::size_t>::max() / sizeof(T))) {
+    if (size > std::numeric_limits<std::size_t>::max() / sizeof(T)) [[unlikely]]
+    {
         piranha_throw(std::bad_alloc, );
     }
+
     // Allocate space. This could be nullptr if size is zero.
     auto ptr = static_cast<T *>(aligned_palloc(0u, static_cast<std::size_t>(size * sizeof(T))));
     try {

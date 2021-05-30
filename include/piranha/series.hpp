@@ -568,7 +568,8 @@ class series_operators
             return retval;
         }
         // NOTE: we do not use x any more, as it might have been moved.
-        if (likely(retval.m_symbol_set == y.m_symbol_set)) {
+        if (retval.m_symbol_set == y.m_symbol_set) [[likely]] 
+        {
             retval.template merge_terms<Sign>(std::forward<U>(y));
         } else {
             // Let's fix the args of the first series, if needed.
@@ -2071,6 +2072,8 @@ public:
         PIRANHA_TT_CHECK(is_input_iterator, const_iterator);
         piranha_assert(destruction_checks());
     }
+
+
     /// Copy-assignment operator.
     /**
      * @param other assignment argument.
@@ -2081,12 +2084,14 @@ public:
      */
     series &operator=(const series &other)
     {
-        if (likely(this != &other)) {
+        if (this != &other) [[likely]] {
             series tmp(other);
             *this = std::move(tmp);
         }
         return *this;
     }
+
+
     /// Move assignment operator.
     /**
      * @param other the assignment argument.

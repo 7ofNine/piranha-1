@@ -205,14 +205,14 @@ TEST_CASE("t_subs_series_t_subs_test")
     CHECK(x.t_subs("x", p_type3{"c"}, p_type3{"s"}) == p_type3{"x"});
     CHECK(piranha::sin(x).t_subs("x", p_type3{"c"}, p_type3{3.}) == p_type3{3.});
     CHECK(                                                         //TODO:: comparison with different precisions fails. mpp has changed
-        piranha::pow(piranha::cos(p_type3{"x"}), 7).t_subs("x", real(.5), real(piranha::pow(real(3), .5)) / 2) ==
-        piranha::pow(real(.5), 7));
+        piranha::pow(piranha::cos(p_type3{"x"}), 7).t_subs("x", real(.5, 113), real(piranha::pow(real(3, 113), .5)) / 2) ==
+        piranha::pow(real(.5, 113), 7));
     CHECK(                                                         //TODO:: comparison with different precisions fails. mpp has changed
-        piranha::pow(piranha::sin(p_type3{"x"}), 7).t_subs("x", real(piranha::pow(real(3), .5)) / 2, real(.5)) ==
-        piranha::pow(real(.5), 7));
+        piranha::pow(piranha::sin(p_type3{"x"}), 7).t_subs("x", real(piranha::pow(real(3, 113), .5)) / 2, real(.5, 113)) ==
+        piranha::pow(real(.5, 113), 7));
     CHECK(                                                          //TODO:: comparison with different precisions fails. mpp has changed
-        math::t_subs(piranha::pow(piranha::sin(p_type3{"x"}), 7), "x", real(piranha::pow(real(3), .5)) / 2, real(.5)) ==
-        piranha::pow(real(.5), 7));
+        math::t_subs(piranha::pow(piranha::sin(p_type3{"x"}), 7), "x", real(piranha::pow(real(3, 113), .5)) / 2, real(.5, 113)) ==
+        piranha::pow(real(.5, 113), 7));
     CHECK(math::abs(math::evaluate<real>(
                     ((piranha::pow(piranha::sin(p_type3{"x"}), 5) * piranha::pow(piranha::cos(p_type3{"x"}), 5))
                          .t_subs("x", real(piranha::pow(real(3), .5)) / 2, real(.5))

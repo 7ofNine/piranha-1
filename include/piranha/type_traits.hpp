@@ -25,6 +25,7 @@ for more details.
 You should have received copies of the GNU General Public License and the
 GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
+#pragma once
 
 #ifndef PIRANHA_TYPE_TRAITS_HPP
 #define PIRANHA_TYPE_TRAITS_HPP
@@ -79,10 +80,12 @@ template <std::size_t CurIdx, class...>
 struct disjunction_idx_impl : std::integral_constant<std::size_t, 0u> {
 };
 
+
 template <std::size_t CurIdx, class B1>
 struct disjunction_idx_impl<CurIdx, B1>
     : std::integral_constant<std::size_t, (B1::value != false) ? CurIdx : CurIdx + 1u> {
 };
+
 
 template <std::size_t CurIdx, class B1, class... Bn>
 struct disjunction_idx_impl<CurIdx, B1, Bn...>
@@ -90,9 +93,11 @@ struct disjunction_idx_impl<CurIdx, B1, Bn...>
                        disjunction_idx_impl<CurIdx + 1u, Bn...>>::type {
 };
 
+
 template <class... Bs>
 struct disjunction_idx : disjunction_idx_impl<0u, Bs...> {
 };
+
 
 // Deferred conditional. It will check the value of the
 // compile-time boolean constant C, and derive from T if
@@ -100,6 +105,7 @@ struct disjunction_idx : disjunction_idx_impl<0u, Bs...> {
 template <typename C, typename T, typename F>
 struct dcond : std::conditional<C::value != false, T, F>::type {
 };
+
 
 #if PIRANHA_CPLUSPLUS >= 201402L
 
@@ -149,6 +155,7 @@ using decay_t = typename std::decay<T>::type;
 
 #endif
 
+
 // Tuple for_each(). Execute the functor f on each element of the input Tuple.
 // https://isocpp.org/blog/2015/01/for-each-arg-eric-niebler
 // https://www.reddit.com/r/cpp/comments/2tffv3/for_each_argumentsean_parent/
@@ -159,6 +166,7 @@ void apply_to_each_item(T &&t, const F &f, index_sequence<Is...>)
     (void)std::initializer_list<int>{0, (void(f(std::get<Is>(std::forward<T>(t)))), 0)...};
 }
 
+
 template <class Tuple, class F>
 void tuple_for_each(Tuple &&t, const F &f)
 {
@@ -166,55 +174,72 @@ void tuple_for_each(Tuple &&t, const F &f)
                        make_index_sequence<std::tuple_size<typename std::decay<Tuple>::type>::value>{});
 }
 
+
 // Some handy aliases.
 template <typename T>
 using uncv_t = typename std::remove_cv<T>::type;
 
+
 template <typename T>
 using unref_t = typename std::remove_reference<T>::type;
+
 
 template <typename T>
 using uncvref_t = uncv_t<unref_t<T>>;
 
+
 template <typename T>
 using addlref_t = typename std::add_lvalue_reference<T>::type;
+
 
 template <typename T>
 using is_nonconst_rvalue_ref = conjunction<std::is_rvalue_reference<T>, negation<std::is_const<unref_t<T>>>>;
 } // namespace impl
 
+
 template <typename T, typename... Args>
 using are_same = conjunction<std::is_same<T, Args>...>;
+
+
 
 // Provide concept versions of a few C++ type traits.
 template <typename T>
 concept CppArithmetic = std::is_arithmetic<T>::value;
 
+
 template <typename T>
 concept CppIntegral = std::is_integral<T>::value;
+
 
 template <typename T>
 concept CppFloatingPoint = std::is_floating_point<T>::value;
 
+
 template <typename T, typename... Args>
 concept Constructible = std::is_constructible<T, Args...>::value;
+
 
 template <typename T>
 concept DefaultConstructible = std::is_default_constructible<T>::value;
 
+
 template <typename From, typename To>
 concept Convertible = std::is_convertible<From, To>::value;
+
 
 template <typename T>
 concept NonConst = !std::is_const<T>::value;
 
+
 template <typename T, typename... Args>
 concept Same = are_same<T, Args...>::value;
+
 
 template <typename T>
 using is_cpp_complex
     = disjunction<std::is_same<uncv_t<T>, std::complex<float>>, std::is_same<uncv_t<T>, std::complex<double>>,
                   std::is_same<uncv_t<T>, std::complex<long double>>>;
+
 
 template <typename T>
 concept CppComplex = is_cpp_complex<T>::value;
@@ -307,6 +332,7 @@ struct is_swappable : std::conditional<std_swap_viable<T, U>::value, using_std_a
 
 #endif
 
+
 template <typename T, typename U = T>
 concept Swappable = is_swappable<T, U>::value;
 
@@ -319,10 +345,12 @@ template <typename T, typename U>
 using add_t = decltype(std::declval<T>() + std::declval<U>());
 } // namespace impl
 
+
 // Addable type trait.
 template <typename T, typename U = T>
 struct is_addable : is_detected<add_t, T, U> {
 };
+
 
 template <typename T, typename U = T>
 concept Addable = is_addable<T, U>::value;
@@ -348,24 +376,28 @@ public:
     static const bool value = implementation_defined;
 };
 
+
 template <typename T, typename U>
 const bool is_addable_in_place<T, U>::value;
 
+
 inline namespace impl
 {
-
 #if defined(PIRANHA_CLANG_HAS_WDEPRECATED_INCREMENT_BOOL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-increment-bool"
 #endif
+
 
 #if defined(PIRANHA_CLANG_HAS_WINCREMENT_BOOL)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincrement-bool"
 #endif
 
+
 template <typename T>
 using preinc_t = decltype(++std::declval<T>());
+
 
 #if defined(PIRANHA_CLANG_HAS_WDEPRECATED_INCREMENT_BOOL) || defined(PIRANHA_CLANG_HAS_WINCREMENT_BOOL)
 #pragma clang diagnostic pop
@@ -432,6 +464,7 @@ public:
 template <typename T, typename U>
 const bool is_subtractable<T, U>::value;
 
+
 /// In-place subtractable type trait.
 /**
  * This type trait will be \p true if objects of type \p U can be subtracted in-place from objects of type \p T,
@@ -452,16 +485,18 @@ public:
     static const bool value = implementation_defined;
 };
 
+
 template <typename T, typename U>
 const bool is_subtractable_in_place<T, U>::value;
 
+
 inline namespace impl
 {
-
 // Type resulting from the multiplication of T and U.
 template <typename T, typename U>
 using mul_t = decltype(std::declval<const T &>() * std::declval<const U &>());
 } // namespace impl
+
 
 /// Multipliable type trait.
 /**
@@ -476,13 +511,16 @@ class is_multipliable
 {
     static const bool implementation_defined = is_detected<mul_t, T, U>::value;
 
+
 public:
     /// Value of the type trait.
     static const bool value = implementation_defined;
 };
 
+
 template <typename T, typename U>
 const bool is_multipliable<T, U>::value;
+
 
 /// In-place multipliable type trait.
 /**
@@ -504,8 +542,10 @@ public:
     static const bool value = implementation_defined;
 };
 
+
 template <typename T, typename U>
 const bool is_multipliable_in_place<T, U>::value;
+
 
 /// Divisible type trait.
 /**
@@ -768,6 +808,7 @@ public:
 
 template <typename T>
 const bool is_container_element<T>::value;
+
 
 /// Type trait for classes that can be output-streamed.
 /**
@@ -1097,11 +1138,13 @@ using is_input_iterator = conjunction<
     // bidir iterator, etc.).
     std::is_integral<detected_t<it_traits_difference_type, T>>,
     std::is_signed<detected_t<it_traits_difference_type, T>>,
+
     // *it returns it_traits::reference_type, both in mutable and const forms.
     // NOTE: it_traits::reference_type is never nonesuch, we tested its availability
     // in is_iterator.
     std::is_same<det_deref_t<T>, detected_t<it_traits_reference, T>>,
     std::is_same<det_deref_t<const T>, detected_t<it_traits_reference, T>>,
+
     // *it is convertible to it_traits::value_type.
     // NOTE: as above, it_traits::value_type does exist.
     std::is_convertible<det_deref_t<T>, detected_t<it_traits_value_type, T>>,
@@ -1122,10 +1165,13 @@ using is_input_iterator = conjunction<
           std::true_type>,
     // ++it returns &it. Only non-const needed.
     std::is_same<detected_t<preinc_t, addlref_t<T>>, addlref_t<T>>,
+
     // it is post-incrementable. Only non-const needed.
     is_postincrementable<addlref_t<T>>,
+
     // *it++ is convertible to the value type. Only non-const needed.
     std::is_convertible<detected_t<it_inc_deref_t, addlref_t<T>>, detected_t<it_traits_value_type, T>>,
+
     // Check that the iterator category of T derives from the standard
     // input iterator tag. This accommodates the Boost iterators as well, who have
     // custom categories derived from the standard ones.

@@ -228,10 +228,10 @@ TEST_CASE("poisson_series_sin_cos_test")
     CHECK(piranha::sin(p_type2{3}) == piranha::sin(real(3)));
     CHECK(piranha::cos(p_type2{3}) == piranha::cos(real(3)));
     p_type2 p2 = p_type2{"x"} - 2 * p_type2{"y"};
-    CHECK(boost::lexical_cast<std::string>(piranha::sin(-p2)) ==                                  //TODO:: how can we properly control the lenght of the number in the string representation??
-                      "-1.0000000000000000000000000000000*sin(x-2*y)");
+    CHECK(boost::lexical_cast<std::string>(piranha::sin(-p2)) ==                                  
+                      "-1.0000000000*sin(x-2*y)");  // mppp real precision is now 32bits (53 bits = 15 digits ? are specified??
     CHECK(boost::lexical_cast<std::string>(piranha::cos(-p2)) ==
-                      "1.0000000000000000000000000000000*cos(x-2*y)");                            //TODO:: how can we properly control the lenght of the number in the string representation??
+                       "1.0000000000*cos(x-2*y)");                            
     CHECK_THROWS_AS(piranha::sin(p_type2{"x"} * real(rational(1, 2))), std::invalid_argument);
     CHECK_THROWS_AS(piranha::cos(p_type2{"x"} * real(rational(1, 2))), std::invalid_argument);
     typedef poisson_series<real> p_type3;

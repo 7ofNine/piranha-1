@@ -436,8 +436,8 @@ TEST_CASE("series_evaluate_test")
     typedef symbol_fmap<real> dict_type2;
     CHECK((is_evaluable<p_type1, real>::value));
     CHECK(                                                       //TODO:: failes because of different precision 
-        math::evaluate(x + (2 * y).pow(3), dict_type2{{"x", real(1.234)}, {"y", real(-5.678)}, {"z", real()}}) ==
-        real(1.234) + piranha::pow(2 * real(-5.678), 3));
+        math::evaluate(x + (2 * y).pow(3), dict_type2{{"x", real(1.234, 113)}, {"y", real(-5.678, 113)}, {"z", real()}}) ==
+        real(1.234, 113) + piranha::pow(2 * real(-5.678, 113), 3));
     CHECK(
         math::evaluate(x + (2 * y).pow(3), dict_type2{{"x", real(1.234)}, {"y", real(-5.678)}, {"z", real()}}) ==
         math::evaluate(x + piranha::pow(2 * y, 3), dict_type2{{"x", real(1.234)}, {"y", real(-5.678)}, {"z", real()}}));

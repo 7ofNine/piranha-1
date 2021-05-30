@@ -67,12 +67,14 @@ template <typename To, SafelyCastable<To> From>
 inline To safe_cast(From &&x)
 {
     To retval;
-    if (likely(piranha::safe_convert(retval, std::forward<From>(x)))) {
+    if (piranha::safe_convert(retval, std::forward<From>(x))) [[likely]]
+    {
         return retval;
     }
     piranha_throw(safe_cast_failure, "the safe conversion of a value of type '" + type_name<decltype(x)>()
                                          + "' to the type '" + type_name<To>() + "' failed");
 }
+
 
 // Input iterator whose ref type is safely castable to To.
 // NOTE: the way this is currently written we are in the situation in which:

@@ -50,7 +50,8 @@ struct atomic_flag_array {
     // This constructor will init all the flags in the array to false.
     explicit atomic_flag_array(const std::size_t &size) : m_size(size)
     {
-        if (unlikely(size > std::numeric_limits<std::size_t>::max() / sizeof(value_type))) {
+        if (size > std::numeric_limits<std::size_t>::max() / sizeof(value_type)) [[unlikely]]
+        {
             piranha_throw(std::bad_alloc, );
         }
         // Dynamically create an array of unsigned char with enough storage.

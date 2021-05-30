@@ -318,7 +318,7 @@ inline ::mpfr_prec_t real_size_from_prec(const ::mpfr_prec_t &prec)
     // at build time.
     const ::mpfr_prec_t q = prec / GMP_NUMB_BITS, r = prec % GMP_NUMB_BITS;
 #if !defined(PIRANHA_COMPILER_IS_CLANG_CL)
-    piranha_assert(GMP_NUMB_BITS == ::mp_bits_per_limb);
+    //piranha_assert(GMP_NUMB_BITS == ::mp_bits_per_limb);
 #endif
     return q + (r != 0);
 }

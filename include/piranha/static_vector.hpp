@@ -270,6 +270,8 @@ public:
         piranha_assert(m_tag == 1u);
         destroy_items();
     }
+
+
     /// Copy assignment operator.
     /**
      * @param other target of the copy assignment operation.
@@ -280,7 +282,7 @@ public:
      */
     static_vector &operator=(const static_vector &other)
     {
-        if (likely(this != &other)) {
+        if (this != &other) [[likely]] {
  //           if (std::is_pod<T>::value) {  //TODO::is is_trivially_copyable enough??
             if (std::is_trivially_copyable_v<T>){
                 if (other.m_size > m_size) {
@@ -297,6 +299,8 @@ public:
         }
         return *this;
     }
+
+
     /// Move assignment operator.
     /**
      * @param other target of the move assignment operation.
@@ -305,7 +309,7 @@ public:
      */
     static_vector &operator=(static_vector &&other) noexcept
     {
-        if (likely(this != &other)) {
+        if (this != &other) [[likely]] {
  //           if (std::is_pod<T>::value) {    //TODO:: is trivially_copyable enough??
             if (std::is_trivially_copyable_v<T>) {
                 if (other.m_size > m_size) {
@@ -341,6 +345,8 @@ public:
         }
         return *this;
     }
+
+
     /// Const subscript operator.
     /**
      * @param n index of the desired element.

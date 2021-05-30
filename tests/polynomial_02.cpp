@@ -249,15 +249,15 @@ TEST_CASE("polynomial_ipow_subs_test")
         CHECK((has_ipow_subs<p_type2, p_type2>::value));                                     // mppp had the handling of precision changed after version 0.13
         CHECK((has_ipow_subs<p_type2, integer>::value));
         p_type2 x{"x"}, y{"y"};
-        CHECK((x * x * x + y * y).ipow_subs("x", integer(1), real(1.234)) ==                 //TODO:: fails for float different precision causes differetn output.
-                          y * y + piranha::pow(real(1.234), 3));
-        CHECK((x * x * x + y * y).ipow_subs("x", integer(3), real(1.234)) == y * y + real(1.234));
+        CHECK((x * x * x + y * y).ipow_subs("x", integer(1), real(1.234, 113)) ==                 //TODO:: fails for float different precision causes differetn output.
+                          y * y + piranha::pow(real(1.234, 113), 3));
+        CHECK((x * x * x + y * y).ipow_subs("x", integer(3), real(1.234)) == y * y + real(1.234, 113));
         CHECK(
-            (x * x * x + y * y).ipow_subs("x", integer(2), real(1.234)).ipow_subs("y", integer(2), real(-5.678)) ==
-            real(-5.678) + real(1.234) * x);
+            (x * x * x + y * y).ipow_subs("x", integer(2), real(1.234)).ipow_subs("y", integer(2), real(-5.678, 113)) ==
+            real(-5.678, 113) + real(1.234, 113) * x);
         CHECK(                                                                                //TODO:: fails for float different precision causes different output.
-            math::ipow_subs(x * x * x + y * y, "x", integer(1), real(1.234)).ipow_subs("y", integer(1), real(-5.678)) ==
-            piranha::pow(real(-5.678), 2) + piranha::pow(real(1.234), 3));
+            math::ipow_subs(x * x * x + y * y, "x", integer(1), real(1.234, 113)).ipow_subs("y", integer(1), real(-5.678, 113)) ==
+            piranha::pow(real(-5.678, 113), 2) + piranha::pow(real(1.234, 113), 3));
     }
 #endif
     {

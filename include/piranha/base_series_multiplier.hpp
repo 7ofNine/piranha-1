@@ -362,7 +362,7 @@ public:
      */
     explicit base_series_multiplier(const Series &s1, const Series &s2) : m_ss(s1.get_symbol_set())
     {
-        if (unlikely(s1.get_symbol_set() != s2.get_symbol_set())) {
+        if (s1.get_symbol_set() != s2.get_symbol_set()) [[unlikely]] {
             piranha_throw(std::invalid_argument, "incompatible arguments sets");
         }
         // The largest series goes first.
@@ -451,7 +451,7 @@ protected:
                                 const LimitFunctor &lf) const
     {
         PIRANHA_TT_CHECK(is_function_object, MultFunctor, void, const size_type &, const size_type &);
-        if (unlikely(start1 > end1 || start1 > m_v1.size() || end1 > m_v1.size())) {
+        if (start1 > end1 || start1 > m_v1.size() || end1 > m_v1.size()) [[unlikely]] {
             piranha_throw(std::invalid_argument, "invalid bounds in blocked_multiplication");
         }
         // Block size and number of regular blocks.
@@ -570,7 +570,8 @@ protected:
         const size_type size1 = m_v1.size(), size2 = m_v2.size();
         constexpr std::size_t result_size = MultArity;
         // If one of the two series is empty, just return 0.
-        if (unlikely(!size1 || !size2)) {
+        if (!size1 || !size2) [[unlikely]] 
+        {
             return 1u;
         }
         // If either series has a size of 1, just return size1 * size2 * result_size.
@@ -656,8 +657,9 @@ protected:
                     // Perform term multiplication.
                     mf(*it1, idx2);
                     // Check for unlikely overflows when increasing count.
-                    if (unlikely(result_size > std::numeric_limits<size_type>::max()
-                                 || count > std::numeric_limits<size_type>::max() - result_size)) {
+                    if (result_size > std::numeric_limits<size_type>::max()
+                                 || count > std::numeric_limits<size_type>::max() - result_size) [[unlikely]]
+                    {
                         piranha_throw(std::overflow_error, "overflow error");
                     }
                     if (tmp.size() != count + result_size) {
@@ -855,7 +857,8 @@ protected:
     static void sanitise_series(Series &retval, unsigned n_threads)
     {
         using term_type = typename Series::term_type;
-        if (unlikely(n_threads == 0u)) {
+        if (n_threads == 0u) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid number of threads");
         }
         auto &container = retval._container();
@@ -866,15 +869,17 @@ protected:
         if (n_threads == 1u) {
             const auto it_end = container.end();
             for (auto it = container.begin(); it != it_end;) {
-                if (unlikely(!it->is_compatible(args))) {
+                if (!it->is_compatible(args)) [[unlikely]]
+                {
                     piranha_throw(std::invalid_argument, "incompatible term");
                 }
-                if (unlikely(container.size() == std::numeric_limits<bucket_size_type>::max())) {
+                if (container.size() == std::numeric_limits<bucket_size_type>::max()) [[unlikely]] {
                     piranha_throw(std::overflow_error, "overflow error in the number of terms of a series");
                 }
                 // First update the size, it will be scaled back in the erase() method if necessary.
                 container._update_size(static_cast<bucket_size_type>(container.size() + 1u));
-                if (unlikely(it->is_zero(args))) {
+                if (it->is_zero(args)) [[unlikely]]
+                {
                     it = container.erase(it);
                 } else {
                     ++it;
@@ -899,15 +904,19 @@ protected:
                 const auto it_f = bl.end();
                 for (auto it = bl.begin(); it != it_f; ++it) {
                     // Check first for compatibility.
-                    if (unlikely(!it->is_compatible(args))) {
+                    if (!it->is_compatible(args)) [[unlikely]]
+                    {
                         piranha_throw(std::invalid_argument, "incompatible term");
                     }
+
                     // Check for ignorability.
-                    if (unlikely(it->is_zero(args))) {
+                    if (it->is_zero(args)) [[unlikely]]
+                    {
                         term_list.push_back(*it);
                     }
                     // Update the count of terms.
-                    if (unlikely(count == std::numeric_limits<bucket_size_type>::max())) {
+                    if (count == std::numeric_limits<bucket_size_type>::max()) [[unlikely]] 
+                    {
                         piranha_throw(std::overflow_error, "overflow error in the number of terms of a series");
                     }
                     count = static_cast<bucket_size_type>(count + 1u);
@@ -997,7 +1006,8 @@ protected:
         Series retval;
         retval.set_symbol_set(m_ss);
         // Do not do anything if one of the two series is empty.
-        if (unlikely(m_v1.empty() || m_v2.empty())) {
+        if (m_v1.empty() || m_v2.empty()) [[unlikely]]
+        {
             return retval;
         }
         const size_type size1 = m_v1.size(), size2 = m_v2.size();

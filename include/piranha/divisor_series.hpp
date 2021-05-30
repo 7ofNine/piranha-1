@@ -136,17 +136,23 @@ class divisor_series
     template <typename T, enable_if_t<std::is_integral<T>::value, int> = 0>
     static void expo_increase(T &e)
     {
-        if (unlikely(e == std::numeric_limits<T>::max())) {
+        if (e == std::numeric_limits<T>::max()) [[unlikely]] 
+{
             piranha_throw(std::overflow_error, "overflow in the computation of the partial derivative "
                                                "of a divisor series");
         }
+
         e = static_cast<T>(e + T(1));
     }
+
+
     template <typename T, enable_if_t<!std::is_integral<T>::value, int> = 0>
     static void expo_increase(T &e)
     {
         ++e;
     }
+
+
     // Safe computation of the integral multiplier.
     template <typename T, enable_if_t<std::is_integral<T>::value, int> = 0>
     static auto safe_mult(const T &n, const T &m) -> decltype(n * m)
@@ -155,23 +161,33 @@ class divisor_series
         ret.neg();
         return static_cast<decltype(n * m)>(ret);
     }
+
+
     template <typename T, enable_if_t<!std::is_integral<T>::value, int> = 0>
     static auto safe_mult(const T &n, const T &m) -> decltype(-(n * m))
     {
         return -(n * m);
     }
+
+
     // This is the first stage - the second part of the chain rule for each term.
     template <typename T>
     using d_partial_type_0
         = decltype(std::declval<const dv_type &>() * std::declval<const dv_type &>() * std::declval<const T &>());
+
+
     template <typename T>
     using d_partial_type_1 = decltype(std::declval<const T &>() * std::declval<const d_partial_type_0<T> &>());
+
+
     // Requirements on the final type for the first stage.
     template <typename T>
     using d_partial_type = enable_if_t<
         conjunction<std::is_constructible<d_partial_type_1<T>, d_partial_type_0<T>>,
                     std::is_constructible<d_partial_type_1<T>, int>, is_addable_in_place<d_partial_type_1<T>>>::value,
         d_partial_type_1<T>>;
+
+
     template <typename T = divisor_series>
     d_partial_type<T> d_partial_impl(typename T::term_type::key_type &key, const symbol_idx &p) const
     {
@@ -219,6 +235,8 @@ class divisor_series
         }
         return retval;
     }
+
+
     template <typename T = divisor_series>
     d_partial_type<T> divisor_partial(const typename T::term_type &term, const symbol_idx &p) const
     {
@@ -241,6 +259,8 @@ class divisor_series
         // Construct and return the result.
         return tmp_ds * d_partial_impl(sd.first, p);
     }
+
+
     // The final type.
     template <typename T>
     using partial_type_ = decltype(
@@ -535,25 +555,31 @@ public:
         const auto it_f = this->m_container.end();
         // Turn name into symbol position.
         const auto idx = ss_index_of(this->m_symbol_set, name);
-        for (auto it = this->m_container.begin(); it != it_f; ++it) {
-            if (idx < this->m_symbol_set.size()) {
+        for (auto it = this->m_container.begin(); it != it_f; ++it)
+        {
+            if (idx < this->m_symbol_set.size())
+            {
                 // If the variable is in the symbol set, then we need to make sure
                 // that each multiplier associated to it is zero. Otherwise, the divisor
                 // depends on the variable and we cannot perform the integration.
                 const auto it2_f = it->m_key.m_container.end();
-                for (auto it2 = it->m_key.m_container.begin(); it2 != it2_f; ++it2) {
+                for (auto it2 = it->m_key.m_container.begin(); it2 != it2_f; ++it2)
+                {
                     using size_type = decltype(it2->v.size());
                     piranha_assert(idx < it2->v.size());
-                    if (unlikely(it2->v[static_cast<size_type>(idx)] != 0)) {
+                    if (it2->v[static_cast<size_type>(idx)] != 0) [[unlikely]]
+                    {
                         piranha_throw(std::invalid_argument, "unable to integrate with respect to divisor variables");
                     }
                 }
             }
+
             divisor_series tmp;
             tmp.set_symbol_set(this->m_symbol_set);
             tmp.insert(term_type(cf_type(1), it->m_key));
             retval += math::integrate(it->m_cf, name) * tmp;
         }
+
         return retval;
     }
 };
