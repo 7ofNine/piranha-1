@@ -35,8 +35,9 @@ see https://www.gnu.org/licenses/. */
 #include <thread>
 #include <type_traits>
 #include <vector>
+#include <barrier>
 
-#include <piranha/thread_barrier.hpp>
+//#include <piranha/thread_barrier.hpp>
 
 #include "catch.hpp"
 
@@ -60,9 +61,9 @@ TEST_CASE("atomic_utils_atomic_flag_array_test")
     // Concurrent.
     size = 1000000u;
     a_array a2(size);
-    thread_barrier tb(2u);
+    std::barrier tb(2u, []() noexcept {});
     auto func = [&a2, &tb, size]() {
-        tb.wait();
+        tb.arrive_and_wait();
         for (std::size_t i = 0u; i < size; ++i) {
             a2[i].test_and_set();
         }
@@ -97,9 +98,9 @@ TEST_CASE("atomic_utils_atomic_lock_guard_test")
     using size_type = std::vector<double>::size_type;
     std::vector<double> v(size, 0.);
     a_array a0(size);
-    thread_barrier tb(2u);
+    std::barrier tb(2u, []()noexcept {});
     auto func = [&a0, &tb, &v, size]() {
-        tb.wait();
+        tb.arrive_and_wait();
         for (std::size_t i = 0u; i < size; ++i) {
             alg l(a0[i]);
             v[static_cast<size_type>(i)] = 1.;

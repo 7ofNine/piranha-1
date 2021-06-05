@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.19.0)
 
 project(piranha VERSION 0.20)
 
+#we only support c++20 and higher
+set (PIRANHA_MIN_CXX_STANDARD 20)
+if(${CMAKE_CXX_STANDARD} VERSION_LESS ${PIRANHA_MIN_CXX_STANDARD})
+    message(FATAL "C++ standard ${CMAKE_CXX_STANDARD} less than 20 is not supported")
+else()
+    message(STATUS "C++ standard used is ${CMAKE_CXX_STANDARD}")    
+endif()
+
+if(NOT MSVC)
+    message(FATAL "Only Visual Studio >= 2019 is supported")
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules" "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/yacma")
 
 message(STATUS "System name: ${CMAKE_SYSTEM_NAME}")
@@ -208,7 +220,7 @@ endif()
 set(PIRANHA_MINIMUM_MPPP_VERSION 0.23)
 find_package(mp++ REQUIRED)
 if(${mp++_VERSION} VERSION_LESS ${PIRANHA_MINIMUM_MPPP_VERSION})
-    message(FATAL_ERROR "The minimum mp++ version required by obake is ${PIRANHA_MINIMUM_MPPP_VERSION}, but version ${mp++_VERSION} was found instead.")
+    message(FATAL_ERROR "The minimum mp++ version required by piranha is ${PIRANHA_MINIMUM_MPPP_VERSION}, but version ${mp++_VERSION} was found instead.")
 endif()
 
 target_link_libraries(piranha INTERFACE mp++::mp++)
@@ -384,8 +396,7 @@ SET(INCS
     include/piranha/symbol_utils.hpp
     include/piranha/t_substitutable_series.hpp
     include/piranha/term.hpp
-    include/piranha/thread_barrier.hpp
-    include/piranha/thread_management.hpp
+    #include/piranha/thread_barrier.hpp
     include/piranha/thread_pool.hpp
     include/piranha/trigonometric_series.hpp
     include/piranha/tuning.hpp

@@ -145,7 +145,8 @@ class sin_impl<mppp::integer<SSize>>
 public:
     mppp::integer<SSize> operator()(const mppp::integer<SSize> &n) const
     {
-        if (unlikely(!n.is_zero())) {
+        if (!n.is_zero()) [[unlikely]]
+        {
             piranha_throw(std::domain_error, "cannot compute the sine of the non-zero integer " + n.to_string());
         }
         return mppp::integer<SSize>{};
@@ -158,9 +159,11 @@ class cos_impl<mppp::integer<SSize>>
 public:
     mppp::integer<SSize> operator()(const mppp::integer<SSize> &n) const
     {
-        if (unlikely(!n.is_zero())) {
+        if (!n.is_zero()) [[unlikely]] 
+        {
             piranha_throw(std::domain_error, "cannot compute the cosine of the non-zero integer " + n.to_string());
         }
+
         return mppp::integer<SSize>{1};
     }
 };
@@ -194,13 +197,15 @@ struct partial_impl<mppp::integer<SSize>> {
 template <std::size_t SSize>
 inline mppp::integer<SSize> factorial(const mppp::integer<SSize> &n)
 {
-    if (unlikely(n.sgn() < 0)) {
+    if (n.sgn() < 0) [[unlikely]]
+    {
         piranha_throw(std::domain_error, "cannot compute the factorial of the negative integer " + n.to_string());
     }
     mppp::integer<SSize> retval;
     mppp::fac_ui(retval, static_cast<unsigned long>(n));
     return retval;
 }
+
 
 /// Default functor for the implementation of piranha::math::ipow_subs().
 /**
@@ -349,13 +354,8 @@ struct div3_impl<mppp::integer<SSize>> {
 }
 
 // Specialisation of the implementation of piranha::gcd() for mp++'s integers.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename U, typename T> requires mppp::integer_integral_op_types<U,T>
 class gcd_impl<T, U>
-#else
-template <typename T, typename U>
-class gcd_impl<T, U, enable_if_t<mppp::are_integer_integral_op_types<T, U>::value>>
-#endif
 {
 public:
     // Call operator, overload for mp++'s integers.
@@ -699,13 +699,8 @@ struct msgpack_convert_impl<T, integer_msgpack_convert_enabler<T>> {
 
 #endif
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <std::size_t SSize, mppp::cpp_arithmetic From>
 class safe_convert_impl<mppp::integer<SSize>, From>
-#else
-template <std::size_t SSize, typename From>
-class safe_convert_impl<mppp::integer<SSize>, From, enable_if_t<mppp::is_cpp_arithmetic<From>::value>>
-#endif
 {
     template <typename T>
     static bool impl(mppp::integer<SSize> &out, const T &n, const std::true_type &)
@@ -730,13 +725,8 @@ public:
     }
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <mppp::cpp_integral To, std::size_t SSize>
 class safe_convert_impl<To, mppp::integer<SSize>>
-#else
-template <typename To, std::size_t SSize>
-class safe_convert_impl<To, mppp::integer<SSize>, enable_if_t<mppp::is_cpp_integral<To>::value>>
-#endif
 {
 public:
     bool operator()(To &out, const mppp::integer<SSize> &n) const

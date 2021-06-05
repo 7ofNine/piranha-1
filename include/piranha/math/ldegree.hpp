@@ -62,12 +62,9 @@ template <typename T>
 using is_ldegree_type
     = conjunction<is_returnable<detected_t<total_ldegree_t_, T>>, is_returnable<detected_t<partial_ldegree_t_, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept LdegreeType = is_ldegree_type<T>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -80,26 +77,16 @@ using partial_ldegree_t = enable_if_t<is_ldegree_type<T>::value, partial_ldegree
 } // namespace impl
 
 // Total low degree.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <LdegreeType T>
 inline auto
-#else
-template <typename T>
-inline total_ldegree_t<T>
-#endif
 ldegree(T &&x)
 {
     return ldegree_impl<uncvref_t<T>>{}(std::forward<T>(x));
 }
 
 // Partial low degree.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <LdegreeType T>
 inline auto
-#else
-template <typename T>
-inline partial_ldegree_t<T>
-#endif
 ldegree(T &&x, const symbol_fset &s)
 {
     return ldegree_impl<uncvref_t<T>>{}(std::forward<T>(x), s);

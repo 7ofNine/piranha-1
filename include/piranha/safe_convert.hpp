@@ -44,12 +44,7 @@ namespace piranha
 {
 
 // Default implementation of piranha::safe_convert().
-template <typename To, typename From
-#if !defined(PIRANHA_HAVE_CONCEPTS)
-          ,
-          typename = void
-#endif
-          >
+template <typename To, typename From>
 class safe_convert_impl
 {
 public:
@@ -77,32 +72,20 @@ using safe_convert_t_
 template <typename From, typename To>
 using is_safely_convertible = std::is_convertible<detected_t<safe_convert_t_, To, From>, bool>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename From, typename To>
 concept SafelyConvertible = is_safely_convertible<From, To>::value;
 
-#endif
 
 // Safe conversion.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename To, SafelyConvertible<To> From>
-#else
-template <typename To, typename From, enable_if_t<is_safely_convertible<From, To>::value, int> = 0>
-#endif
 inline bool safe_convert(To &&x, From &&y)
 {
     return safe_convert_impl<uncvref_t<To>, uncvref_t<From>>{}(std::forward<To>(x), std::forward<From>(y));
 }
 
 // Specialisation for integral to integral conversions.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppIntegral To, CppIntegral From>
 class safe_convert_impl<To, From>
-#else
-template <typename To, typename From>
-class safe_convert_impl<To, From, enable_if_t<conjunction<std::is_integral<To>, std::is_integral<From>>::value>>
-#endif
 {
     // Unsigned-unsigned overload.
     template <typename T1, typename U1>
@@ -153,13 +136,8 @@ public:
 };
 
 // Specialisation for fp to integral conversions.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppIntegral To, CppFloatingPoint From>
 class safe_convert_impl<To, From>
-#else
-template <typename To, typename From>
-class safe_convert_impl<To, From, enable_if_t<conjunction<std::is_integral<To>, std::is_floating_point<From>>::value>>
-#endif
 {
 public:
     bool operator()(To &out, From x) const

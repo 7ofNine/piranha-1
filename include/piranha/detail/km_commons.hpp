@@ -50,7 +50,8 @@ namespace detail
 template <typename VType, typename KaType, typename T>
 inline VType km_unpack(const symbol_fset &args, const T &value)
 {
-    if (unlikely(args.size() > VType::max_size)) {
+    if (args.size() > VType::max_size) [[unlikely]]
+    {
         piranha_throw(std::invalid_argument, "the size of the input arguments set (" + std::to_string(args.size())
                                                  + ") is larger than the maximum allowed size ("
                                                  + std::to_string(VType::max_size) + ")");
@@ -64,13 +65,16 @@ inline VType km_unpack(const symbol_fset &args, const T &value)
 template <typename VType, typename KaType, typename T>
 inline T km_merge_symbols(const symbol_idx_fmap<symbol_fset> &ins_map, const symbol_fset &args, const T &value)
 {
-    if (unlikely(!ins_map.size())) {
+    if (!ins_map.size()) [[unlikely]]
+    {
         // If we have nothing to insert, it means something is wrong: we should never invoke
         // symbol merging if there's nothing to merge.
         piranha_throw(std::invalid_argument,
                       "invalid argument(s) for symbol set merging: the insertion map cannot be empty");
     }
-    if (unlikely(ins_map.rbegin()->first > args.size())) {
+
+    if (ins_map.rbegin()->first > args.size()) [[unlikely]]
+    {
         // The last element of the insertion map must be at most args.size(), which means that there
         // are symbols to be appended at the end.
         piranha_throw(std::invalid_argument,
@@ -78,12 +82,16 @@ inline T km_merge_symbols(const symbol_idx_fmap<symbol_fset> &ins_map, const sym
                           + std::to_string(ins_map.rbegin()->first) + ") must not be greater than the key's size ("
                           + std::to_string(args.size()) + ")");
     }
+
     const auto old_vector = km_unpack<VType, KaType>(args, value);
     VType new_vector;
     auto map_it = ins_map.begin();
     const auto map_end = ins_map.end();
-    for (decltype(old_vector.size()) i = 0; i < old_vector.size(); ++i) {
-        if (map_it != map_end && map_it->first == i) {
+
+    for (decltype(old_vector.size()) i = 0; i < old_vector.size(); ++i)
+    {
+        if (map_it != map_end && map_it->first == i)
+        {
             // NOTE: if we move to TLS vector for unpacking, this can just
             // become a resize (below as well).
             std::fill_n(std::back_inserter(new_vector), map_it->second.size(), T(0));
@@ -91,24 +99,29 @@ inline T km_merge_symbols(const symbol_idx_fmap<symbol_fset> &ins_map, const sym
         }
         new_vector.push_back(old_vector[i]);
     }
+
     // We could still have symbols which need to be appended at the end.
     if (map_it != map_end) {
         std::fill_n(std::back_inserter(new_vector), map_it->second.size(), T(0));
         piranha_assert(map_it + 1 == map_end);
     }
+
     // Return new encoded value.
     return KaType::encode(new_vector);
 }
 
+
 template <typename VType, typename KaType, typename T>
 inline void km_trim_identify(std::vector<char> &candidates, const symbol_fset &args, const T &value)
 {
-    if (unlikely(candidates.size() != args.size())) {
+    if (candidates.size() != args.size()) [[unlikely]]
+    {
         piranha_throw(std::invalid_argument, "invalid mask for trim_identify(): the size of the mask ("
                                                  + std::to_string(candidates.size())
                                                  + ") differs from the size of the reference symbol set ("
                                                  + std::to_string(args.size()) + ")");
     }
+
     const VType tmp = km_unpack<VType, KaType>(args, value);
     for (decltype(tmp.size()) i = 0; i < tmp.size(); ++i) {
         if (tmp[i] != T(0)) {
@@ -120,19 +133,25 @@ inline void km_trim_identify(std::vector<char> &candidates, const symbol_fset &a
 template <typename VType, typename KaType, typename T>
 inline T km_trim(const std::vector<char> &trim_idx, const symbol_fset &args, const T &value)
 {
-    if (unlikely(trim_idx.size() != args.size())) {
+    if (trim_idx.size() != args.size()) [[unlikely]]
+    {
         piranha_throw(std::invalid_argument, "invalid mask for trim(): the size of the mask ("
                                                  + std::to_string(trim_idx.size())
                                                  + ") differs from the size of the reference symbol set ("
                                                  + std::to_string(args.size()) + ")");
     }
+
     const VType tmp = km_unpack<VType, KaType>(args, value);
     VType new_vector;
-    for (decltype(tmp.size()) i = 0; i < tmp.size(); ++i) {
-        if (!trim_idx[static_cast<decltype(trim_idx.size())>(i)]) {
+
+    for (decltype(tmp.size()) i = 0; i < tmp.size(); ++i)
+    {
+        if (!trim_idx[static_cast<decltype(trim_idx.size())>(i)])
+        {
             new_vector.push_back(tmp[i]);
         }
     }
+
     return KaType::encode(new_vector);
 }
 }

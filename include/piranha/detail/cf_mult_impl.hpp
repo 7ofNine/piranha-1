@@ -25,6 +25,7 @@ for more details.
 You should have received copies of the GNU General Public License and the
 GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
+#pragma once
 
 #ifndef PIRANHA_DETAIL_CF_MULT_IMPL_HPP
 #define PIRANHA_DETAIL_CF_MULT_IMPL_HPP
@@ -32,7 +33,6 @@ see https://www.gnu.org/licenses/. */
 #include <type_traits>
 #include <utility>
 
-#include <mp++/rational.hpp>
 
 #include <piranha/is_cf.hpp>
 #include <piranha/math.hpp>
@@ -46,14 +46,14 @@ inline namespace impl
 {
 
 // Overload if the coefficient is a rational.
-template <typename Cf, enable_if_t<mppp::detail::is_rational<Cf>::value, int> = 0>
+template <Rational Cf> 
 inline void cf_mult_impl(Cf &out_cf, const Cf &cf1, const Cf &cf2)
 {
     math::mul3(out_cf._get_num(), cf1.get_num(), cf2.get_num());
 }
 
 // Overload if the coefficient is not a rational.
-template <typename Cf, enable_if_t<!mppp::detail::is_rational<Cf>::value, int> = 0>
+template <NotRational Cf>
 inline void cf_mult_impl(Cf &out_cf, const Cf &cf1, const Cf &cf2)
 {
     math::mul3(out_cf, cf1, cf2);

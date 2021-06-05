@@ -79,8 +79,9 @@ inline void stream_stacktrace(std::ostream &os, const stacktrace &st)
     // NOTE: the overflow check is because we will have to cast to std::streamsize
     // later, due to the iostreams API.
     // LCOV_EXCL_START
-    if (unlikely(max_idx_width > static_cast<std::make_unsigned<std::streamsize>::type>(
-                                     std::numeric_limits<std::streamsize>::max()))) {
+    if (max_idx_width > static_cast<std::make_unsigned<std::streamsize>::type>(
+                                     std::numeric_limits<std::streamsize>::max())) [[unlikely]]
+    {
         // Not much left to do here really.
         std::cerr << "Overflow in the size of a stacktrace, aborting now.\n";
         std::abort();

@@ -683,6 +683,10 @@ public:
 template <typename T>
 const bool has_negate<T>::value;
 
+template <typename T>
+concept Negatable = requires (decltype(std::declval<T&>()) x)
+                             {math::negate(x); };
+
 namespace detail
 {
 
@@ -2179,6 +2183,15 @@ public:
 template <typename T>
 const bool has_mul3<T>::value;
 
+
+template <typename T>
+concept Multiply3 = requires ( decltype(std::declval<T &>()) x, decltype(std::declval<const T&>()) y, decltype(std::declval<const T&>()) z)
+{
+    math::mul3(x, y, z);
+};
+
+
+
 /// Detect piranha::math::div3().
 /**
  * The type trait will be \p true if piranha::math::div3() can be used on instances of \p T,
@@ -2198,6 +2211,13 @@ public:
 
 template <typename T>
 const bool has_div3<T>::value;
+
+
+template <typename T>
+concept Divide3 = requires (decltype(std::declval<T&>()) x, decltype(std::declval<const T&>()) y, decltype(std::declval<const T&>()) z)
+{
+    math::div3(x, y, z);
+};
 } // namespace piranha
 
 #endif

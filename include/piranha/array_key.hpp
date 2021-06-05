@@ -186,7 +186,8 @@ public:
     template <typename U, typename Derived2, typename S2, generic_ctor_enabler<U> = 0>
     explicit array_key(const array_key<U, Derived2, S2> &other, const symbol_fset &args)
     {
-        if (unlikely(other.size() != args.size())) {
+        if (other.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "inconsistent sizes in the generic array_key constructor: the size of the array ("
                               + std::to_string(other.size()) + ") differs from the size of the symbol set ("
@@ -195,12 +196,16 @@ public:
         std::transform(other.begin(), other.end(), std::back_inserter(m_container),
                        [](const U &x) { return piranha::safe_cast<value_type>(x); });
     }
+
+
     /// Trivial destructor.
     ~array_key()
     {
         PIRANHA_TT_CHECK(is_container_element, Derived);
         PIRANHA_TT_CHECK(std::is_base_of, array_key, Derived);
     }
+
+
     /// Copy assignment operator.
     /**
      * @param other the assignment argument.
@@ -299,6 +304,8 @@ public:
     {
         return m_container.hash();
     }
+
+
     /// Move-add element at the end.
     /**
      * Move-add \p x at the end of the internal container.
@@ -307,10 +314,14 @@ public:
      *
      * @throws unspecified any exception thrown by piranha::small_vector::push_back().
      */
+
+
     void push_back(value_type &&x)
     {
         m_container.push_back(std::move(x));
     }
+
+
     /// Copy-add element at the end.
     /**
      * Copy-add \p x at the end of the internal container.
@@ -323,6 +334,8 @@ public:
     {
         m_container.push_back(x);
     }
+
+
     /// Equality operator.
     /**
      * @param other the comparison argument.
@@ -369,13 +382,15 @@ public:
     void trim_identify(std::vector<char> &trim_mask, const symbol_fset &args) const
     {
         auto sbe = size_begin_end();
-        if (unlikely(std::get<0>(sbe) != args.size())) {
+        if (std::get<0>(sbe) != args.size()) [[unlikely]] 
+        {
             piranha_throw(std::invalid_argument, "invalid symbol set for trim_identify(): the size of the array ("
                                                      + std::to_string(std::get<0>(sbe))
                                                      + ") differs from the size of the reference symbol set ("
                                                      + std::to_string(args.size()) + ")");
         }
-        if (unlikely(std::get<0>(sbe) != trim_mask.size())) {
+        if (std::get<0>(sbe) != trim_mask.size()) [[unlikely]] 
+        {
             piranha_throw(std::invalid_argument,
                           "invalid mask for trim_identify(): the size of the array (" + std::to_string(std::get<0>(sbe))
                               + ") differs from the size of the mask (" + std::to_string(trim_mask.size()) + ")");
@@ -411,13 +426,15 @@ public:
     Derived trim(const std::vector<char> &trim_mask, const symbol_fset &args) const
     {
         auto sbe = size_begin_end();
-        if (unlikely(std::get<0>(sbe) != args.size())) {
+        if (std::get<0>(sbe) != args.size()) [[unlikely]] 
+        {
             piranha_throw(std::invalid_argument, "invalid arguments set for trim(): the size of the array ("
                                                      + std::to_string(std::get<0>(sbe))
                                                      + ") differs from the size of the reference symbol set ("
                                                      + std::to_string(args.size()) + ")");
         }
-        if (unlikely(std::get<0>(sbe) != trim_mask.size())) {
+        if (std::get<0>(sbe) != trim_mask.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid mask for trim(): the size of the array (" + std::to_string(std::get<0>(sbe))
                               + ") differs from the size of the mask (" + std::to_string(trim_mask.size()) + ")");

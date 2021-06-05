@@ -76,6 +76,7 @@ template <typename Series, typename Derived>
 class ipow_substitutable_series : public Series, ipow_substitutable_series_tag
 {
     typedef Series base;
+
     // Detect subs term.
     template <typename Term, typename T>
     struct subs_term_score {
@@ -83,13 +84,17 @@ class ipow_substitutable_series : public Series, ipow_substitutable_series_tag
             = static_cast<unsigned>(has_ipow_subs<typename Term::cf_type, T>::value)
               + (static_cast<unsigned>(key_has_ipow_subs<typename Term::key_type, T>::value) << 1u);
     };
+
+
     // Case 1: subs only on cf.
     template <typename T, typename Term>
     using cf_subs_type
         = decltype(math::ipow_subs(std::declval<typename Term::cf_type const &>(), std::declval<std::string const &>(),
                                    std::declval<const integer &>(), std::declval<T const &>()));
+
     template <typename T, typename Term>
     using ret_type_1 = decltype(std::declval<const cf_subs_type<T, Term> &>() * std::declval<Derived const &>());
+
     template <typename T, typename Term, typename std::enable_if<subs_term_score<Term, T>::value == 1u, int>::type = 0>
     static ret_type_1<T, Term> subs_term_impl(const Term &t, const symbol_idx &idx, const std::string &name,
                                               const integer &n, const T &x, const symbol_fset &s_set)
@@ -102,17 +107,22 @@ class ipow_substitutable_series : public Series, ipow_substitutable_series_tag
         // NOTE: use moves here in case the multiplication can take advantage.
         return math::ipow_subs(t.m_cf, name, n, x) * std::move(tmp);
     }
+
+
     // Case 2: subs only on key.
     template <typename T, typename Term>
     using k_subs_type = typename decltype(std::declval<const typename Term::key_type &>().ipow_subs(
         std::declval<const symbol_idx &>(), std::declval<const integer &>(), std::declval<const T &>(),
         std::declval<const symbol_fset &>()))::value_type::first_type;
+
     template <typename T, typename Term>
     using ret_type_2_ = decltype(std::declval<Derived const &>() * std::declval<const k_subs_type<T, Term> &>());
+
     template <typename T, typename Term>
     using ret_type_2 = typename std::enable_if<is_addable_in_place<ret_type_2_<T, Term>>::value
                                                    && std::is_constructible<ret_type_2_<T, Term>, const int &>::value,
                                                ret_type_2_<T, Term>>::type;
+
     template <typename T, typename Term, typename std::enable_if<subs_term_score<Term, T>::value == 2u, int>::type = 0>
     static ret_type_2<T, Term> subs_term_impl(const Term &t, const symbol_idx &idx, const std::string &name,
                                               const integer &n, const T &x, const symbol_fset &s_set)
@@ -130,11 +140,14 @@ class ipow_substitutable_series : public Series, ipow_substitutable_series_tag
         }
         return retval;
     }
+
+
     // Case 3: subs on cf and key.
     // NOTE: the checks on type 2 are already present in the alias above.
     template <typename T, typename Term>
     using ret_type_3
         = decltype(std::declval<const cf_subs_type<T, Term> &>() * std::declval<const ret_type_2<T, Term> &>());
+
     template <typename T, typename Term, typename std::enable_if<subs_term_score<Term, T>::value == 3u, int>::type = 0>
     static ret_type_3<T, Term> subs_term_impl(const Term &t, const symbol_idx &idx, const std::string &name,
                                               const integer &n, const T &x, const symbol_fset &s_set)
@@ -153,17 +166,23 @@ class ipow_substitutable_series : public Series, ipow_substitutable_series_tag
         }
         return std::move(cf_subs) * std::move(acc);
     }
+
+
     // Initial definition of the subs type.
     template <typename T>
     using subs_type_ = decltype(subs_term_impl(std::declval<typename Series::term_type const &>(),
                                                std::declval<const symbol_idx &>(), std::declval<const std::string &>(),
                                                std::declval<const integer &>(), std::declval<const T &>(),
                                                std::declval<symbol_fset const &>()));
+
+
     // Enable conditionally based on the common requirements in the ipow_subs() method.
     template <typename T>
     using ipow_subs_type = enable_if_t<
         conjunction<std::is_constructible<subs_type_<T>, const int &>, is_addable_in_place<subs_type_<T>>>::value,
         subs_type_<T>>;
+
+
     // Enabler for the alternate overload.
     template <typename Int>
     using ipow_subs_int_enabler = enable_if_t<std::is_integral<Int>::value, int>;
@@ -175,7 +194,9 @@ public:
     ipow_substitutable_series(const ipow_substitutable_series &) = default;
     /// Defaulted move constructor.
     ipow_substitutable_series(ipow_substitutable_series &&) = default;
+
     PIRANHA_FORWARDING_CTOR(ipow_substitutable_series, base)
+
     /// Copy assignment operator.
     /**
      * @param other the assignment argument.
@@ -185,6 +206,8 @@ public:
      * @throws unspecified any exception thrown by the assignment operator of the base class.
      */
     ipow_substitutable_series &operator=(const ipow_substitutable_series &other) = default;
+
+
     /// Defaulted move assignment operator.
     /**
      * @param other the assignment argument.
@@ -192,6 +215,8 @@ public:
      * @return a reference to \p this.
      */
     ipow_substitutable_series &operator=(ipow_substitutable_series &&other) = default;
+
+
     /// Trivial destructor.
     ~ipow_substitutable_series()
     {
@@ -199,6 +224,8 @@ public:
         PIRANHA_TT_CHECK(is_series, Derived);
         PIRANHA_TT_CHECK(std::is_base_of, ipow_substitutable_series, Derived);
     }
+
+
     PIRANHA_FORWARDING_ASSIGNMENT(ipow_substitutable_series, base)
     /// Substitution.
     /**

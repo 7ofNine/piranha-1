@@ -26,6 +26,8 @@ You should have received copies of the GNU General Public License and the
 GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
 
+#pragma once
+
 #ifndef PIRANHA_DETAIL_SAFE_INTEGRAL_ARITH_HPP
 #define PIRANHA_DETAIL_SAFE_INTEGRAL_ARITH_HPP
 
@@ -120,51 +122,66 @@ inline T safe_int_sub(T a, T b)
 template <typename T>
 inline T safe_int_add_impl(T a, T b, const std::true_type &)
 {
-    if (b >= T(0)) {
-        if (unlikely(a > std::numeric_limits<T>::max() - b)) {
+    if (b >= T(0))
+    {
+        if (a > std::numeric_limits<T>::max() - b) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, safe_int_arith_err("addition", a, b));
         }
     } else {
-        if (unlikely(a < std::numeric_limits<T>::min() - b)) {
+        if (a < std::numeric_limits<T>::min() - b) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, safe_int_arith_err("addition", a, b));
         }
     }
+
     return static_cast<T>(a + b);
 }
+
 
 // The unsigned add implementation.
 template <typename T>
 inline T safe_int_add_impl(T a, T b, const std::false_type &)
 {
-    if (unlikely(a > std::numeric_limits<T>::max() - b)) {
+    if (a > std::numeric_limits<T>::max() - b) [[unlikely]]
+    {
         piranha_throw(std::overflow_error, safe_int_arith_err("addition", a, b));
     }
+
     return static_cast<T>(a + b);
 }
+
 
 // The signed sub implementation.
 template <typename T>
 inline T safe_int_sub_impl(T a, T b, const std::true_type &)
 {
-    if (b <= T(0)) {
-        if (unlikely(a > std::numeric_limits<T>::max() + b)) {
+    if (b <= T(0))
+    {
+        if (a > std::numeric_limits<T>::max() + b) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, safe_int_arith_err("subtraction", a, b));
         }
     } else {
-        if (unlikely(a < std::numeric_limits<T>::min() + b)) {
+        if (a < std::numeric_limits<T>::min() + b) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, safe_int_arith_err("subtraction", a, b));
         }
     }
+
     return static_cast<T>(a - b);
 }
+
 
 // The unsigned sub implementation.
 template <typename T>
 inline T safe_int_sub_impl(T a, T b, const std::false_type &)
 {
-    if (unlikely(a < b)) {
+    if (a < b) [[unlikely]]
+    {
         piranha_throw(std::overflow_error, safe_int_arith_err("subtraction", a, b));
     }
+
     return static_cast<T>(a - b);
 }
 
@@ -186,20 +203,25 @@ inline T safe_int_sub(T a, T b)
 
 #endif
 
+
 // Let's special case bools, as the integer overflow builtins will not work with them.
 template <>
-inline bool safe_int_add(bool a, bool b)
+inline bool safe_int_add(bool const a, bool const b)
 {
-    if (unlikely(a && b)) {
+    if (a && b) [[unlikely]] 
+    {
         piranha_throw(std::overflow_error, safe_int_arith_err("addition", a, b));
     }
+
     return (a + b) != 0;
 }
 
+
 template <>
-inline bool safe_int_sub(bool a, bool b)
+inline bool safe_int_sub(bool const a, bool const b)
 {
-    if (unlikely(!a && b)) {
+    if (!a && b) [[unlikely]] 
+    {
         piranha_throw(std::overflow_error, safe_int_arith_err("subtraction", a, b));
     }
     return (a - b) != 0;

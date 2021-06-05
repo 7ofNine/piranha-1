@@ -277,12 +277,14 @@ private:
         }
         return true;
     }
+
+
     // Insertion machinery.
     template <typename Term>
     void insertion_impl(Term &&term)
     {
         // Handle the case of a table with no buckets.
-        if (unlikely(!m_container.bucket_count())) {
+        if (!m_container.bucket_count()) [[unlikely]] {
             m_container._increase_size();
         }
         // Try to locate the term.
@@ -290,13 +292,16 @@ private:
         const auto it = m_container._find(term, bucket_idx);
         if (it == m_container.end()) {
             // New term.
-            if (unlikely(m_container.size() == std::numeric_limits<size_type>::max())) {
+            if (m_container.size() == std::numeric_limits<size_type>::max()) [[unlikely]]
+            {
                 piranha_throw(std::overflow_error, "maximum number of elements reached");
             }
+
             // Term is new. Handle the case in which we need to rehash because of load factor.
-            if (unlikely(static_cast<double>(m_container.size() + size_type(1u))
+            if (static_cast<double>(m_container.size() + size_type(1u))
                              / static_cast<double>(m_container.bucket_count())
-                         > m_container.max_load_factor())) {
+                         > m_container.max_load_factor()) [[unlikely]]
+            {
                 m_container._increase_size();
                 // We need a new bucket index in case of a rehash.
                 bucket_idx = m_container._bucket(term);
@@ -309,6 +314,8 @@ private:
             update_exponent(it->e, term.e);
         }
     }
+
+
     template <typename U = T, typename std::enable_if<std::is_integral<U>::value, int>::type = 0>
     static void update_exponent(value_type &a, const value_type &b)
     {
@@ -316,11 +323,14 @@ private:
         piranha_assert(a > 0);
         piranha_assert(b > 0);
         // NOTE: this is safe as we require b to be a positive value.
-        if (unlikely(a > std::numeric_limits<value_type>::max() - b)) {
+        if (a > std::numeric_limits<value_type>::max() - b) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "overflow in the computation of the exponent of a divisor term");
         }
         a = static_cast<value_type>(a + b);
     }
+
+
     template <typename U = T, typename std::enable_if<!std::is_integral<U>::value, int>::type = 0>
     static void update_exponent(value_type &a, const value_type &b)
     {
@@ -365,11 +375,14 @@ public:
      */
     explicit divisor(const divisor &other, const symbol_fset &args) : m_container(other.m_container)
     {
-        if (unlikely(!is_compatible(args))) {
+        if (!is_compatible(args)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the constructed divisor is incompatible with the "
                                                  "input symbol set");
         }
     }
+
+
     /// Constructor from piranha::symbol_fset.
     /**
      * Equivalent to the default constructor.
@@ -381,6 +394,8 @@ public:
         piranha_assert(destruction_checks());
         PIRANHA_TT_CHECK(is_key, divisor);
     }
+
+
     /// Copy assignment operator.
     /**
      * @param other the assignment argument.
@@ -433,24 +448,34 @@ public:
         p_type term;
         // Assign the exponent.
         term.e = piranha::safe_cast<value_type>(e);
-        if (unlikely(term.e <= 0)) {
+        if (term.e <= 0) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "a term of a divisor must have a positive exponent");
         }
+
         // Build the vector to be inserted.
-        for (; begin != end; ++begin) {
+        for (; begin != end; ++begin)
+        {
             term.v.push_back(piranha::safe_cast<value_type>(*begin));
         }
+
         // Range check.
-        if (unlikely(!term_range_check(term))) {
+        if (!term_range_check(term)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "an element in a term of a divisor is outside the allowed range");
         }
+
         // Check that the term is canonical.
-        if (unlikely(!term_is_canonical(term))) {
+        if (!term_is_canonical(term)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "term not in canonical form");
         }
+
         // Perform the insertion.
         insertion_impl(std::move(term));
     }
+
+
     /// Size.
     /**
      * @return the size of the internal container - that is, the number of terms in the product.
@@ -613,13 +638,17 @@ public:
         if (m_container.empty()) {
             return;
         }
-        if (unlikely(m_container.begin()->v.size() != args.size())) {
+        if (m_container.begin()->v.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid size of arguments set");
         }
+
         const auto it_f = m_container.end();
         bool first_term = true;
         os << "1/[";
-        for (auto it = m_container.begin(); it != it_f; ++it) {
+
+        for (auto it = m_container.begin(); it != it_f; ++it)
+        {
             // If this is not the first term, print a leading '*' operator.
             if (first_term) {
                 first_term = false;
@@ -675,12 +704,16 @@ public:
         if (m_container.empty()) {
             return;
         }
-        if (unlikely(m_container.begin()->v.size() != args.size())) {
+        if (m_container.begin()->v.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid size of arguments set");
         }
+
         const auto it_f = m_container.end();
         os << "\\frac{1}{";
-        for (auto it = m_container.begin(); it != it_f; ++it) {
+
+        for (auto it = m_container.begin(); it != it_f; ++it)
+        {
             bool printed_something = false;
             os << "\\left(";
             auto it_args = args.begin();
@@ -720,9 +753,11 @@ private:
     // NOTE: this will have to be fixed in the rework.
     template <typename U>
     using eval_sum_type = decltype(std::declval<const value_type &>() * std::declval<const U &>());
+
     template <typename U>
     using eval_type_
         = decltype(piranha::pow(std::declval<const eval_sum_type<U> &>(), std::declval<const value_type &>()));
+
     template <typename U>
     using eval_type = enable_if_t<
         conjunction<std::is_constructible<eval_type_<U>, const int &>, is_divisible_in_place<eval_type_<U>>,
@@ -751,14 +786,17 @@ public:
     template <typename U>
     eval_type<U> evaluate(const std::vector<U> &values, const symbol_fset &args) const
     {
-        if (unlikely(args.size() != values.size())) {
+        if (args.size() != values.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "cannot evaluate divisor: the size of the symbol set ("
                                                      + std::to_string(args.size())
                                                      + ") differs from the size of the vector of values ("
                                                      + std::to_string(values.size()) + ")");
         }
+
         const auto em = m_container.empty();
-        if (unlikely(!em && m_container.begin()->v.size() != args.size())) {
+        if (!em && m_container.begin()->v.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "cannot evaluate divisor: the size of the symbol set ("
                                                      + std::to_string(args.size())
                                                      + ") differs from the number of symbols in the divisor ("
@@ -770,23 +808,27 @@ public:
             return retval;
         }
         const auto it_f = m_container.end();
-        for (auto it = m_container.begin(); it != it_f; ++it) {
+        for (auto it = m_container.begin(); it != it_f; ++it)
+        {
             eval_sum_type<U> tmp(0);
-            for (typename v_type::size_type i = 0u; i < it->v.size(); ++i) {
+            for (typename v_type::size_type i = 0u; i < it->v.size(); ++i)
+            {
                 // NOTE: might use multadd here eventually for performance.
                 tmp += it->v[i] * values[static_cast<decltype(values.size())>(i)];
             }
+
             // NOTE: consider rewriting this in terms of multiplications as a performance
             // improvement - the eval_type deduction should be changed accordingly.
             retval /= piranha::pow(tmp, it->e);
         }
+
         return retval;
     }
 
-private:
-    // Multiplication utilities.
-    template <typename Cf>
-    using multiply_enabler = enable_if_t<has_mul3<Cf>::value, int>;
+//private:
+//    // Multiplication utilities.
+//    template <typename Cf>
+//    using multiply_enabler = enable_if_t<has_mul3<Cf>::value, int>;
 
 public:
     /// Multiply terms with a divisor key.
@@ -813,15 +855,18 @@ public:
      * - the public interface of piranha::hash_set,
      * - arithmetic operations on the exponent.
      */
-    template <typename Cf, multiply_enabler<Cf> = 0>
+    //template <typename Cf, multiply_enabler<Cf> = 0>
+    template <Multiply3 Cf>
     static void multiply(std::array<term<Cf, divisor>, multiply_arity> &res, const term<Cf, divisor> &t1,
                          const term<Cf, divisor> &t2, const symbol_fset &args)
     {
         term<Cf, divisor> &t = res[0u];
-        if (unlikely(!t1.m_key.is_compatible(args) || !t2.m_key.is_compatible(args))) {
+        if (!t1.m_key.is_compatible(args) || !t2.m_key.is_compatible(args)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "cannot multiply terms with divisor keys: at least one of the terms "
                                                  "is not compatible with the input symbol set");
         }
+
         // Coefficient.
         cf_mult_impl(t.m_cf, t1.m_cf, t2.m_cf);
         // Now deal with the key.
@@ -835,10 +880,13 @@ public:
         t.m_key = large;
         // Run the multiplication.
         const auto it_f = small_.m_container.end();
-        for (auto it = small_.m_container.begin(); it != it_f; ++it) {
+        for (auto it = small_.m_container.begin(); it != it_f; ++it)
+        {
             t.m_key.insertion_impl(*it);
         }
     }
+
+
     /// Identify symbols that can be trimmed.
     /**
      * This method is used in piranha::series::trim(). The input parameter \p trim_mask
@@ -856,24 +904,33 @@ public:
      */
     void trim_identify(std::vector<char> &trim_mask, const symbol_fset &args) const
     {
-        if (unlikely(!is_compatible(args))) {
+        if (!is_compatible(args)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid arguments set for trim_identify()");
         }
-        if (unlikely(trim_mask.size() != args.size())) {
+
+        if (trim_mask.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid symbol_set for trim_identify() in a divisor: the size of the symbol set ("
                               + std::to_string(args.size()) + ") differs from the size of the trim mask ("
                               + std::to_string(trim_mask.size()) + ")");
         }
+
         const auto it_f = m_container.end();
-        for (auto it = m_container.begin(); it != it_f; ++it) {
-            for (typename v_type::size_type i = 0u; i < it->v.size(); ++i) {
-                if (!piranha::is_zero(it->v[i])) {
+        for (auto it = m_container.begin(); it != it_f; ++it)
+        {
+            for (typename v_type::size_type i = 0u; i < it->v.size(); ++i)
+            {
+                if (!piranha::is_zero(it->v[i]))
+                {
                     trim_mask[static_cast<decltype(trim_mask.size())>(i)] = 0;
                 }
             }
         }
     }
+
+
     /// Trim.
     /**
      * This method is used in piranha::series::trim(). The input mask \p trim_mask
@@ -893,28 +950,38 @@ public:
      */
     divisor trim(const std::vector<char> &trim_mask, const symbol_fset &args) const
     {
-        if (unlikely(!is_compatible(args))) {
+        if (!is_compatible(args)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid arguments set for trim()");
         }
-        if (unlikely(trim_mask.size() != args.size())) {
+
+        if (trim_mask.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid symbol_set for trim() in a divisor: the size of the symbol set ("
                               + std::to_string(args.size()) + ") differs from the size of the trim mask ("
                               + std::to_string(trim_mask.size()) + ")");
         }
+
         divisor retval;
         const auto it_f = m_container.end();
-        for (auto it = m_container.begin(); it != it_f; ++it) {
+        for (auto it = m_container.begin(); it != it_f; ++it)
+        {
             v_type tmp;
-            for (typename v_type::size_type i = 0u; i < it->v.size(); ++i) {
-                if (!trim_mask[static_cast<decltype(trim_mask.size())>(i)]) {
+            for (typename v_type::size_type i = 0u; i < it->v.size(); ++i)
+            {
+                if (!trim_mask[static_cast<decltype(trim_mask.size())>(i)])
+                {
                     tmp.push_back(it->v[i]);
                 }
             }
             retval.insert(tmp.begin(), tmp.end(), it->e);
         }
+
         return retval;
     }
+
+
     /// Split divisor.
     /**
      * This method will split \p this into two parts: the first one will contain the terms of the divisor
@@ -933,10 +1000,13 @@ public:
      */
     std::pair<divisor, divisor> split(const symbol_idx &p, const symbol_fset &args) const
     {
-        if (unlikely(!is_compatible(args))) {
+        if (!is_compatible(args)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid size of arguments set");
         }
-        if (unlikely(p >= args.size())) {
+
+        if (p >= args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid index for the splitting of a divisor: the value of the index (" + std::to_string(p)
                               + ") is not less than the number of symbols in the divisor ("

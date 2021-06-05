@@ -26,6 +26,8 @@ You should have received copies of the GNU General Public License and the
 GNU Lesser General Public License along with the Piranha library.  If not,
 see https://www.gnu.org/licenses/. */
 
+#pragma once
+
 #ifndef PIRANHA_HASH_SET_HPP
 #define PIRANHA_HASH_SET_HPP
 
@@ -257,7 +259,7 @@ class hash_set
         }
         list &operator=(list &&other)
         {
-            if (likely(this != &other)) {
+            if (this != &other) [[likely]]{
                 // Destroy the content of this.
                 destroy();
                 steal_from_rvalue(std::move(other));
@@ -266,7 +268,7 @@ class hash_set
         }
         list &operator=(const list &other)
         {
-            if (likely(this != &other)) {
+            if (this != &other) [[likely]]{
                 auto tmp = other;
                 *this = std::move(tmp);
             }
@@ -468,7 +470,8 @@ private:
     void init_from_n_buckets(const size_type &n_buckets, unsigned n_threads)
     {
         piranha_assert(!ptr() && !m_log2_size && !m_n_elements);
-        if (unlikely(!n_threads)) {
+        if (!n_threads) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the number of threads must be strictly positive");
         }
         // Proceed to actual construction only if the requested number of buckets is nonzero.
@@ -478,13 +481,17 @@ private:
         const size_type log2_size = get_log2_from_hint(n_buckets);
         const size_type size = size_type(1u) << log2_size;
         auto new_ptr = allocator_access::allocate(allocator(), size);
-        if (unlikely(!new_ptr)) {
+        if (!new_ptr)
+        {
             piranha_throw(std::bad_alloc, );
         }
-        if (n_threads == 1u) {
+
+        if (n_threads == 1u)
+        {
             // Default-construct the elements of the array.
             // NOTE: this is a noexcept operation, no need to account for rolling back.
-            for (size_type i = 0u; i < size; ++i) {
+            for (size_type i = 0u; i < size; ++i)
+            {
                 allocator_access::construct(allocator(), &new_ptr[i]);
             }
         } else {
@@ -492,9 +499,11 @@ private:
             using crs_type = std::vector<std::pair<size_type, size_type>>;
             crs_type constructed_ranges(static_cast<typename crs_type::size_type>(n_threads),
                                         std::make_pair(size_type(0u), size_type(0u)));
-            if (unlikely(constructed_ranges.size() != n_threads)) {
+            if (constructed_ranges.size() != n_threads) [[unlikely]]
+            {
                 piranha_throw(std::bad_alloc, );
             }
+
             // Thread function.
             auto thread_function = [this, new_ptr, &constructed_ranges](const size_type &start, const size_type &end,
                                                                         const unsigned &thread_idx) {
@@ -534,6 +543,8 @@ private:
         ptr() = new_ptr;
         m_log2_size = log2_size;
     }
+
+
     // Destroy all elements and deallocate ptr().
     void destroy_and_deallocate()
     {
@@ -706,10 +717,12 @@ public:
         : m_pack(nullptr, other.hash(), other.k_equal(), other.allocator()), m_log2_size(0u), m_n_elements(0u)
     {
         // Proceed to actual copy only if other has some content.
-        if (other.ptr()) {
+        if (other.ptr())
+        {
             const size_type size = size_type(1u) << other.m_log2_size;
             auto new_ptr = allocator_access::allocate(allocator(), size);
-            if (unlikely(!new_ptr)) {
+            if (!new_ptr) [[unlikely]]
+            {
                 piranha_throw(std::bad_alloc, );
             }
             size_type i = 0u;
@@ -726,14 +739,18 @@ public:
                 allocator_access::deallocate(allocator(), new_ptr, size);
                 throw;
             }
+
             // Assign the members.
             ptr() = new_ptr;
             m_log2_size = other.m_log2_size;
             m_n_elements = other.m_n_elements;
-        } else {
+        } else
+        {
             piranha_assert(!other.m_log2_size && !other.m_n_elements);
         }
     }
+
+
     /// Move constructor.
     /**
      * After the move, \p other will have zero buckets and zero elements, and its hasher and equality predicate
@@ -814,7 +831,7 @@ public:
      */
     hash_set &operator=(const hash_set &other)
     {
-        if (likely(this != &other)) {
+        if (this != &other) [[likely]]{
             hash_set tmp(other);
             *this = std::move(tmp);
         }
@@ -828,7 +845,7 @@ public:
      */
     hash_set &operator=(hash_set &&other) noexcept
     {
-        if (likely(this != &other)) {
+        if (this != &other)[[likely]] {
             destroy_and_deallocate();
             m_pack = std::move(other.m_pack);
             m_log2_size = other.m_log2_size;
@@ -840,6 +857,8 @@ public:
         }
         return *this;
     }
+
+
     /// Const begin iterator.
     /**
      * @return hash_set::const_iterator to the first element of the set, or end() if the set is empty.
@@ -864,7 +883,9 @@ public:
         }
         return retval;
     }
-    /// Const end iterator.
+
+
+        /// Const end iterator.
     /**
      * @return hash_set::const_iterator to the position past the last element of the set.
      */
@@ -872,6 +893,8 @@ public:
     {
         return const_iterator(this, bucket_count(), local_iterator{});
     }
+
+
     /// Begin iterator.
     /**
      * @return hash_set::iterator to the first element of the set, or end() if the set is empty.
@@ -880,6 +903,8 @@ public:
     {
         return static_cast<hash_set const *>(this)->begin();
     }
+
+
     /// End iterator.
     /**
      * @return hash_set::iterator to the position past the last element of the set.
@@ -888,6 +913,8 @@ public:
     {
         return static_cast<hash_set const *>(this)->end();
     }
+
+
     /// Number of elements contained in the set.
     /**
      * @return number of elements in the set.
@@ -896,6 +923,8 @@ public:
     {
         return m_n_elements;
     }
+
+
     /// Test for empty set.
     /**
      * @return \p true if size() returns 0, \p false otherwise.
@@ -904,6 +933,8 @@ public:
     {
         return !size();
     }
+
+
     /// Number of buckets.
     /**
      * @return number of buckets in the set.
@@ -912,6 +943,8 @@ public:
     {
         return (ptr()) ? (size_type(1u) << m_log2_size) : size_type(0u);
     }
+
+
     /// Load factor.
     /**
      * @return <tt>(double)size() / bucket_count()</tt>, or 0 if the set is empty.
@@ -921,6 +954,8 @@ public:
         const auto b_count = bucket_count();
         return (b_count) ? static_cast<double>(size()) / static_cast<double>(b_count) : 0.;
     }
+
+
     /// Index of destination bucket.
     /**
      * Index to which \p k would belong, were it to be inserted into the set. The index of the
@@ -935,11 +970,14 @@ public:
      */
     size_type bucket(const key_type &k) const
     {
-        if (unlikely(!bucket_count())) {
+        if (!bucket_count()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "cannot calculate bucket index in an empty set");
         }
         return _bucket(k);
     }
+
+
     /// Find element.
     /**
      * @param k element to be located.
@@ -950,11 +988,14 @@ public:
      */
     const_iterator find(const key_type &k) const
     {
-        if (unlikely(!bucket_count())) {
+        if (!bucket_count()) [[unlikely]]
+        {
             return end();
         }
         return _find(k, _bucket(k));
     }
+
+
     /// Find element.
     /**
      * @param k element to be located.
@@ -967,6 +1008,8 @@ public:
     {
         return static_cast<const hash_set *>(this)->find(k);
     }
+
+
     /// Maximum load factor.
     /**
      * @return the maximum load factor allowed before a resize.
@@ -977,6 +1020,8 @@ public:
         // NOTE: if this is ever made configurable, it should never be allowed to go to zero.
         return 1.;
     }
+
+
     /// Insert element.
     /**
      * \note
@@ -1009,7 +1054,8 @@ public:
     {
         auto b_count = bucket_count();
         // Handle the case of a set with no buckets.
-        if (unlikely(!b_count)) {
+        if (!b_count) [[unlikely]]
+        {
             _increase_size();
             // Update the bucket count.
             b_count = 1u;
@@ -1021,20 +1067,26 @@ public:
             // Item already present, exit.
             return std::make_pair(it, false);
         }
-        if (unlikely(m_n_elements == std::numeric_limits<size_type>::max())) {
+        if (m_n_elements == std::numeric_limits<size_type>::max()) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, "maximum number of elements reached");
         }
+
         // Item is new. Handle the case in which we need to rehash because of load factor.
-        if (unlikely(static_cast<double>(m_n_elements + size_type(1u)) / static_cast<double>(b_count)
-                     > max_load_factor())) {
+        if (static_cast<double>(m_n_elements + size_type(1u)) / static_cast<double>(b_count)
+                     > max_load_factor()) [[unlikely]]
+        {
             _increase_size();
             // We need a new bucket index in case of a rehash.
             bucket_idx = _bucket(k);
         }
+
         const auto it_retval = _unique_insert(std::forward<U>(k), bucket_idx);
         ++m_n_elements;
         return std::make_pair(it_retval, true);
     }
+
+
     /// Erase element.
     /**
      * Erase the element to which \p it points. \p it must be a valid iterator
@@ -1087,6 +1139,8 @@ public:
         m_n_elements = static_cast<size_type>(m_n_elements - 1u);
         return retval;
     }
+
+
     /// Remove all elements.
     /**
      * After this call, size() and bucket_count() will both return zero.
@@ -1099,6 +1153,8 @@ public:
         m_log2_size = 0u;
         m_n_elements = 0u;
     }
+
+
     /// Swap content.
     /**
      * Will use \p std::swap to swap hasher and equality predicate.
@@ -1113,6 +1169,8 @@ public:
         std::swap(m_log2_size, other.m_log2_size);
         std::swap(m_n_elements, other.m_n_elements);
     }
+
+
     /// Rehash set.
     /**
      * Change the number of buckets in the set to at least \p new_size. No rehash is performed
@@ -1129,7 +1187,8 @@ public:
      */
     void rehash(const size_type &new_size, unsigned n_threads = 1u)
     {
-        if (unlikely(!n_threads)) {
+        if (!n_threads) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the number of threads must be strictly positive");
         }
         // If rehash is requested to zero, do something only if there are no items stored in the set.
@@ -1139,10 +1198,12 @@ public:
             }
             return;
         }
+
         // Do nothing if rehashing to the new size would lead to exceeding the max load factor.
         if (static_cast<double>(size()) / static_cast<double>(new_size) > max_load_factor()) {
             return;
         }
+
         // Create a new set with needed amount of buckets.
         hash_set new_set(new_size, hash(), k_equal(), n_threads);
         try {
@@ -1164,6 +1225,8 @@ public:
         // Assign the new set.
         *this = std::move(new_set);
     }
+
+
     /// Get information on the sparsity of the set.
     /**
      * @return an <tt>std::map<size_type,size_type></tt> in which the key is the number of elements
@@ -1185,6 +1248,8 @@ public:
         }
         return retval;
     }
+
+
     /** @name Low-level interface
      * Low-level methods and types.
      */
@@ -1198,6 +1263,7 @@ public:
      * set before calling hash_set::clear() will lead to assertion failures in debug mode).
      */
     using _m_iterator = iterator_impl<key_type>;
+
     /// Mutable begin iterator.
     /**
      * @return hash_set::_m_iterator to the beginning of the set.
@@ -1222,6 +1288,8 @@ public:
         }
         return retval;
     }
+
+
     /// Mutable end iterator.
     /**
      * @return hash_set::_m_iterator to the end of the set.
@@ -1230,6 +1298,8 @@ public:
     {
         return _m_iterator(this, bucket_count(), typename list::iterator{});
     }
+
+
     /// Insert unique element (low-level).
     /**
      * \note
@@ -1263,6 +1333,8 @@ public:
         auto p = ptr()[bucket_idx].insert(std::forward<U>(k));
         return iterator(this, bucket_idx, local_iterator(p));
     }
+
+
     /// Find element (low-level).
     /**
      * Locate element in the set. The parameter \p bucket_idx is the index of the destination bucket for \p k and, for
@@ -1292,6 +1364,8 @@ public:
         }
         return retval;
     }
+
+
     /// Index of destination bucket from hash value.
     /**
      * Note that this method will not check if the number of buckets is zero.
@@ -1305,6 +1379,8 @@ public:
         piranha_assert(bucket_count());
         return hash % (size_type(1u) << m_log2_size);
     }
+
+
     /// Index of destination bucket (low-level).
     /**
      * Equivalent to bucket(), with the exception that this method will not check
@@ -1320,6 +1396,8 @@ public:
     {
         return _bucket_from_hash(hash()(k));
     }
+
+
     /// Force update of the number of elements.
     /**
      * After this call, size() will return \p new_size regardless of the true number of elements in the set.
@@ -1330,6 +1408,8 @@ public:
     {
         m_n_elements = new_size;
     }
+
+
     /// Increase bucket count.
     /**
      * Increase the number of buckets to the next implementation-defined value.
@@ -1340,7 +1420,8 @@ public:
      */
     void _increase_size()
     {
-        if (unlikely(m_log2_size >= m_n_nonzero_sizes - 1u)) {
+        if (m_log2_size >= m_n_nonzero_sizes - 1u) [[unlikely]]
+        {
             piranha_throw(std::bad_alloc, );
         }
         // We must take care here: if the set has zero buckets,
@@ -1350,6 +1431,8 @@ public:
         // Rehash to the new size.
         rehash(size_type(1u) << new_log2_size);
     }
+
+
     /// Const reference to list in bucket.
     /**
      * @param idx index of the bucket whose list will be returned.
@@ -1362,6 +1445,8 @@ public:
         piranha_assert(idx < bucket_count());
         return ptr()[idx];
     }
+
+
     /// Erase element.
     /**
      * Erase the element to which \p it points. \p it must be a valid iterator
@@ -1437,11 +1522,14 @@ private:
     size_type m_n_elements;
 };
 
+
 template <typename T, typename Hash, typename Pred>
 typename hash_set<T, Hash, Pred>::node hash_set<T, Hash, Pred>::list::terminator;
 
+
 template <typename T, typename Hash, typename Pred>
 const typename hash_set<T, Hash, Pred>::size_type hash_set<T, Hash, Pred>::m_n_nonzero_sizes;
+
 
 #if defined(PIRANHA_WITH_BOOST_S11N)
 
@@ -1454,11 +1542,13 @@ using hash_set_boost_save_enabler
     = enable_if_t<conjunction<has_boost_save<Archive, T>,
                               has_boost_save<Archive, typename hash_set<T, Hash, Pred>::size_type>>::value>;
 
+
 template <typename Archive, typename T, typename Hash, typename Pred>
 using hash_set_boost_load_enabler
     = enable_if_t<conjunction<has_boost_load<Archive, T>,
                               has_boost_load<Archive, typename hash_set<T, Hash, Pred>::size_type>>::value>;
 }
+
 
 /// Specialisation of piranha::boost_save() for piranha::hash_set.
 /**
@@ -1474,6 +1564,7 @@ template <typename Archive, typename T, typename Hash, typename Pred>
 struct boost_save_impl<Archive, hash_set<T, Hash, Pred>, hash_set_boost_save_enabler<Archive, T, Hash, Pred>>
     : boost_save_via_boost_api<Archive, hash_set<T, Hash, Pred>> {
 };
+
 
 /// Specialisation of piranha::boost_load() for piranha::hash_set.
 /**
@@ -1509,9 +1600,11 @@ template <typename Stream, typename T, typename Hash, typename Pred>
 using hash_set_msgpack_pack_enabler
     = enable_if_t<conjunction<is_msgpack_stream<Stream>, has_msgpack_pack<Stream, T>>::value>;
 
+
 template <typename T>
 using hash_set_msgpack_convert_enabler = enable_if_t<has_msgpack_convert<T>::value>;
 }
+
 
 /// Specialisation of piranha::msgpack_pack() for piranha::hash_set.
 /**
@@ -1543,6 +1636,7 @@ struct msgpack_pack_impl<Stream, hash_set<T, Hash, Pred>, hash_set_msgpack_pack_
         msgpack_pack_range(p, h.begin(), h.end(), h.size(), f);
     }
 };
+
 
 /// Specialisation of piranha::msgpack_convert() for piranha::hash_set.
 /**
@@ -1590,6 +1684,7 @@ struct msgpack_convert_impl<hash_set<T, Hash, Pred>, hash_set_msgpack_convert_en
         }
     }
 };
+
 
 #endif
 }

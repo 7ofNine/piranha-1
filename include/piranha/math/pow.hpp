@@ -63,12 +63,9 @@ template <typename T, typename U = T>
 struct is_exponentiable : is_returnable<detected_t<pow_t_, T, U>> {
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U = T>
 concept Exponentiable = is_exponentiable<T, U>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -93,13 +90,8 @@ inline pow_t<T, U> pow(T &&x, U &&y)
 // Specialisation of the implementation of piranha::pow() for C++ arithmetic types.
 // It will use std::pow() if at least one of the types is an FP, and mp++ integral exponentiation
 // otherwise.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppArithmetic T, CppArithmetic U>
 class pow_impl<T, U>
-#else
-template <typename T, typename U>
-class pow_impl<T, U, enable_if_t<conjunction<std::is_arithmetic<T>, std::is_arithmetic<U>>::value>>
-#endif
 {
     using use_std_pow = disjunction<std::is_floating_point<T>, std::is_floating_point<U>>;
     template <typename T1, typename U1>
@@ -124,13 +116,8 @@ public:
 // NOTE: this specialisation must be here (rather than integer.hpp) as in the integral-integral overload above we use
 // mppp::integer inside, so the declaration of mppp::integer must be avaiable. On the other hand, we cannot put this in
 // integer.hpp as the integral-integral overload is supposed to work without including mppp::integer.hpp.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename U, mppp::integer_op_types<U> T>
 class pow_impl<T, U>
-#else
-template <typename T, typename U>
-class pow_impl<T, U, enable_if_t<mppp::are_integer_op_types<T, U>::value>>
-#endif
 {
 public:
     template <typename T1, typename U1>

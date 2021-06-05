@@ -40,12 +40,7 @@ namespace piranha
 {
 
 // Default functor for the implementation of piranha::key_degree().
-template <typename T
-#if !defined(PIRANHA_HAVE_CONCEPTS)
-          ,
-          typename = void
-#endif
-          >
+template <typename T>
 class key_degree_impl
 {
 };
@@ -67,12 +62,9 @@ template <typename T>
 using is_key_degree_type = conjunction<is_returnable<detected_t<total_key_degree_t_, T>>,
                                        is_returnable<detected_t<partial_key_degree_t_, T>>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept KeyDegreeType = is_key_degree_type<T>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -85,26 +77,16 @@ using partial_key_degree_t = enable_if_t<is_key_degree_type<T>::value, partial_k
 } // namespace impl
 
 // Total degree of a key.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <KeyDegreeType T>
 inline auto
-#else
-template <typename T>
-inline total_key_degree_t<T>
-#endif
 key_degree(T &&x, const symbol_fset &s)
 {
     return key_degree_impl<uncvref_t<T>>{}(std::forward<T>(x), s);
 }
 
 // Partial degree of a key.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <KeyDegreeType T>
 inline auto
-#else
-template <typename T>
-inline partial_key_degree_t<T>
-#endif
 key_degree(T &&x, const symbol_idx_fset &idx, const symbol_fset &s)
 {
     return key_degree_impl<uncvref_t<T>>{}(std::forward<T>(x), idx, s);

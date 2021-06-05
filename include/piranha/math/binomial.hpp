@@ -43,12 +43,7 @@ namespace piranha
 {
 
 // The default (empty) implementation.
-template <typename T, typename U
-#if !defined(PIRANHA_HAVE_CONCEPTS)
-          ,
-          typename = void
-#endif
-          >
+template <typename T, typename U>
 class binomial_impl
 {
 };
@@ -65,12 +60,9 @@ template <typename T, typename U = T>
 struct are_binomial_types : is_returnable<detected_t<binomial_t_, T, U>> {
 };
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename U = T>
 concept BinomialTypes = are_binomial_types<T, U>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -80,26 +72,16 @@ using binomial_t = enable_if_t<are_binomial_types<T, U>::value, binomial_t_<T, U
 }
 
 // Generalised binomial coefficient.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename T, typename U> requires BinomialTypes<T, U>
 inline auto binomial(T &&x, U &&y)
-#else
-template <typename T, typename U>
-inline binomial_t<T, U> binomial(T &&x, U &&y)
-#endif
 {
     return binomial_impl<uncvref_t<decltype(x)>, uncvref_t<decltype(y)>>{}(std::forward<decltype(x)>(x),
                                                                            std::forward<decltype(y)>(y));
 }
 
 // Specialisation for C++ integrals.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppIntegral T, CppIntegral U>
 class binomial_impl<T, U>
-#else
-template <typename T, typename U>
-class binomial_impl<T, U, enable_if_t<conjunction<std::is_integral<T>, std::is_integral<U>>::value>>
-#endif
 {
 public:
     integer operator()(const T &x, const U &y) const
@@ -109,13 +91,8 @@ public:
 };
 
 // Specialisation for mp++ integers.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename U, mppp::integer_integral_op_types<U> T>
 class binomial_impl<T, U>
-#else
-template <typename T, typename U>
-class binomial_impl<T, U, enable_if_t<mppp::are_integer_integral_op_types<T, U>::value>>
-#endif
 {
 public:
     template <typename T1, typename U1>

@@ -137,6 +137,8 @@ public:
             throw;
         }
     }
+
+
     ~dynamic_storage()
     {
         // NOTE: here we should replace with bidirectional tt, if we ever implement it.
@@ -145,9 +147,11 @@ public:
         piranha_assert(m_tag == 0u);
         destroy_and_deallocate();
     }
+
+
     dynamic_storage &operator=(dynamic_storage &&other) noexcept
     {
-        if (likely(this != &other)) {
+        if (this != &other) [[likely]] {
             // Destroy and deallocate this.
             destroy_and_deallocate();
             // Just pilfer the resources.
@@ -161,9 +165,11 @@ public:
         }
         return *this;
     }
+
+
     dynamic_storage &operator=(const dynamic_storage &other)
     {
-        if (likely(this != &other)) {
+        if (this != &other) [[likely]] {
             dynamic_storage tmp(other);
             *this = std::move(tmp);
         }
@@ -492,17 +498,23 @@ union small_vector_union {
         }
         return *this;
     }
+
+
     small_vector_union &operator=(const small_vector_union &other)
     {
-        if (likely(this != &other)) {
+        if (this != &other) [[likely]] {
             *this = small_vector_union(other);
         }
         return *this;
     }
+
+
     bool is_static() const
     {
         return static_cast<bool>(m_st.m_tag);
     }
+
+
     // Getters.
     const s_storage &g_st() const
     {
@@ -643,6 +655,7 @@ public:
      * Will initialise an empty vector with internal static storage.
      */
     small_vector() = default;
+
     /// Copy constructor.
     /**
      * The storage type after successful construction will be the same of \p other.
@@ -653,6 +666,7 @@ public:
      * @throws unspecified any exception thrown by the copy constructor of \p T.
      */
     small_vector(const small_vector &other) = default;
+
     /// Move constructor.
     /**
      * The storage type after successful construction will be the same of \p other.
@@ -660,6 +674,7 @@ public:
      * @param other construction argument.
      */
     small_vector(small_vector &&other) = default;
+
     /// Constructor from initializer list.
     /**
      * \note
@@ -680,6 +695,7 @@ public:
             push_back(piranha::safe_cast<T>(x));
         }
     }
+
     /// Constructor from size and value.
     /**
      * This constructor will initialise a vector containing \p size copies of \p value.
@@ -695,6 +711,7 @@ public:
             push_back(value);
         }
     }
+
     /// Destructor.
     ~small_vector() = default;
     /// Copy assignment operator.
@@ -778,6 +795,7 @@ public:
             return m_union.g_dy().end();
         }
     }
+
     /// Const begin iterator.
     /**
      * @return iterator to the beginning of the vector.
@@ -790,6 +808,7 @@ public:
             return m_union.g_dy().begin();
         }
     }
+
     /// Const end iterator.
     /**
      * @return iterator to the end of the vector.
@@ -802,6 +821,7 @@ public:
             return m_union.g_dy().end();
         }
     }
+
     /// Size.
     /**
      * @return number of elements stored in the vector.
@@ -814,6 +834,7 @@ public:
             return m_union.g_dy().size();
         }
     }
+
     /// Static storage flag.
     /**
      * @return \p true if the storage being used is the static one, \p false otherwise.

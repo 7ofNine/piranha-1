@@ -135,7 +135,8 @@ public:
      */
     value_type *allocate(const size_type &size) const
     {
-        if (unlikely(size > max_size())) {
+        if (size > max_size()) [[unlikely]]
+        {
             piranha_throw(std::bad_alloc, );
         }
         return static_cast<value_type *>(
