@@ -61,7 +61,6 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/exceptions.hpp>
 #include <piranha/integer.hpp>
 #include <piranha/runtime_info.hpp>
-#include <piranha/thread_management.hpp>
 #include <piranha/type_traits.hpp>
 
 namespace piranha
@@ -73,17 +72,9 @@ inline namespace impl
 // Task queue class. Inspired by:
 // https://github.com/progschj/ThreadPool
 struct task_queue {
-    task_queue(unsigned n, bool bind) : m_stop(false)
+    task_queue(unsigned n, bool bind = false) : m_stop(false)
     {
-        auto runner = [this, n, bind]() {
-            if (bind) {
-                try {
-                    bind_to_proc(n);
-                } catch (...) {
-                    // Don't stop if we cannot bind.
-                    // NOTE: logging candidate.
-                }
-            }
+        auto runner = [this]() {
             try {
                 while (true) {
                     std::unique_lock<std::mutex> lock(this->m_mutex);
@@ -132,17 +123,22 @@ struct task_queue {
             std::abort();
         }
     }
+
+
     // Small utility to remove reference_wrapper.
     template <typename T>
     struct unwrap_ref {
         using type = T;
     };
+
     template <typename T>
     struct unwrap_ref<std::reference_wrapper<T>> {
         using type = T;
     };
+
     template <typename T>
     using unwrap_ref_t = typename unwrap_ref<T>::type;
+
     // NOTE: the functor F will be forwarded to std::bind in order to create a nullary wrapper. The nullary wrapper
     // will create copies of the input arguments, and it will then pass these copies as lvalue refs to a copy of the
     // original functor when the call operator is invoked (with special handling of reference wrappers). Thus, the
@@ -151,6 +147,7 @@ struct task_queue {
     // also by std::bind() to F.
     template <typename F, typename... Args>
     using f_ret_type = decltype(std::declval<decay_t<F> &>()(std::declval<unwrap_ref_t<uncvref_t<Args>> &>()...));
+
     // enqueue() will be enabled if:
     // - f_ret_type is a valid type (checked in the return type),
     // - we can construct the nullary wrapper via std::bind() (this requires F and Args to be ctible from the input
@@ -206,6 +203,7 @@ struct task_queue {
         m_cond.notify_one();
         m_thread.join();
     }
+
     // Data members.
     bool m_stop;
     std::condition_variable m_cond;
@@ -223,16 +221,19 @@ inline thread_queues_t get_initial_thread_queues()
     // Create the vector of queues.
     const unsigned candidate = runtime_info::get_hardware_concurrency(), hc = (candidate > 0u) ? candidate : 1u;
     retval.first.reserve(static_cast<decltype(retval.first.size())>(hc));
+
     for (unsigned i = 0u; i < hc; ++i) {
         // NOTE: thread binding is disabled on startup.
         retval.first.emplace_back(::new task_queue(i, false));
     }
+
     // Generate the set of thread IDs.
     for (const auto &ptr : retval.first) {
         auto p = retval.second.insert(ptr->m_thread.get_id());
         (void)p;
         piranha_assert(p.second);
     }
+
 #if !defined(NDEBUG)
     // Ensure we can write to cout during static initialisation.
     std::ios_base::Init ios_init;
@@ -244,7 +245,6 @@ inline thread_queues_t get_initial_thread_queues()
 template <typename = void>
 struct thread_pool_base {
     static thread_queues_t s_queues;
-    static bool s_bind;
     static std::atomic_flag s_atf;
 };
 
@@ -254,8 +254,6 @@ thread_queues_t thread_pool_base<T>::s_queues = get_initial_thread_queues();
 template <typename T>
 std::atomic_flag thread_pool_base<T>::s_atf = ATOMIC_FLAG_INIT;
 
-template <typename T>
-bool thread_pool_base<T>::s_bind = false;
 
 template <typename>
 void thread_pool_shutdown();
@@ -332,7 +330,9 @@ public:
         }
         return base::s_queues.first[static_cast<decltype(base::s_queues.first.size())>(n)]->enqueue(
             std::forward<F>(f), std::forward<Args>(args)...);
-    }
+    }  
+
+
     /// Size
     /**
      * @return the number of threads in the pool.
@@ -345,22 +345,27 @@ public:
 
 private:
     // Helper function to create 'new_size' new queues with thread binding set to 'bind'.
-    static thread_queues_t create_new_queues(unsigned new_size, bool bind)
+    static thread_queues_t create_new_queues(unsigned new_size, bool bind = false)
     {
         thread_queues_t new_queues;
         // Create the task queues.
         new_queues.first.reserve(static_cast<decltype(new_queues.first.size())>(new_size));
+
         for (auto i = 0u; i < new_size; ++i) {
             new_queues.first.emplace_back(::new task_queue(i, bind));
-        }
+        }  
+
         // Fill in the thread ids set.
         for (const auto &ptr : new_queues.first) {
             auto p = new_queues.second.insert(ptr->m_thread.get_id());
             (void)p;
             piranha_assert(p.second);
         }
+
         return new_queues;
     }
+
+
     // Shutdown. This can be used to stop the threads at program shutdown.
     static void shutdown()
     {
@@ -390,7 +395,8 @@ public:
         }
         // NOTE: need to lock here as we are reading the s_bind member.
         detail::atomic_lock_guard lock(s_atf);
-        auto new_queues = create_new_queues(new_size, base::s_bind);
+        //auto new_queues = create_new_queues(new_size, base::s_bind);
+        auto new_queues = create_new_queues(new_size);
         // NOTE: here the allocator is not swapped, as std::allocator won't propagate on swap.
         // Besides, all instances of std::allocator are equal, so the operation is well-defined.
         // http://en.cppreference.com/w/cpp/container/vector/swap
@@ -399,45 +405,6 @@ public:
         // NOTE: the dtor of the queues is effectively noexcept, as the program will just abort in case of errors
         // in the dtor.
         new_queues.swap(base::s_queues);
-    }
-    /// Set the thread binding policy.
-    /**
-     * If \p flag is \p true, this method will bind each thread in the pool to a different processor/core via
-     * piranha::bind_to_proc(). If \p flag is \p false, then this method will unbind the threads in the pool from any
-     * processor/core to which they might be bound.
-     *
-     * The threads created at program startup are not bound to any specific processor/core. Any error raised by
-     * piranha::bind_to_proc() (e.g., because the number of threads in the pool is larger than the number of logical
-     * cores or because the thread binding functionality is not available on the platform) is silently ignored.
-     *
-     * @param flag the desired thread binding policy.
-     *
-     * @throws unspecified any exception thrown by:
-     * - threading primitives,
-     * - memory allocation errors.
-     */
-    static void set_binding(bool flag)
-    {
-        detail::atomic_lock_guard lock(s_atf);
-        if (flag == base::s_bind) {
-            // Don't do anything if we are not changing the binding policy.
-            return;
-        }
-        auto new_queues = create_new_queues(static_cast<unsigned>(base::s_queues.first.size()), flag);
-        new_queues.swap(base::s_queues);
-        base::s_bind = flag;
-    }
-    /// Get the thread binding policy.
-    /**
-     * This method returns the flag set by set_binding(). The threads created on program startup are not bound to
-     * specific processors/cores.
-     *
-     * @return a boolean flag representing the active thread binding policy.
-     */
-    static bool get_binding()
-    {
-        detail::atomic_lock_guard lock(s_atf);
-        return base::s_bind;
     }
     /// Compute number of threads to use.
     /**

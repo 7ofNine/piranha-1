@@ -384,8 +384,7 @@ SET(INCS
     include/piranha/symbol_utils.hpp
     include/piranha/t_substitutable_series.hpp
     include/piranha/term.hpp
-    include/piranha/thread_barrier.hpp
-    include/piranha/thread_management.hpp
+    #include/piranha/thread_barrier.hpp
     include/piranha/thread_pool.hpp
     include/piranha/trigonometric_series.hpp
     include/piranha/tuning.hpp

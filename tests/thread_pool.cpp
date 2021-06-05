@@ -45,7 +45,6 @@ see https://www.gnu.org/licenses/. */
 #include <piranha/real.hpp>
 #endif
 #include <piranha/runtime_info.hpp>
-#include <piranha/thread_management.hpp>
 #include <piranha/type_traits.hpp>
 
 #include "catch.hpp"
@@ -102,6 +101,7 @@ struct cref_test_functor {
 
 TEST_CASE("thread_pool_task_queue_test")
 {
+    std::cout << "thread_pool_task_queue_test" << std::endl <<std::flush;
     // A few simple tests.
     auto simple_00 = []() {};
     CHECK((is_detected<enqueue_t, decltype(simple_00)>::value));
@@ -112,12 +112,15 @@ TEST_CASE("thread_pool_task_queue_test")
     CHECK((!is_detected<enqueue_t, decltype(simple_00) &, void>::value));
     CHECK((!is_detected<enqueue_t, void, int>::value));
     CHECK((!is_detected<enqueue_t, decltype(simple_00) &, void>::value));
+
     // Check that noncopyable functor disables enqueue.
     CHECK((!is_detected<enqueue_t, noncopyable_functor &>::value));
     CHECK((!is_detected<enqueue_t, noncopyable_functor &&>::value));
     CHECK((!is_detected<enqueue_t, noncopyable_functor>::value));
+
     // Check that noncopyable return type disables enqueue.
     CHECK((!is_detected<enqueue_t, decltype(noncopyable_ret_f)>::value));
+
     // Check that if a function argument must be passed as rvalue ref, then enqueue is disabled.
     CHECK((!is_detected<enqueue_t, decltype(requires_move), int>::value));
     // Test that std::ref/cref works as intended (i.e., it does not copy the value) and that
@@ -133,51 +136,51 @@ TEST_CASE("thread_pool_task_queue_test")
     };
     auto instant_task = []() noexcept {};
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         tq.stop();
         tq.stop();
         tq.stop();
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         tq.enqueue([]() noexcept {});
         tq.stop();
         tq.stop();
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         tq.enqueue(slow_task);
         tq.stop();
         tq.stop();
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         tq.enqueue(slow_task);
         tq.enqueue(slow_task);
         tq.enqueue(slow_task);
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         auto f1 = tq.enqueue(slow_task);
         auto f2 = tq.enqueue(slow_task);
         auto f3 = tq.enqueue(slow_task);
         f3.get();
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         auto f1 = tq.enqueue([](int) { throw std::runtime_error(""); }, 1);
         CHECK_THROWS_AS(f1.get(), std::runtime_error);
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         auto f1 = tq.enqueue([](int n) noexcept { return n + n; }, 45);
         CHECK(f1.get() == 90);
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         using f_type = decltype(tq.enqueue(fast_task, 0));
         std::list<f_type> l;
         for (int i = 0; i < 100; ++i) {
@@ -191,7 +194,7 @@ TEST_CASE("thread_pool_task_queue_test")
         CHECK(result == 4950);
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         for (int i = 0; i < 10000; ++i) {
             tq.enqueue(instant_task);
         }
@@ -201,45 +204,17 @@ TEST_CASE("thread_pool_task_queue_test")
         );
     }
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         noncopyable nc;
         tq.enqueue([](noncopyable &) noexcept {}, std::ref(nc));
         tq.enqueue([](const noncopyable &) noexcept {}, std::cref(nc));
     }
 #if defined(MPPP_WITH_MPFR)
     {
-        task_queue tq(0, true);
+        task_queue tq(0);
         for (int i = 0; i < 100; ++i) {
             tq.enqueue([]() { mppp::real_pi(500); });
         }
-    }
-#endif
-#if !defined(__APPLE_CC__)
-    // Check the binding.
-    const unsigned hc = runtime_info::get_hardware_concurrency();
-    auto bind_checker = [](unsigned n) {
-        auto res = bound_proc();
-        if (!res.first || res.second != n) {
-            throw std::runtime_error("");
-        }
-    };
-    for (unsigned i = 0u; i < hc; ++i) {
-        task_queue tq(i, true);
-        CHECK_NOTHROW(tq.enqueue(bind_checker, i).get());
-    }
-    if (hc != 0) {
-        task_queue tq(hc, true);
-        CHECK_THROWS_AS(tq.enqueue(bind_checker, hc).get(), std::runtime_error);
-    }
-    auto unbound_checker = []() {
-        auto res = bound_proc();
-        if (res.first) {
-            throw std::runtime_error("");
-        }
-    };
-    for (unsigned i = 0u; i < hc; ++i) {
-        task_queue tq(i, false);
-        CHECK_NOTHROW(tq.enqueue(unbound_checker).get());
     }
 #endif
 }
@@ -251,9 +226,9 @@ static int adder(int a, int b)
 
 TEST_CASE("thread_pool_test")
 {
+    std::cout << "thread_pool_test" << std::endl << std::flush;
     const unsigned initial_size = thread_pool::size();
     CHECK(initial_size > 0u);
-    CHECK(thread_pool::get_binding() == false);
     CHECK(thread_pool::enqueue(0, adder, 1, 2).get() == 3);
     thread_pool::enqueue(0, []() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
     CHECK(thread_pool::enqueue(0, adder, 4, -5).get() == -1);
@@ -261,14 +236,6 @@ TEST_CASE("thread_pool_test")
         thread_pool::enqueue(initial_size, adder, 4, -5), std::invalid_argument,
         test::ExceptionMatcher<std::invalid_argument>(std::string("the thread pool contains only "))
     );
-#if !defined(__APPLE_CC__)
-    CHECK(thread_pool::enqueue(0, []() { return bound_proc(); }).get().first == false);
-    thread_pool::set_binding(true);
-    CHECK(thread_pool::enqueue(0, []() { return bound_proc(); }).get() == std::make_pair(true, 0u));
-    CHECK(thread_pool::get_binding() == true);
-    thread_pool::set_binding(false);
-    CHECK(thread_pool::get_binding() == false);
-#endif
     CHECK_THROWS_AS(thread_pool::enqueue(0, []() { throw std::runtime_error(""); }).get(), std::runtime_error);
     auto fast_task = [](int n) -> int {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -284,21 +251,13 @@ TEST_CASE("thread_pool_test")
     }
     auto slow_task = []() { std::this_thread::sleep_for(std::chrono::milliseconds(250)); };
     thread_pool::resize(1);
-    CHECK(thread_pool::get_binding() == false);
     thread_pool::enqueue(0, slow_task);
     thread_pool::resize(20u);
-    CHECK(thread_pool::get_binding() == false);
     CHECK(thread_pool::size() == 20u);
-    thread_pool::set_binding(true);
-    thread_pool::set_binding(true);
     thread_pool::resize(1);
-    CHECK(thread_pool::get_binding() == true);
     thread_pool::enqueue(0, slow_task);
     thread_pool::resize(20u);
-    CHECK(thread_pool::get_binding() == true);
     CHECK(thread_pool::size() == 20u);
-    thread_pool::set_binding(false);
-    thread_pool::set_binding(false);
     for (unsigned i = 0u; i < 20u; ++i) {
         thread_pool::enqueue(0u, slow_task);
         for (int n = 1; n < 1000; ++n) {
@@ -308,19 +267,6 @@ TEST_CASE("thread_pool_test")
     CHECK(thread_pool::size() == 20u);
     thread_pool::resize(10u);
     CHECK(thread_pool::size() == 10u);
-#if !defined(__APPLE_CC__)
-    if (initial_size != std::numeric_limits<unsigned>::max()) {
-        thread_pool::resize(initial_size + 1u);
-        auto func = []() { return bound_proc(); };
-        std::vector<decltype(thread_pool::enqueue(0u, func))> list;
-        for (unsigned i = 0; i < initial_size + 1u; ++i) {
-            list.push_back(thread_pool::enqueue(i, func));
-        }
-        std::all_of(list.begin(), list.begin() + initial_size,
-                    [](decltype(thread_pool::enqueue(0u, func)) &f) { return f.get().first; });
-        CHECK(!(list.begin() + initial_size)->get().second);
-    }
-#endif
     CHECK_THROWS_MATCHES(thread_pool::resize(0u), std::invalid_argument, 
          test::ExceptionMatcher<std::invalid_argument>(std::string("cannot resize the thread pool to zero"))
     );
@@ -329,6 +275,7 @@ TEST_CASE("thread_pool_test")
 
 TEST_CASE("thread_pool_future_list_test")
 {
+    std::cout << "thread_pool_future_list_test"  << std::endl << std::flush;
     thread_pool::resize(10u);
     auto null_task = []() {};
     future_list<decltype(null_task())> f1;
@@ -374,6 +321,7 @@ TEST_CASE("thread_pool_future_list_test")
 
 TEST_CASE("thread_pool_use_threads_test")
 {
+    std::cout << "thread_pool_use_threads_test" << std::endl << std::flush;
     thread_pool::resize(4u);
     CHECK(thread_pool::use_threads(100u, 3u) == 4u);
     CHECK_THROWS_MATCHES(

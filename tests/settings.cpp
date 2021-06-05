@@ -50,13 +50,6 @@ TEST_CASE("settings_thread_number_test")
     settings::set_n_threads(10u);
     settings::reset_n_threads();
     CHECK(original == settings::get_n_threads());
-    CHECK(!settings::get_thread_binding());
-    settings::set_thread_binding(true);
-    settings::set_thread_binding(true);
-    CHECK(settings::get_thread_binding());
-    settings::set_thread_binding(false);
-    settings::set_thread_binding(false);
-    CHECK(!settings::get_thread_binding());
 }
 
 TEST_CASE("settings_cache_line_size_test")
