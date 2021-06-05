@@ -30,14 +30,18 @@ If(PIRANHA_BUILD_BENCHMARKS)
     list(APPEND _PIRANHA_REQUIRED_BOOST_LIBS system filesystem)
 endif()
 
+set(Boost_USE_STATIC_LIBS        OFF)  # only windows default is ON
+
 message(STATUS "Required Boost libraries: ${_PIRANHA_REQUIRED_BOOST_LIBS}")
+
+message(STATUS "Boost_USE_STATIC_LIBS   ${Boost_USE_STATIC_LIBS}")
 
 if(PIRANHA_WITH_BOOST_STACKTRACE)
 	# Boost stacktrace is available since 1.65.
-	find_package(Boost 1.65.0 REQUIRED COMPONENTS "${_PIRANHA_REQUIRED_BOOST_LIBS}")
+	find_package(Boost 1.76.0 REQUIRED COMPONENTS "${_PIRANHA_REQUIRED_BOOST_LIBS}")
 else()
 	# Otherwise, we require at least 1.58 due to flat_set/flat_map API requirements.
-	find_package(Boost 1.58.0 REQUIRED COMPONENTS "${_PIRANHA_REQUIRED_BOOST_LIBS}")
+	find_package(Boost 1.76.0 REQUIRED COMPONENTS "${_PIRANHA_REQUIRED_BOOST_LIBS}")
 endif()
 
 if(NOT Boost_FOUND)
