@@ -181,7 +181,9 @@ endif()
 
 # Boost libraries setup.
 include(PiranhaFindBoost)
-target_link_libraries(piranha INTERFACE Boost::boost Boost::disable_autolinking)
+
+target_link_libraries(piranha INTERFACE Boost::boost Boost::disable_autolinking) # disable autoo linking. a safety feature but pretty annoying
+
 if(PIRANHA_WITH_BOOST_S11N)
 	target_link_libraries(piranha INTERFACE Boost::serialization)
     SET(PYRANHA_PYTHON_S11 True)
@@ -396,7 +398,6 @@ SET(INCS
     include/piranha/symbol_utils.hpp
     include/piranha/t_substitutable_series.hpp
     include/piranha/term.hpp
-    #include/piranha/thread_barrier.hpp
     include/piranha/thread_pool.hpp
     include/piranha/trigonometric_series.hpp
     include/piranha/tuning.hpp
