@@ -277,10 +277,13 @@ public:
         const auto size = v.size();
         // NOTE: here the check is >= because indices in the limits vector correspond to the sizes of the vectors to be
         // encoded.
-        if (unlikely(size >= m_limits.size())) {
+        if (size >= m_limits.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "size of vector to be encoded is too large");
         }
-        if (unlikely(!size)) {
+
+        if (!size) [[unlikely]]
+        {
             return int_type(0);
         }
         // Cache quantities.
@@ -288,12 +291,15 @@ public:
         const auto &minmax_vec = std::get<0u>(limit);
         // Check that the vector's components are compatible with the limits.
         // NOTE: here size is not greater than m_limits.size(), which in turn is compatible with the minmax vectors.
-        for (min_int<decltype(v.size()), decltype(minmax_vec.size())> i = 0u; i < size; ++i) {
-            if (unlikely(piranha::safe_cast<int_type>(v[i]) < -minmax_vec[i]
-                         || piranha::safe_cast<int_type>(v[i]) > minmax_vec[i])) {
+        for (min_int<decltype(v.size()), decltype(minmax_vec.size())> i = 0u; i < size; ++i)
+        {
+            if (piranha::safe_cast<int_type>(v[i]) < -minmax_vec[i]
+                         || piranha::safe_cast<int_type>(v[i]) > minmax_vec[i]) [[unlikely]]
+            {
                 piranha_throw(std::invalid_argument, "a component of the vector to be encoded is out of bounds");
             }
         }
+
         piranha_assert(minmax_vec[0u] > 0);
         int_type retval = static_cast<int_type>(piranha::safe_cast<int_type>(v[0u]) + minmax_vec[0u]),
                  cur_c = static_cast<int_type>(2 * minmax_vec[0u] + 1);
@@ -331,20 +337,27 @@ public:
     {
         typedef typename Vector::value_type v_type;
         const auto m = retval.size();
-        if (unlikely(m >= m_limits.size())) {
+        if (m >= m_limits.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "size of vector to be decoded is too large");
         }
-        if (unlikely(!m)) {
-            if (unlikely(n != 0)) {
+
+        if (!m) [[unlikely]]
+        {
+            if (n != 0) [[unlikely]]
+            {
                 piranha_throw(std::invalid_argument, "a vector of size 0 must always be encoded as 0");
             }
+
             return;
         }
+
         // Cache values.
         const auto &limit = m_limits[m];
         const auto &minmax_vec = std::get<0u>(limit);
         const auto hmin = std::get<1u>(limit), hmax = std::get<2u>(limit);
-        if (unlikely(n < hmin || n > hmax)) {
+        if (n < hmin || n > hmax) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the integer to be decoded is out of bounds");
         }
         // NOTE: the static_cast here is useful when working with int_type == char. In that case,

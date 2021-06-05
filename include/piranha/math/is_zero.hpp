@@ -65,32 +65,20 @@ using is_zero_t_ = decltype(is_zero_impl<uncvref_t<T>>{}(std::declval<T>()));
 template <typename T>
 using is_is_zero_type = std::is_convertible<detected_t<is_zero_t_, T>, bool>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept IsZeroType = is_is_zero_type<T>::value;
 
-#endif
 
 // Zero detection.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <IsZeroType T>
-#else
-template <typename T, enable_if_t<is_is_zero_type<T>::value, int> = 0>
-#endif
 inline bool is_zero(T &&x)
 {
     return is_zero_impl<uncvref_t<T>>{}(std::forward<T>(x));
 }
 
 // Specialisation of the piranha::is_zero() functor for C++ complex floating-point types.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppComplex T>
 class is_zero_impl<T>
-#else
-template <typename T>
-class is_zero_impl<T, enable_if_t<is_cpp_complex<T>::value>>
-#endif
 {
 public:
     bool operator()(const T &c) const

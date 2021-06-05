@@ -59,27 +59,22 @@ template <typename From, typename To>
 using is_safely_castable
     = conjunction<std::is_default_constructible<To>, is_safely_convertible<From, addlref_t<To>>, is_returnable<To>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename From, typename To>
 concept SafelyCastable = is_safely_castable<From, To>::value;
 
-#endif
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <typename To, SafelyCastable<To> From>
-#else
-template <typename To, typename From, enable_if_t<is_safely_castable<From, To>::value, int> = 0>
-#endif
 inline To safe_cast(From &&x)
 {
     To retval;
-    if (likely(piranha::safe_convert(retval, std::forward<From>(x)))) {
+    if (piranha::safe_convert(retval, std::forward<From>(x))) [[likely]]
+    {
         return retval;
     }
     piranha_throw(safe_cast_failure, "the safe conversion of a value of type '" + type_name<decltype(x)>()
                                          + "' to the type '" + type_name<To>() + "' failed");
 }
+
 
 // Input iterator whose ref type is safely castable to To.
 // NOTE: the way this is currently written we are in the situation in which:
@@ -90,35 +85,26 @@ inline To safe_cast(From &&x)
 template <typename T, typename To>
 using is_safely_castable_input_iterator = conjunction<is_input_iterator<T>, is_safely_castable<det_deref_t<T>, To>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename To>
 concept SafelyCastableInputIterator = is_safely_castable_input_iterator<T, To>::value;
 
-#endif
 
 // Forward iterator whose ref type is safely castable to To.
 template <typename T, typename To>
 using is_safely_castable_forward_iterator = conjunction<is_forward_iterator<T>, is_safely_castable<det_deref_t<T>, To>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename To>
 concept SafelyCastableForwardIterator = is_safely_castable_forward_iterator<T, To>::value;
 
-#endif
 
 // Mutable forward iterator whose ref type is safely castable to To.
 template <typename T, typename To>
 using is_safely_castable_mutable_forward_iterator
     = conjunction<is_mutable_forward_iterator<T>, is_safely_castable<det_deref_t<T>, To>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename To>
 concept SafelyCastableMutableForwardIterator = is_safely_castable_mutable_forward_iterator<T, To>::value;
 
-#endif
 
 // Input range whose ref type is safely castable to To.
 template <typename T, typename To>
@@ -128,36 +114,27 @@ using is_safely_castable_input_range
     // we just need to check for the safe castability.
     = conjunction<is_input_range<T>, is_safely_castable<det_deref_t<detected_t<begin_adl::type, T>>, To>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename To>
 concept SafelyCastableInputRange = is_safely_castable_input_range<T, To>::value;
 
-#endif
 
 // Forward range whose ref type is safely castable to To.
 template <typename T, typename To>
 using is_safely_castable_forward_range
     = conjunction<is_forward_range<T>, is_safely_castable<det_deref_t<detected_t<begin_adl::type, T>>, To>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename To>
 concept SafelyCastableForwardRange = is_safely_castable_forward_range<T, To>::value;
 
-#endif
 
 // Mutable forward range whose ref type is safely castable to To.
 template <typename T, typename To>
 using is_safely_castable_mutable_forward_range
     = conjunction<is_mutable_forward_range<T>, is_safely_castable<det_deref_t<detected_t<begin_adl::type, T>>, To>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T, typename To>
 concept SafelyCastableMutableForwardRange = is_safely_castable_mutable_forward_range<T, To>::value;
 
-#endif
 } // namespace piranha
 
 #endif

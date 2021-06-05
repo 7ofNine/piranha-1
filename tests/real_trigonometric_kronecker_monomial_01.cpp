@@ -1046,17 +1046,17 @@ struct evaluate_tester {
         k1.set_flavour(false);
         CHECK(k1.template evaluate<integer>({0_z}, symbol_fset{"x"}) == 0);
         k1 = k_type({T(2), T(-3)});
-        CHECK(k1.template evaluate<real>({real(3.2), real(-4.3)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
-                          piranha::cos((0. + (real(3.2) * 2)) + (real(-4.3) * -3)));
+        CHECK(k1.template evaluate<real>({real(3.2, 113), real(-4.3, 113)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
+                          piranha::cos((0. + (real(3.2, 113) * 2)) + (real(-4.3, 113) * -3)));
         k1.set_flavour(false);
-        CHECK(k1.template evaluate<real>({real(3.2), real(-4.3)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
-                          piranha::sin((0. + (real(3.2) * 2)) + (real(-4.3) * -3)));
+        CHECK(k1.template evaluate<real>({real(3.2, 113), real(-4.3, 113)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
+                          piranha::sin((0. + (real(3.2, 113) * 2)) + (real(-4.3, 113) * -3)));
         k1 = k_type({T(-2), T(-3)});
-        CHECK(k1.template evaluate<real>({real(3.2), real(-4.3)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
-                          piranha::cos((0. + (real(3.2) * -2)) + (real(-4.3) * -3)));
+        CHECK(k1.template evaluate<real>({real(3.2, 113), real(-4.3, 113)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
+                          piranha::cos((0. + (real(3.2, 113) * -2)) + (real(-4.3, 113) * -3)));
         k1.set_flavour(false);
-        CHECK(k1.template evaluate<real>({real(3.2), real(-4.3)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
-                          piranha::sin((0. + (real(3.2) * -2)) + (real(-4.3) * -3)));
+        CHECK(k1.template evaluate<real>({real(3.2, 113), real(-4.3, 113)}, symbol_fset{"x", "y"}) ==    //TODO:: fails due to precission issue
+                          piranha::sin((0. + (real(3.2, 113) * -2)) + (real(-4.3, 113) * -3)));
         k1 = k_type({T(3), T(-2)});
         CHECK(k1.template evaluate<rational>({2_q / 3, 1_q}, symbol_fset{"x", "y"}) == 1);
         k1.set_flavour(false);

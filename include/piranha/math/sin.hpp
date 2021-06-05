@@ -60,12 +60,9 @@ using sin_t_ = decltype(sin_impl<uncvref_t<T>>{}(std::declval<T>()));
 template <typename T>
 using is_sine_type = is_returnable<detected_t<sin_t_, T>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept SineType = is_sine_type<T>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -75,26 +72,16 @@ using sin_t = enable_if_t<is_sine_type<T>::value, sin_t_<T>>;
 }
 
 // Sine.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <SineType T>
 inline auto
-#else
-template <typename T>
-inline sin_t<T>
-#endif
 sin(T &&x)
 {
     return sin_impl<uncvref_t<T>>{}(std::forward<T>(x));
 }
 
 // Specialisation of the implementation of piranha::sin() for C++ arithmetic types.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppArithmetic T>
 class sin_impl<T>
-#else
-template <typename T>
-class sin_impl<T, enable_if_t<std::is_arithmetic<T>::value>>
-#endif
 {
     // Floating-point overload.
     template <typename T1>

@@ -97,8 +97,8 @@ TEST_CASE("polynomial_multiplier_st_vs_mt_test")
 TEST_CASE("polynomial_multiplier_different_cf_test")
 {
     settings::set_n_threads(1u);
-    using p_type1 = polynomial<std::size_t, k_monomial>;
-    using p_type2 = polynomial<integer, k_monomial>;
+    using p_type1 = polynomial<integer, k_monomial>; // original std::size_t leads to problems with negate compile warnings
+    using p_type2 = polynomial<long, k_monomial>;
     p_type1 x("x"), y("y"), z("z"), t("t");
     auto f = 1 + x + y + z + t;
     p_type2 tmp2(f);

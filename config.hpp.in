@@ -51,7 +51,6 @@ see https://www.gnu.org/licenses/. */
 // Import a bunch of macros/definitions from mp++.
 #include <mp++/config.hpp>
 
-#define likely(x) mppp_likely(x)
 #define unlikely(x) mppp_unlikely(x)
 
 #define PIRANHA_MAYBE_TLS MPPP_MAYBE_TLS
@@ -59,11 +58,10 @@ see https://www.gnu.org/licenses/. */
 #define PIRANHA_HAVE_THREAD_LOCAL
 #endif
 
-#if defined(MPPP_HAVE_CONCEPTS)
-#define PIRANHA_HAVE_CONCEPTS
-#endif
-
 #define PIRANHA_CPLUSPLUS MPPP_CPLUSPLUS
+#if PIRANHA_CPLUSPLUS < 201705L
+#error C++ standard less then 20 is not supported
+#endif
 
 // NOTE: clang has to go first, as it might define __GNUC__ internally.
 // Same thing could happen with ICC.

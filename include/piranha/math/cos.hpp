@@ -68,12 +68,9 @@ using cos_t_ = decltype(cos_impl<uncvref_t<T>>{}(std::declval<T>()));
 template <typename T>
 using is_cosine_type = is_returnable<detected_t<cos_t_, T>>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
-
 template <typename T>
 concept CosineType = is_cosine_type<T>::value;
 
-#endif
 
 inline namespace impl
 {
@@ -86,26 +83,16 @@ using cos_t = enable_if_t<is_cosine_type<T>::value, cos_t_<T>>;
 }
 
 // Cosine.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CosineType T>
 inline auto
-#else
-template <typename T>
-inline cos_t<T>
-#endif
 cos(T &&x)
 {
     return cos_impl<uncvref_t<T>>{}(std::forward<T>(x));
 }
 
 // Specialisation of the implementation of piranha::cos() for C++ arithmetic types.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <CppArithmetic T>
 class cos_impl<T>
-#else
-template <typename T>
-class cos_impl<T, enable_if_t<std::is_arithmetic<T>::value>>
-#endif
 {
     // Floating-point overload.
     template <typename T1>

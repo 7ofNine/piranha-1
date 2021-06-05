@@ -41,12 +41,7 @@ namespace piranha
 {
 
 // Default functor for the implementation of piranha::key_is_zero().
-template <typename T
-#if !defined(PIRANHA_HAVE_CONCEPTS)
-          ,
-          typename = void
-#endif
-          >
+template <typename T>
 class key_is_zero_impl
 {
 public:
@@ -74,19 +69,13 @@ using key_is_zero_t_
 template <typename T>
 using is_key_is_zero_type = std::is_convertible<detected_t<key_is_zero_t_, T>, bool>;
 
-#if defined(PIRANHA_HAVE_CONCEPTS)
 
 template <typename T>
 concept KeyIsZeroType = is_key_is_zero_type<T>::value;
 
-#endif
 
 // Zero detection for keys.
-#if defined(PIRANHA_HAVE_CONCEPTS)
 template <KeyIsZeroType T>
-#else
-template <typename T, enable_if_t<is_key_is_zero_type<T>::value, int> = 0>
-#endif
 inline bool key_is_zero(T &&x, const symbol_fset &s)
 {
     return key_is_zero_impl<uncvref_t<T>>{}(std::forward<T>(x), s);

@@ -111,6 +111,7 @@ class monomial : public array_key<T, monomial<T, S>, S>
     PIRANHA_TT_CHECK(is_ostreamable, T);
     PIRANHA_TT_CHECK(has_negate, T);
     PIRANHA_TT_CHECK(std::is_copy_assignable, T);
+
     using base = array_key<T, monomial<T, S>, S>;
     // Less-than operator.
     template <typename U>
@@ -201,7 +202,8 @@ public:
     template <typename Iterator, it_ctor_enabler<Iterator> = 0>
     explicit monomial(Iterator begin, Iterator end, const symbol_fset &s) : monomial(begin, end)
     {
-        if (unlikely(this->size() != s.size())) {
+        if (this->size() != s.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the monomial constructor from range and symbol set "
                                                  "yielded an invalid monomial: the final size is "
                                                      + std::to_string(this->size())
@@ -261,7 +263,8 @@ public:
     std::pair<bool, symbol_idx> is_linear(const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid symbol set for the identification of a linear "
                                                  "monomial: the size of the symbol set ("
                                                      + std::to_string(args.size())
@@ -329,7 +332,8 @@ public:
     monomial pow(const U &x, const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid symbol set for the exponentiation of a "
                                                  "monomial: the size of the symbol set ("
                                                      + std::to_string(args.size())
@@ -361,7 +365,8 @@ private:
     static void ip_dec(U &x, const std::integral_constant<std::size_t, 0u> &)
     {
         // NOTE: maybe replace with the safe integral subber, eventually.
-        if (unlikely(x == std::numeric_limits<U>::min())) {
+        if (x == std::numeric_limits<U>::min()) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, "negative overflow error in the calculation of the "
                                                "partial derivative of a monomial");
         }
@@ -406,7 +411,8 @@ public:
     std::pair<T, monomial> partial(const symbol_idx &p, const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid symbol set for the computation of the partial derivative of a "
                           "monomial: the size of the symbol set ("
@@ -441,7 +447,8 @@ private:
     static void ip_inc(U &x, const std::integral_constant<std::size_t, 0u> &)
     {
         // NOTE: maybe replace with the safe integral adder, eventually.
-        if (unlikely(x == std::numeric_limits<U>::max())) {
+        if (x == std::numeric_limits<U>::max()) [[unlikely]]
+        {
             piranha_throw(std::overflow_error, "positive overflow error in the calculation of the "
                                                "antiderivative of a monomial");
         }
@@ -490,7 +497,8 @@ public:
     std::pair<T, monomial> integrate(const std::string &s, const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid symbol set for the computation of the antiderivative of a "
                                                  "monomial: the size of the symbol set ("
                                                      + std::to_string(args.size())
@@ -517,7 +525,8 @@ public:
                 auto &ref = retval[i];
                 // Do the addition and check for zero later, to detect -1 expo.
                 ip_inc(ref, monomial_int_dispatcher<U>{});
-                if (unlikely(piranha::is_zero(ref))) {
+                if (piranha::is_zero(ref)) [[unlikely]]
+                {
                     piranha_throw(std::invalid_argument,
                                   "unable to perform monomial integration: a negative "
                                   "unitary exponent was encountered in correspondence of the variable '"
@@ -568,15 +577,19 @@ public:
     void print(std::ostream &os, const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "cannot print monomial: the size of the symbol set (" + std::to_string(args.size())
                               + ") differs from the size of the monomial (" + std::to_string(std::get<0>(sbe)) + ")");
         }
+
         bool empty_output = true;
         auto it_args = args.begin();
-        for (decltype(args.size()) i = 0; std::get<1>(sbe) != std::get<2>(sbe); ++i, ++std::get<1>(sbe), ++it_args) {
-            if (!piranha::is_zero(*std::get<1>(sbe))) {
+        for (decltype(args.size()) i = 0; std::get<1>(sbe) != std::get<2>(sbe); ++i, ++std::get<1>(sbe), ++it_args)
+        {
+            if (!piranha::is_zero(*std::get<1>(sbe)))
+            {
                 // If we are going to print a symbol, and something has been printed before,
                 // then we are going to place the multiplication sign.
                 if (!empty_output) {
@@ -591,6 +604,8 @@ public:
             }
         }
     }
+
+
     /// Print in TeX mode.
     /**
      * This method will print to stream a TeX representation of the monomial.
@@ -607,7 +622,8 @@ public:
     void print_tex(std::ostream &os, const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "cannot print monomial in TeX mode: the size of the symbol set ("
                                                      + std::to_string(args.size())
                                                      + ") differs from the size of the monomial ("
@@ -683,16 +699,19 @@ public:
     eval_type<U> evaluate(const std::vector<U> &values, const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "cannot evaluate monomial: the size of the symbol set (" + std::to_string(args.size())
                               + ") differs from the size of the monomial (" + std::to_string(std::get<0>(sbe)) + ")");
         }
-        if (unlikely(values.size() != std::get<0>(sbe))) {
+        if (values.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "cannot evaluate monomial: the size of the vector of values (" + std::to_string(values.size())
                               + ") differs from the size of the monomial (" + std::to_string(std::get<0>(sbe)) + ")");
         }
+
         if (args.size()) {
             eval_type<U> retval(piranha::pow(values[0], *std::get<1>(sbe)++));
             for (decltype(values.size()) i = 1; i < values.size(); ++i, ++std::get<1>(sbe)) {
@@ -752,19 +771,22 @@ public:
     std::vector<std::pair<subs_type<U>, monomial>> subs(const symbol_idx_fmap<U> &smap, const symbol_fset &args) const
     {
         auto sbe = this->size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "cannot perform substitution in a monomial: the size of the symbol set ("
                               + std::to_string(args.size()) + ") differs from the size of the monomial ("
                               + std::to_string(std::get<0>(sbe)) + ")");
         }
-        if (unlikely(smap.size() && smap.rbegin()->first >= std::get<0>(sbe))) {
+        if (smap.size() && smap.rbegin()->first >= std::get<0>(sbe)) [[unlikely]]
+        {
             // The last element of the substitution map must be a valid index.
             piranha_throw(std::invalid_argument,
                           "invalid argument(s) for substitution in a monomial: the last index of the substitution map ("
                               + std::to_string(smap.rbegin()->first) + ") must be smaller than the monomial's size ("
                               + std::to_string(std::get<0>(sbe)) + ")");
         }
+
         std::vector<std::pair<subs_type<U>, monomial>> retval;
         if (smap.size()) {
             // The substitution map contains something, proceed to the substitution.
@@ -879,16 +901,20 @@ public:
     std::vector<std::pair<ipow_subs_type<U>, monomial>> ipow_subs(const symbol_idx &p, const integer &n, const U &x,
                                                                   const symbol_fset &args) const
     {
-        if (unlikely(this->size() != args.size())) {
+        if (this->size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "cannot perform integral power substitution in a monomial: the size of the symbol set ("
                               + std::to_string(args.size()) + ") differs from the size of the monomial ("
                               + std::to_string(this->size()) + ")");
         }
-        if (unlikely(!n.sgn())) {
+
+        if (!n.sgn()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid integral power for ipow_subs() in a monomial: the power must be nonzero");
         }
+
         // Initialise the return value.
         std::vector<std::pair<ipow_subs_type<U>, monomial>> retval;
         auto mon(*this);
@@ -948,17 +974,20 @@ public:
     // NOTE: it should be ok to use this method (and the one below) with overlapping arguments, as this is allowed
     // in small_vector::add().
     template <typename Cf, multiply_enabler<Cf> = 0>
+    //template <Multiply3 Cf>
     static void multiply(std::array<term<Cf, monomial>, multiply_arity> &res, const term<Cf, monomial> &t1,
                          const term<Cf, monomial> &t2, const symbol_fset &args)
     {
         term<Cf, monomial> &t = res[0u];
         // NOTE: the check on the monomials' size is in vector_add().
-        if (unlikely(t1.m_key.size() != args.size())) {
+        if (t1.m_key.size() != args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "cannot multiply terms with monomial keys: the size of the symbol set ("
                               + std::to_string(args.size()) + ") differs from the size of the first monomial ("
                               + std::to_string(t1.m_key.size()) + ")");
         }
+
         // Coefficient.
         cf_mult_impl(t.m_cf, t1.m_cf, t2.m_cf);
         // Now deal with the key.
@@ -979,12 +1008,14 @@ public:
     {
         const auto sbe1 = this->size_begin_end();
         const auto sbe2 = other.size_begin_end();
-        if (unlikely(std::get<0u>(sbe1) != std::get<0u>(sbe2))) {
+        if (std::get<0u>(sbe1) != std::get<0u>(sbe2)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "mismatched sizes in a monomial comparison: the first monomial has a size of "
                               + std::to_string(std::get<0u>(sbe1)) + ", the second monomial has a size of "
                               + std::to_string(std::get<0u>(sbe2)));
         }
+
         return std::lexicographical_compare(std::get<1u>(sbe1), std::get<2u>(sbe1), std::get<1u>(sbe2),
                                             std::get<2u>(sbe2));
     }
@@ -1077,12 +1108,14 @@ public:
     bool operator()(const monomial<T, S> &m, const symbol_fset &s) const
     {
         const auto sbe = m.size_begin_end();
-        if (unlikely(s.size() != std::get<0>(sbe))) {
+        if (s.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument,
                           "invalid sizes in the invocation of key_is_one() for a monomial: the monomial has a size of "
                               + std::to_string(std::get<0>(sbe)) + ", while the reference symbol set has a size of "
                               + std::to_string(s.size()));
         }
+
         return std::all_of(std::get<1>(sbe), std::get<2>(sbe),
                            [](const T &element) { return piranha::is_zero(element); });
     }
@@ -1138,13 +1171,15 @@ public:
     degree_type<U> operator()(const monomial<U, S> &m, const symbol_fset &args) const
     {
         auto sbe = m.size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(
                 std::invalid_argument,
                 "invalid symbol set for the computation of the degree of a monomial: the size of the symbol set ("
                     + std::to_string(args.size()) + ") differs from the size of the monomial ("
                     + std::to_string(std::get<0>(sbe)) + ")");
         }
+
         degree_type<U> retval(0);
         for (; std::get<1>(sbe) != std::get<2>(sbe); ++std::get<1>(sbe)) {
             expo_add(retval, *std::get<1>(sbe), std::is_integral<U>{});
@@ -1182,14 +1217,16 @@ public:
     degree_type<U> operator()(const monomial<U, S> &m, const symbol_idx_fset &p, const symbol_fset &args) const
     {
         auto sbe = m.size_begin_end();
-        if (unlikely(args.size() != std::get<0>(sbe))) {
+        if (args.size() != std::get<0>(sbe)) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "invalid symbol set for the computation of the partial degree of a "
                                                  "monomial: the size of the symbol set ("
                                                      + std::to_string(args.size())
                                                      + ") differs from the size of the monomial ("
                                                      + std::to_string(std::get<0>(sbe)) + ")");
         }
-        if (unlikely(p.size() && *p.rbegin() >= args.size())) {
+        if (p.size() && *p.rbegin() >= args.size()) [[unlikely]]
+        {
             piranha_throw(std::invalid_argument, "the largest value in the positions set for the computation of the "
                                                  "partial degree of a monomial is "
                                                      + std::to_string(*p.rbegin())
