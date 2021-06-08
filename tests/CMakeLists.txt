@@ -1,6 +1,6 @@
 include(YACMACompilerLinkerSettings)
 
-add_library(piranha_test STATIC catch_main.cpp)
+add_library(piranha_test STATIC catch_main.cpp)  # create piranha_test i.e. basically catch
 target_compile_options(piranha_test PRIVATE
   "$<$<CONFIG:Debug>:${OBAKE_CXX_FLAGS_DEBUG}>"
   "$<$<CONFIG:Release>:${OBAKE_CXX_FLAGS_RELEASE}>"
@@ -25,30 +25,13 @@ function(ADD_PIRANHA_TESTCASE arg1)
 	add_executable("${arg1}" "${arg1}.cpp")
 	target_link_libraries(${arg1} piranha piranha_test)
 	target_compile_options(${arg1} PRIVATE "$<$<CONFIG:DEBUG>:${PIRANHA_CXX_FLAGS_DEBUG}>" "$<$<CONFIG:RELEASE>:${PIRANHA_CXX_FLAGS_RELEASE}>" "$<$<CONFIG:RELWITHDEBINFO>:${PIRANHA_CXX_FLAGS_RELWITHDEBINFO}>")
-	if(PIRANHA_RUN_ON_VALGRIND AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-		# Add a special definition for the unit tests when the run-on-Valgrind
-		# option is selected.
-		target_compile_definitions(${arg1} PRIVATE PIRANHA_RUN_ON_VALGRIND)
-	endif()
-	# Pass down the current build directory to the tests as a definition
-	# (this is used for the creation of temporary files).
 	target_compile_definitions(${arg1} PRIVATE PIRANHA_BINARY_TESTS_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-	# NOTE: for clang-cl, cmake tries to set -std=c++11 here, which makes
-	# it error out. Disable it as MSVC 2015 is implicitly C++14 anyway.
-	if(NOT (YACMA_COMPILER_IS_MSVC AND YACMA_COMPILER_IS_CLANGXX))
+	#if(NOT (YACMA_COMPILER_IS_MSVC AND YACMA_COMPILER_IS_CLANGXX))
 		# Let's setup the target C++ standard, but only if the user did not provide it manually.
 		if(NOT CMAKE_CXX_STANDARD)
-			if(PIRANHA_COMPILER_SUPPORTS_CONCEPTS)
-				# NOTE: the idea here is that we want to use C++14 if the compilers supports
-				# concepts (as variable concepts are essentially template variables).
-				set_property(TARGET ${arg1} PROPERTY CXX_STANDARD 14)
-			else()
-				set_property(TARGET ${arg1} PROPERTY CXX_STANDARD 11)
-			endif()
+            set_property(TARGET ${arg1} PROPERTY CXX_STANDARD 20) #only C++20 and higher is supported
+	#	endif()
 		endif()
-		set_property(TARGET ${arg1} PROPERTY CXX_STANDARD_REQUIRED YES)
-		set_property(TARGET ${arg1} PROPERTY CXX_EXTENSIONS NO)
-	endif()
 	add_test("${arg1}" "${arg1}")
 endfunction()
 
@@ -139,7 +122,6 @@ ADD_PIRANHA_TESTCASE(substitutable_series)
 ADD_PIRANHA_TESTCASE(symbol_utils)
 ADD_PIRANHA_TESTCASE(t_substitutable_series)
 ADD_PIRANHA_TESTCASE(term)
-#ADD_PIRANHA_TESTCASE(thread_barrier)
 ADD_PIRANHA_TESTCASE(thread_pool)
 ADD_PIRANHA_TESTCASE(trigonometric_series)
 ADD_PIRANHA_TESTCASE(tuning)

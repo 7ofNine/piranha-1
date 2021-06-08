@@ -7,6 +7,10 @@ macro(ADD_PIRANHA_BENCHMARK arg1)
 	endif()
 	if(NOT PIRANHA_TEST_NSPLIT OR "${PIRANHA_TEST_SPLIT_NUM}" STREQUAL "${_PIRANHA_TEST_NUM}")
 		add_executable("${arg1}" "${arg1}.cpp")
+        if(NOT CMAKE_CXX_STANDARD)
+            set_property(TARGET ${arg1} PROPERTY CMAKE_CXX_STANDARD 20) #only C++20 and higher is supported
+        endif()    
+
 		target_compile_options(${arg1} PRIVATE "$<$<CONFIG:DEBUG>:${PIRANHA_CXX_FLAGS_DEBUG}>" "$<$<CONFIG:RELEASE>:${PIRANHA_CXX_FLAGS_RELEASE}>")
 		# Pass the current source dir as a definition, so we can load data for tests from the source dir.
 		target_compile_definitions(${arg1} PRIVATE PIRANHA_TESTS_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}")

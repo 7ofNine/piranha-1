@@ -4,11 +4,14 @@ project(piranha VERSION 0.20)
 
 #we only support c++20 and higher
 set (PIRANHA_MIN_CXX_STANDARD 20)
-if(${CMAKE_CXX_STANDARD} VERSION_LESS ${PIRANHA_MIN_CXX_STANDARD})
-    message(FATAL "C++ standard ${CMAKE_CXX_STANDARD} less than 20 is not supported")
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD ${PIRANHA_MIN_CXX_STANDARD})
 else()
-    message(STATUS "C++ standard used is ${CMAKE_CXX_STANDARD}")    
-endif()
+    if(${CMAKE_CXX_STANDARD} VERSION_LESS ${PIRANHA_MIN_CXX_STANDARD})
+        message(FATAL "C++ standard ${CMAKE_CXX_STANDARD} less than 20 is not supported")
+    endif()
+endif()    
+message(STATUS "C++ standard used is ${CMAKE_CXX_STANDARD}")    
 
 if(NOT MSVC)
     message(FATAL "Only Visual Studio >= 2019 is supported")
@@ -54,13 +57,6 @@ option(PIRANHA_WITH_BOOST_STACKTRACE "Enable support for the Boost stacktrace li
 option(PIRANHA_INSTALL_HEADERS "Enable the installation of the library headers." ON)
 mark_as_advanced(PIRANHA_INSTALL_HEADERS)
 
-# A general-purpose option to signal that we intend to run Piranha under Valgrind.
-# At the moment it just disables tests involving long double that give problems in Valgrind,
-# in the future it might become a more general-purpose flag.
-option(PIRANHA_RUN_ON_VALGRIND "Configure Piranha to be run on Valgrind." OFF)
-# Make it an advanced option, not really interesting for non-developers.
-mark_as_advanced(PIRANHA_RUN_ON_VALGRIND)
-
 # Setup of the compilation flags.
 include(YACMACompilerLinkerSettings)
 include(CheckCXXCompilerFlag)
@@ -80,11 +76,8 @@ if(YACMA_COMPILER_IS_MSVC)
 	# Disable the idiotic minmax macros on MSVC and enable the bigobj option (but not with clang).
 	list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-DNOMINMAX")
     list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-DWIN32_LEAN_AND_MEAN")
-#    list(APPEND PIRANHA_CXX_FLAGS_DEBUG "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
 	list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-DNOMINMAX")
     list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-DWIN_32_LEAN_AND_MEAN")
-#    list(APPEND PIRANHA_CXX_FLAGS_RELEASE "-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING")#We have to fix the allocator warnings
-	list(APPEND PIRANHA_CXX_FLAGS_RELWITHDEBINFO "-DNOMINMAX")#We have to fix the allocator warnings
     list(APPEND PIRANHA_CXX_FLAGS_RELWITHDEBINFO "-DWIN_32_LEAN_AND_MEAN")
 	if(YACMA_COMPILER_IS_CLANGXX)
 		# clang-cl emits various warnings from the Boost/GMP/MPFR libraries, let's just silence them.
@@ -182,7 +175,7 @@ endif()
 # Boost libraries setup.
 include(PiranhaFindBoost)
 
-target_link_libraries(piranha INTERFACE Boost::boost Boost::disable_autolinking) # disable autoo linking. a safety feature but pretty annoying
+target_link_libraries(piranha INTERFACE Boost::boost Boost::disable_autolinking ) # disable auto linking. a safety feature but pretty annoying
 
 if(PIRANHA_WITH_BOOST_S11N)
 	target_link_libraries(piranha INTERFACE Boost::serialization)
@@ -241,8 +234,8 @@ if(PIRANHA_WITH_ZLIB)
 	message(STATUS "zlib include dir is: ${ZLIB_INCLUDE_DIR}")
 	message(STATUS "zlib library is: ${ZLIB_LIBRARIES}")
 	set(PIRANHA_ENABLE_ZLIB "#define PIRANHA_WITH_ZLIB")
-	target_link_libraries(piranha INTERFACE ZLIB::ZLIB)
-endif()
+    target_link_libraries(piranha INTERFACE ZLIB::ZLIB) 
+endif()                                                 
 
 if(PIRANHA_WITH_BZIP2)
 	include(PiranhaFindBZip2)
